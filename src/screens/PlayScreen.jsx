@@ -4,6 +4,7 @@ import { useToast } from '../components/Toast.jsx'
 import { Coin } from '../components/ui.jsx'
 import CloudDash from '../games/CloudDash.jsx'
 import BaggageMatch from '../games/BaggageMatch.jsx'
+import CandyRush from '../games/CandyRush.jsx'
 
 const GAMES = [
   {
@@ -21,6 +22,14 @@ const GAMES = [
     emoji: '🧳',
     tint: '#f6e9fb',
     Component: BaggageMatch
+  },
+  {
+    id: 'candyrush',
+    name: 'Candy Rush',
+    blurb: 'Swap UO treats to line up 3 or more — cascades pay a combo multiplier.',
+    emoji: '🧋',
+    tint: '#fdeaf3',
+    Component: CandyRush
   }
 ]
 

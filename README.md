@@ -19,9 +19,9 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 | --- | --- |
 | **Daily check-in** | +10 berry coins, streak tracking, a bonus blindbox every 7 days, and the Pilot Berry look at 30 consecutive days |
 | **Feed Berry** | Treats dropped by check-ins can be fed to Berry, who pays coins back (snack +25, juice +20, soap +15) |
-| **Minigames** | Cloud Dash and Baggage Match, 3 rewarded plays each per day |
+| **Minigames** | Cloud Dash, Baggage Match and Candy Rush, 3 rewarded plays each per day |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
-| **Passport & medals** | Every flight stamps a destination and unlocks that city's exclusive prop; medals reward multiple travels |
+| **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
 | **Redemption** | Coins convert into inflight meal discounts, merchandise vouchers and travel extras — redeemable from ticket purchase until online check-in |
 
 ### Berry's wardrobe
@@ -34,6 +34,33 @@ A flat sprite in a fixed pose can't take a clothing layer, so the wardrobe has t
   anchor points in `src/data/looks.js`, so one drawing lands correctly on all three poses. Props may
   also declare a `Behind` layer that renders *under* the sprite, which is what puts the neck pillow
   behind Berry's head instead of across his face.
+
+### The network
+
+The passport covers the real UO flight network — 35 destinations across 8 countries, grouped into
+four regions for the region badges. The published network also lists ferry and coach connections
+(Shekou, Nansha, Humen, Pazhou, Zhongshan, Zhuhai HZMB, Macao HZMB, Shenzhen Airport Ferry); those
+feed *into* HKG rather than being places Berry flies to, so they aren't collectible.
+
+Exclusives are awarded **per country**, on the first landing there — eight props is a set that can
+be drawn well, where 35 city props could not. The six city-flavoured props that predate the network
+expansion (takoyaki hat, ramen hat, straw hat, shell necklace, snorkel, lantern) moved into the
+blindbox pool rather than being retired.
+
+### Medals
+
+Five medals climb **Copper → Silver → Gold → Diamond**, each showing how far the next promotion is:
+
+| Medal | Measures | Copper | Silver | Gold | Diamond |
+| --- | --- | --- | --- | --- | --- |
+| Frequent Flyer | trips | 3 | 10 | 25 | 50 |
+| Berry Streak | best streak | 7 | 30 | 100 | 365 |
+| Passport | destinations | 5 | 12 | 24 | 35 |
+| Wardrobe | cosmetics | 5 | 10 | 17 | 25 |
+| Coin Earner | lifetime coins | 500 | 2,000 | 6,000 | 15,000 |
+
+Below them sit four region badges — Japan, Korea, Greater China, Southeast Asia — earned by stamping
+a whole region. All of it derives from state in `src/data/medals.js`; the store tracks no medal data.
 
 ### Economy
 
@@ -80,9 +107,10 @@ product — it exists so a 30-day habit loop can be shown in five minutes:
    Collection → Wardrobe — thirty days of loyalty earns the captain's uniform.
 5. **Give treats → Feed Berry.** Berry eats, hearts pop, coins come back. Care is its own reason to
    open the app.
-6. **Play → Cloud Dash.** Play a short round, collect coins.
+6. **Play → Candy Rush.** Swap a few tiles; cascades stack a combo multiplier.
 7. **Rewards → open a blindbox.** Show the rarity reveal, then equip the new prop.
-8. **Trips → simulate landing.** The passport stamps, and Tokyo's sakura clip unlocks.
+8. **Trips → simulate landing.** The passport stamps, and Japan's sakura clip unlocks. Fly to a
+   second Japanese city to show the stamp still lands — exclusives are one per country.
 9. **Grant 2,000 → Rewards → redeem** an inflight meal discount. A voucher with a code is issued —
    this is the revenue link: engagement becomes an ancillary conversion.
 
@@ -95,7 +123,7 @@ src/
   data/                looks, items, destinations, rewards, medals — all tunable content
   components/          Berry.jsx (sprite + prop layers), BerryArt.jsx (props), Toast, ui primitives
   screens/             Home, Play, Collect, Shop, Trips
-  games/               CloudDash, BaggageMatch
+  games/               CloudDash, BaggageMatch, CandyRush
   dev/DemoPanel.jsx    presenter controls
 ```
 

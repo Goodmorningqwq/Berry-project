@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStore, MILESTONE_DAYS, prettyDate, STORAGE_KEY } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import { Modal } from '../components/ui.jsx'
-import { DESTINATIONS, DESTINATIONS_BY_CODE } from '../data/destinations.js'
+import { BY_COUNTRY, DESTINATIONS_BY_CODE } from '../data/destinations.js'
 
 /**
  * Presenter controls. Nothing here exists in the real product — it's the
@@ -107,16 +107,27 @@ export default function DemoPanel() {
           </div>
 
           {flying && (
-            <div className="destination-picker">
-              {DESTINATIONS.map((d) => (
-                <button key={d.code} onClick={() => fly(d.code)}>
-                  <span style={{ fontSize: 18 }}>{d.emoji}</span>
-                  <span>
-                    {d.city}
-                    <br />
-                    <span className="tiny">{state.stamps.includes(d.code) ? 'Stamped' : d.code}</span>
-                  </span>
-                </button>
+            <div className="picker-scroll">
+              {BY_COUNTRY.map((country) => (
+                <div key={country.id}>
+                  <p className="picker-group">
+                    {country.flag} {country.id}
+                  </p>
+                  <div className="destination-picker">
+                    {country.cities.map((d) => (
+                      <button key={d.code} onClick={() => fly(d.code)}>
+                        <span style={{ fontSize: 18 }}>{d.emoji}</span>
+                        <span>
+                          {d.city}
+                          <br />
+                          <span className="tiny">
+                            {state.stamps.includes(d.code) ? 'Stamped' : d.code}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}

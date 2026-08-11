@@ -7,12 +7,12 @@ import {
   MILESTONE_ITEM_ID,
   STARTER_ITEM_ID
 } from '../data/items.js'
-import { DESTINATIONS_BY_CODE } from '../data/destinations.js'
-import { MEDALS } from '../data/medals.js'
+import { COUNTRIES_BY_ID, DESTINATIONS_BY_CODE } from '../data/destinations.js'
+import { REGION_BADGES, TIERED_MEDALS, tierFor } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 2
+const SCHEMA_VERSION = 3
 
 export const CHECK_IN_COINS = 10
 export const BLINDBOX_COST = 150
@@ -154,11 +154,25 @@ function reducer(state, action) {
         next.inventory = { ...state.inventory, [bonus.id]: (state.inventory[bonus.id] || 0) + 1 }
       }
 
-      // 30 consecutive days unlocks the exclusive cosmetic.
+      // 30 consecutive days unlocks the exclusive look.
       const milestone = streak >= MILESTONE_DAYS && !state.ownedItems.includes(MILESTONE_ITEM_ID)
       if (milestone) next.ownedItems = [...state.ownedItems, MILESTONE_ITEM_ID]
 
+      // The reveal sheet renders straight from this, rather than the screen
+      // trying to infer what was awarded by diffing the previous state.
+      next.lastCheckInResult = {
+        day: streak,
+        coins: CHECK_IN_COINS,
+        bonus,
+        milestone: milestone ? MILESTONE_ITEM_ID : null
+      }
+
       return next
+    }
+
+    case 'CLEAR_CHECK_IN': {
+      const { lastCheckInResult, ...rest } = state
+      return rest
     }
 
     case 'EARN_COINS':
@@ -234,15 +248,16 @@ function reducer(state, action) {
       const newStamp = !state.stamps.includes(action.code)
       const reward = 50
 
+      // The exclusive is per country, granted on the first landing there —
+      // 35 cities is far more than there is art for.
+      const countryReward = COUNTRIES_BY_ID[dest.country]?.reward
+      const unlocks = countryReward && !state.ownedItems.includes(countryReward)
+
       return {
         ...state,
         stamps: newStamp ? [...state.stamps, action.code] : state.stamps,
         flights: [...state.flights, { code: action.code, date: today }],
-        // Each destination hands out its exclusive piece of clothing once.
-        ownedItems:
-          dest.reward && !state.ownedItems.includes(dest.reward)
-            ? [...state.ownedItems, dest.reward]
-            : state.ownedItems,
+        ownedItems: unlocks ? [...state.ownedItems, countryReward] : state.ownedItems,
         coins: state.coins + reward,
         lifetimeCoins: state.lifetimeCoins + reward
       }
@@ -358,11 +373,14 @@ export function StoreProvider({ children }) {
         const used = state.plays.day === today ? state.plays.counts[gameId] || 0 : 0
         return Math.max(0, DAILY_PLAYS_PER_GAME - used)
       },
-      medals: MEDALS.map((medal) => ({
+      medals: TIERED_MEDALS.map((medal) => ({
         ...medal,
-        earned: medal.test(state),
-        progress: medal.progress(state)
+        ...tierFor(medal.value(state), medal.thresholds)
       })),
+      regionBadges: REGION_BADGES.map((badge) => {
+        const count = badge.count(state)
+        return { ...badge, count, earned: count === badge.total }
+      }),
       ownedCosmetics: state.ownedItems.map((id) => ITEMS_BY_ID[id]).filter(Boolean)
     }
   }, [state])

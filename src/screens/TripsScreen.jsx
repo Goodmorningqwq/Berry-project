@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { useStore, prettyDate } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import { Empty } from '../components/ui.jsx'
-import { DESTINATIONS, DESTINATIONS_BY_CODE, ORIGIN, nextTrip } from '../data/destinations.js'
+import {
+  BY_COUNTRY,
+  COUNTRIES_BY_ID,
+  DESTINATIONS_BY_CODE,
+  ORIGIN,
+  nextTrip
+} from '../data/destinations.js'
 import { ITEMS_BY_ID } from '../data/items.js'
 
 const FLIGHT_COINS = 50
@@ -17,7 +23,9 @@ export default function TripsScreen() {
   const fly = (code) => {
     const dest = DESTINATIONS_BY_CODE[code]
     const isNewStamp = !state.stamps.includes(code)
-    const reward = dest.reward && !state.ownedItems.includes(dest.reward) ? ITEMS_BY_ID[dest.reward] : null
+    const countryReward = COUNTRIES_BY_ID[dest.country]?.reward
+    const reward =
+      countryReward && !state.ownedItems.includes(countryReward) ? ITEMS_BY_ID[countryReward] : null
 
     dispatch({ type: 'COMPLETE_FLIGHT', code })
     setPicking(false)
@@ -25,7 +33,7 @@ export default function TripsScreen() {
 
     toast(`Landed in ${dest.city} · +${FLIGHT_COINS} berry coins`, '🛬')
     if (isNewStamp) toast(`${dest.city} stamp added to your passport`, dest.emoji)
-    if (reward) toast(`Destination exclusive unlocked: ${reward.name}`, '🎽')
+    if (reward) toast(`${dest.country} exclusive unlocked: ${reward.name}`, '🎽')
   }
 
   const steps = [
@@ -105,16 +113,27 @@ export default function TripsScreen() {
           </button>
 
           {picking && (
-            <div className="destination-picker">
-              {DESTINATIONS.map((d) => (
-                <button key={d.code} onClick={() => fly(d.code)}>
-                  <span style={{ fontSize: 18 }}>{d.emoji}</span>
-                  <span>
-                    {d.city}
-                    <br />
-                    <span className="tiny">{state.stamps.includes(d.code) ? 'Stamped' : d.code}</span>
-                  </span>
-                </button>
+            <div className="picker-scroll">
+              {BY_COUNTRY.map((country) => (
+                <div key={country.id}>
+                  <p className="picker-group">
+                    {country.flag} {country.id}
+                  </p>
+                  <div className="destination-picker">
+                    {country.cities.map((d) => (
+                      <button key={d.code} onClick={() => fly(d.code)}>
+                        <span style={{ fontSize: 18 }}>{d.emoji}</span>
+                        <span>
+                          {d.city}
+                          <br />
+                          <span className="tiny">
+                            {state.stamps.includes(d.code) ? 'Stamped' : d.code}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}

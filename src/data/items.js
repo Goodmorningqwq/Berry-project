@@ -53,19 +53,25 @@ export const COSMETICS = [
   { id: 'camera', name: 'Travel Camera', slot: 'accessory', art: 'camera', rarity: 'rare', source: 'blindbox' },
   { id: 'scarf', name: 'Winter Scarf', slot: 'accessory', art: 'scarf', rarity: 'common', source: 'blindbox' },
 
-  /* ---- destination exclusives (earned post-flight) ---- */
-  { id: 'sakura-clip', name: 'Tokyo Sakura Clip', slot: 'hat', art: 'sakura', rarity: 'epic', source: 'destination' },
-  { id: 'takoyaki-hat', name: 'Osaka Takoyaki Hat', slot: 'hat', art: 'takoyaki', rarity: 'rare', source: 'destination' },
-  { id: 'ramen-bowl', name: 'Fukuoka Ramen Hat', slot: 'hat', art: 'ramen', rarity: 'rare', source: 'destination' },
-  { id: 'shell-necklace', name: 'Ishigaki Shell Necklace', slot: 'accessory', art: 'shellNecklace', rarity: 'rare', source: 'destination' },
-  { id: 'hanbok-band', name: 'Seoul Hanbok Headband', slot: 'hat', art: 'hanbokBand', rarity: 'epic', source: 'destination' },
-  { id: 'jeju-hat', name: 'Jeju Straw Hat', slot: 'hat', art: 'strawHat', rarity: 'rare', source: 'destination' },
-  { id: 'bubble-tea', name: 'Taipei Bubble Tea', slot: 'accessory', art: 'bubbleTea', rarity: 'rare', source: 'destination' },
-  { id: 'thai-garland', name: 'Bangkok Garland', slot: 'accessory', art: 'garland', rarity: 'rare', source: 'destination' },
-  { id: 'snorkel', name: 'Phuket Snorkel', slot: 'accessory', art: 'snorkel', rarity: 'rare', source: 'destination' },
-  { id: 'lantern', name: 'Chiang Mai Lantern', slot: 'accessory', art: 'lantern', rarity: 'rare', source: 'destination' },
-  { id: 'conical-hat', name: 'Da Nang Nón Lá', slot: 'hat', art: 'conical', rarity: 'rare', source: 'destination' },
-  { id: 'batik-bandana', name: 'Kota Kinabalu Bandana', slot: 'hat', art: 'bandana', rarity: 'rare', source: 'destination' }
+  /* City-flavoured props. These were per-city exclusives before the network
+     grew to 35 destinations; exclusives are per-country now, so rather than
+     retire finished art they deepen the blindbox pool. */
+  { id: 'takoyaki-hat', name: 'Takoyaki Hat', slot: 'hat', art: 'takoyaki', rarity: 'rare', source: 'blindbox' },
+  { id: 'ramen-bowl', name: 'Ramen Hat', slot: 'hat', art: 'ramen', rarity: 'rare', source: 'blindbox' },
+  { id: 'jeju-hat', name: 'Island Straw Hat', slot: 'hat', art: 'strawHat', rarity: 'rare', source: 'blindbox' },
+  { id: 'shell-necklace', name: 'Shell Necklace', slot: 'accessory', art: 'shellNecklace', rarity: 'rare', source: 'blindbox' },
+  { id: 'snorkel', name: 'Snorkel Set', slot: 'accessory', art: 'snorkel', rarity: 'rare', source: 'blindbox' },
+  { id: 'lantern', name: 'Paper Lantern', slot: 'accessory', art: 'lantern', rarity: 'rare', source: 'blindbox' },
+
+  /* ---- country exclusives (first landing in that country) ---- */
+  { id: 'sakura-clip', name: 'Japan Sakura Clip', slot: 'hat', art: 'sakura', rarity: 'epic', source: 'country' },
+  { id: 'hanbok-band', name: 'Korea Hanbok Headband', slot: 'hat', art: 'hanbokBand', rarity: 'epic', source: 'country' },
+  { id: 'panda-hood', name: 'Mainland Panda Hood', slot: 'hat', art: 'pandaHood', rarity: 'epic', source: 'country' },
+  { id: 'bubble-tea', name: 'Taiwan Bubble Tea', slot: 'accessory', art: 'bubbleTea', rarity: 'epic', source: 'country' },
+  { id: 'batik-bandana', name: 'Malaysia Batik Bandana', slot: 'hat', art: 'bandana', rarity: 'epic', source: 'country' },
+  { id: 'salakot', name: 'Philippines Salakot', slot: 'hat', art: 'salakot', rarity: 'epic', source: 'country' },
+  { id: 'thai-garland', name: 'Thailand Garland', slot: 'accessory', art: 'garland', rarity: 'epic', source: 'country' },
+  { id: 'conical-hat', name: 'Vietnam Nón Lá', slot: 'hat', art: 'conical', rarity: 'epic', source: 'country' }
 ]
 
 export const MILESTONE_ITEM_ID = 'pilot'

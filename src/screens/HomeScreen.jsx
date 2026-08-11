@@ -8,8 +8,9 @@ import {
 } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
+import CheckInReveal from '../components/CheckInReveal.jsx'
 import { Coin, Empty, Modal } from '../components/ui.jsx'
-import { BASIC_ITEMS, BASIC_ITEMS_BY_ID, ITEMS_BY_ID } from '../data/items.js'
+import { BASIC_ITEMS, ITEMS_BY_ID } from '../data/items.js'
 import { nextTrip } from '../data/destinations.js'
 
 const CLOUDS = [
@@ -30,7 +31,6 @@ function lineFor(state, checkedInToday) {
 export default function HomeScreen() {
   const { state, dispatch, checkedInToday, today } = useStore()
   const toast = useToast()
-  const prev = useRef(state)
   const [caring, setCaring] = useState(false)
   const [effect, setEffect] = useState(null)
   const effectTimer = useRef(null)
@@ -51,33 +51,6 @@ export default function HomeScreen() {
     clearTimeout(effectTimer.current)
     effectTimer.current = setTimeout(() => setEffect(null), 1600)
   }
-
-  // The reducer decides the daily bonus, so we read the result back out of
-  // state rather than duplicating the roll here.
-  useEffect(() => {
-    const p = prev.current
-    // Only a real check-in toasts — the presenter's streak shortcut also moves
-    // lastCheckIn, but backwards to yesterday.
-    if (state.lastCheckIn === today && state.lastCheckIn !== p.lastCheckIn) {
-      toast(`Day ${state.streak} check-in · +${CHECK_IN_COINS} berry coins`, '🎁')
-
-      if (state.blindboxTickets > p.blindboxTickets) {
-        toast('7-day bonus: a free blindbox!', '🎉')
-      }
-      const gained = Object.keys(state.inventory).find(
-        (k) => (state.inventory[k] || 0) > (p.inventory[k] || 0)
-      )
-      if (gained) {
-        const item = BASIC_ITEMS_BY_ID[gained]
-        toast(`Bonus item: ${item.name}`, item.emoji)
-      }
-      if (state.ownedItems.length > p.ownedItems.length) {
-        const unlocked = ITEMS_BY_ID[state.ownedItems[state.ownedItems.length - 1]]
-        toast(`${MILESTONE_DAYS}-day exclusive unlocked: ${unlocked.name}!`, '👑')
-      }
-    }
-    prev.current = state
-  }, [state, today, toast])
 
   const cyclePosition = state.streak === 0 ? 0 : ((state.streak - 1) % 7) + 1
   const milestonePct = Math.min(100, (state.streak / MILESTONE_DAYS) * 100)
@@ -138,23 +111,33 @@ export default function HomeScreen() {
           {checkedInToday ? `Come back tomorrow` : 'Check in'}
         </button>
 
+        {/* Preview of what the next seven days pay out — the retention
+            argument, made visible. */}
         <div className="streak-days">
           {Array.from({ length: 7 }, (_, i) => {
             const day = i + 1
             const done = day <= cyclePosition
+            const isNext = day === (checkedInToday ? cyclePosition + 1 : cyclePosition + 1)
             return (
               <div
                 key={day}
                 className={`streak-day ${done ? 'streak-day--done' : ''} ${
-                  day === cyclePosition + (checkedInToday ? 1 : 0) ? 'streak-day--today' : ''
+                  isNext ? 'streak-day--today' : ''
                 }`}
               >
-                {day === 7 ? '🎁' : day}
+                <span className="streak-day__num">{day}</span>
+                <span className="streak-day__reward">
+                  {day === 7 ? '🎁' : `+${CHECK_IN_COINS}`}
+                </span>
               </div>
             )
           })}
         </div>
         <p className="tiny" style={{ marginTop: 8, textAlign: 'center' }}>
+          Day 7 pays a free blindbox · day {MILESTONE_DAYS} unlocks{' '}
+          <b>{ITEMS_BY_ID.pilot?.name ?? 'the exclusive look'}</b>
+        </p>
+        <p className="tiny" style={{ marginTop: 4, textAlign: 'center', opacity: 0.7 }}>
           {prettyDate(today)}
         </p>
       </div>
@@ -191,6 +174,14 @@ export default function HomeScreen() {
           </div>
         )}
       </div>
+
+      {state.lastCheckInResult && (
+        <CheckInReveal
+          result={state.lastCheckInResult}
+          equipped={state.equipped}
+          onCollect={() => dispatch({ type: 'CLEAR_CHECK_IN' })}
+        />
+      )}
 
       <Modal open={caring} onClose={() => setCaring(false)} label="Care for Berry">
         <h3 style={{ fontSize: 17 }}>Care for Berry</h3>

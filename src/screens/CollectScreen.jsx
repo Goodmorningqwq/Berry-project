@@ -3,7 +3,7 @@ import { useStore } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
 import { Empty, ProgressBar } from '../components/ui.jsx'
-import { DESTINATIONS } from '../data/destinations.js'
+import { BY_COUNTRY, DESTINATIONS } from '../data/destinations.js'
 import { COSMETICS, ITEMS_BY_ID, RARITY_LABEL, SLOTS } from '../data/items.js'
 
 function Passport() {
@@ -13,53 +13,116 @@ function Passport() {
   return (
     <>
       <p className="muted" style={{ marginTop: 12 }}>
-        {state.stamps.length} of {DESTINATIONS.length} destinations stamped. Every landing also
-        unlocks that city’s exclusive outfit.
+        {state.stamps.length} of {DESTINATIONS.length} destinations stamped across the UO network.
+        Your first landing in each country also unlocks that country’s exclusive.
       </p>
-      <div className="stamp-grid">
-        {DESTINATIONS.map((d) => {
-          const earned = state.stamps.includes(d.code)
-          return (
-            <div
-              key={d.code}
-              className={`stamp ${earned ? 'stamp--earned' : 'stamp--locked'} ${
-                earned && d.code === newest ? 'stamp--new' : ''
-              }`}
-              style={{ '--hue': d.hue }}
-            >
-              <span className="stamp__ring" />
-              <span className="stamp__emoji">{earned ? d.emoji : '🔒'}</span>
-              <span className="stamp__city">{d.city}</span>
-              <span className="stamp__code">{d.code}</span>
+
+      {BY_COUNTRY.map((country) => {
+        const stamped = country.cities.filter((c) => state.stamps.includes(c.code)).length
+        const exclusive = ITEMS_BY_ID[country.reward]
+        const unlocked = state.ownedItems.includes(country.reward)
+
+        return (
+          <section key={country.id}>
+            <h3 className="section-title">
+              <span>
+                {country.flag} {country.id}
+              </span>
+              <small>
+                {stamped}/{country.cities.length}
+              </small>
+            </h3>
+
+            {exclusive && (
+              <p className="tiny" style={{ marginTop: -4, marginBottom: 8 }}>
+                {unlocked ? '✅ Unlocked' : '🔒'} {exclusive.name}
+              </p>
+            )}
+
+            <div className="stamp-grid">
+              {country.cities.map((d) => {
+                const earned = state.stamps.includes(d.code)
+                return (
+                  <div
+                    key={d.code}
+                    className={`stamp ${earned ? 'stamp--earned' : 'stamp--locked'} ${
+                      earned && d.code === newest ? 'stamp--new' : ''
+                    }`}
+                    style={{ '--hue': d.hue }}
+                  >
+                    <span className="stamp__ring" />
+                    <span className="stamp__emoji">{earned ? d.emoji : '🔒'}</span>
+                    <span className="stamp__city">{d.city}</span>
+                    <span className="stamp__code">{d.code}</span>
+                  </div>
+                )
+              })}
             </div>
-          )
-        })}
-      </div>
+          </section>
+        )
+      })}
     </>
   )
 }
 
 function Medals() {
-  const { medals } = useStore()
-  const earned = medals.filter((m) => m.earned).length
+  const { medals, regionBadges } = useStore()
 
   return (
     <>
       <p className="muted" style={{ marginTop: 12 }}>
-        {earned} of {medals.length} medals earned.
+        Every medal climbs Copper → Silver → Gold → Diamond as you keep flying with Berry.
       </p>
+
       <div className="card" style={{ marginTop: 10 }}>
         {medals.map((m) => (
-          <div key={m.id} className={`medal-row ${m.earned ? 'medal-row--earned' : 'medal-row--locked'}`}>
-            <div className="medal-row__badge">{m.earned ? m.emoji : '🔒'}</div>
+          <div key={m.id} className={`medal-row ${m.current ? 'medal-row--earned' : 'medal-row--locked'}`}>
+            <div
+              className="medal-row__badge"
+              style={m.current ? { background: m.current.color, color: '#fff' } : undefined}
+            >
+              {m.current ? m.current.emoji : m.emoji}
+            </div>
+
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: 13.5 }}>{m.name}</div>
-              <p className="tiny">{m.detail}</p>
-              {!m.earned && (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{ fontWeight: 700, fontSize: 13.5 }}>{m.name}</span>
+                <span className="tier-chip" style={m.current ? { color: m.current.color } : undefined}>
+                  {m.current ? m.current.label : 'Unranked'}
+                </span>
+              </div>
+
+              <p className="tiny">
+                {m.value.toLocaleString()} {m.unit}
+              </p>
+
+              <ProgressBar current={m.pct} target={100} />
+              <p className="tiny" style={{ marginTop: 3 }}>
+                {m.maxed
+                  ? '💎 Maxed — nothing left to climb'
+                  : `${m.remaining.toLocaleString()} more ${m.unit} until ${m.next.label}`}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="section-title">
+        Region badges <small>{regionBadges.filter((b) => b.earned).length}/{regionBadges.length}</small>
+      </h3>
+
+      <div className="card">
+        {regionBadges.map((b) => (
+          <div key={b.id} className={`medal-row ${b.earned ? 'medal-row--earned' : 'medal-row--locked'}`}>
+            <div className="medal-row__badge">{b.earned ? b.emoji : '🔒'}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: 13.5 }}>{b.name}</div>
+              <p className="tiny">{b.detail}</p>
+              {!b.earned && (
                 <>
-                  <ProgressBar current={m.progress.current} target={m.progress.target} />
+                  <ProgressBar current={b.count} target={b.total} />
                   <p className="tiny" style={{ marginTop: 3 }}>
-                    {m.progress.current}/{m.progress.target}
+                    {b.count}/{b.total}
                   </p>
                 </>
               )}
@@ -158,8 +221,8 @@ function Wardrobe() {
                 </div>
                 <div className="wardrobe-item__name">{item.name}</div>
                 <div className="tiny">
-                  {item.source === 'destination'
-                    ? 'Fly there'
+                  {item.source === 'country'
+                    ? 'Fly to that country'
                     : item.source === 'milestone'
                       ? '30-day streak'
                       : 'Blindbox'}

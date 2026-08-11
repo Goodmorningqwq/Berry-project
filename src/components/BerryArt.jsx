@@ -133,6 +133,30 @@ const Bandana = () => (
   </g>
 )
 
+/* Domed rather than conical, so it doesn't read as the Vietnamese nón lá. */
+const Salakot = () => (
+  <g {...ink}>
+    <ellipse cx="100" cy="54" rx="64" ry="14" fill="#D8B77A" />
+    <path d="M46 54 a54 44 0 0 1 108 0 z" fill="#E7CB96" />
+    <path d="M62 40 a44 30 0 0 1 76 0" fill="none" stroke="#BE9A57" strokeWidth="2.5" />
+    <path d="M74 26 a30 18 0 0 1 52 0" fill="none" stroke="#BE9A57" strokeWidth="2.5" />
+    <path d="M100 54 v-42" stroke="#BE9A57" strokeWidth="2.5" />
+    <path d="M100 14 l0 -12" strokeWidth="4" />
+    <circle cx="100" cy="0" r="7" fill="#C9A227" />
+  </g>
+)
+
+const PandaHood = () => (
+  <g {...ink}>
+    <circle cx="54" cy="34" r="24" fill="#1C1C1C" />
+    <circle cx="146" cy="34" r="24" fill="#1C1C1C" />
+    <path d="M44 56 a56 44 0 0 1 112 0 l0 12 q-56 -22 -112 0 z" fill="#FAFAFA" />
+    <path d="M56 50 a44 30 0 0 1 88 0" fill="none" stroke="#D6D6D6" strokeWidth="3" />
+    <circle cx="54" cy="34" r="10" fill="#3A3A3A" strokeWidth="2" />
+    <circle cx="146" cy="34" r="10" fill="#3A3A3A" strokeWidth="2" />
+  </g>
+)
+
 /* ------------------------------------------------------------------ */
 /* Face props (head-anchored)                                          */
 /* ------------------------------------------------------------------ */
@@ -302,7 +326,9 @@ export const HAT_ART = {
   strawHat: { anchor: 'head', Front: StrawHat },
   sakura: { anchor: 'head', Front: Sakura },
   hanbokBand: { anchor: 'head', Front: HanbokBand },
-  bandana: { anchor: 'head', Front: Bandana }
+  bandana: { anchor: 'head', Front: Bandana },
+  salakot: { anchor: 'head', Front: Salakot },
+  pandaHood: { anchor: 'head', Front: PandaHood }
 }
 
 export const ACCESSORY_ART = {
