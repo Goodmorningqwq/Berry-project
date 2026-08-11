@@ -384,6 +384,9 @@ p {
   color: var(--purple-900);
 }
 
+/* Berry is the official sprite with SVG props layered over (and under) it.
+   Every layer shares one box so the anchor maths in Berry.jsx lines up. */
+
 .berry {
   display: block;
   margin: 0 auto;
@@ -391,8 +394,32 @@ p {
   filter: drop-shadow(0 10px 14px rgba(75, 11, 87, 0.18));
 }
 
+.berry__sprite,
+.berry__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.berry__sprite {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .berry--animate {
   animation: berry-bob 3.6s ease-in-out infinite;
+}
+
+.berry--sleepy {
+  filter: drop-shadow(0 10px 14px rgba(75, 11, 87, 0.14)) grayscale(0.5) brightness(0.96);
+}
+
+.berry--happy {
+  animation: berry-bob 1.9s ease-in-out infinite;
 }
 
 @keyframes berry-bob {
@@ -400,14 +427,27 @@ p {
   50% { transform: translateY(-9px) rotate(0.6deg); }
 }
 
-.berry-eyes {
-  animation: berry-blink 5.5s infinite;
-  transform-origin: center 88px;
+.berry__hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-@keyframes berry-blink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.08); }
+.berry__hearts span {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  font-size: 22px;
+  animation: heart-float 1.6s ease-out forwards;
+}
+
+.berry__hearts span:nth-child(2) { left: 34%; }
+.berry__hearts span:nth-child(3) { left: 64%; }
+
+@keyframes heart-float {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translateY(-70px) scale(1.15); opacity: 0; }
 }
 
 .speech {
@@ -994,14 +1034,16 @@ p {
 }
 
 .wardrobe-item__preview {
-  height: 62px;
+  height: 74px;
   overflow: hidden;
   display: grid;
   place-items: center;
 }
 
-.wardrobe-item__preview svg {
-  transform: scale(1.15);
+/* Crop to Berry's head and shoulders — that's where the props are. */
+.wardrobe-item__preview .berry {
+  margin-top: 12px;
+  filter: none;
 }
 
 .rarity {

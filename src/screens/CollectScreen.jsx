@@ -74,7 +74,7 @@ function Medals() {
 function Wardrobe() {
   const { state, dispatch } = useStore()
   const toast = useToast()
-  const [slot, setSlot] = useState('outfit')
+  const [slot, setSlot] = useState('look')
 
   const items = COSMETICS.filter((i) => i.slot === slot)
   const owned = items.filter((i) => state.ownedItems.includes(i.id))
@@ -82,6 +82,7 @@ function Wardrobe() {
 
   const toggle = (item) => {
     const wasOn = state.equipped[item.slot] === item.id
+    if (wasOn && item.slot === 'look') return // Berry always wears a look
     dispatch({ type: 'EQUIP_ITEM', itemId: item.id })
     toast(wasOn ? `${item.name} put away` : `Berry is wearing ${item.name}`, wasOn ? '👋' : '✨')
   }
@@ -96,7 +97,7 @@ function Wardrobe() {
             return (
               <span key={s.id} className="chip">
                 {s.label}: {item ? item.name : '—'}
-                {item && (
+                {item && s.id !== 'look' && (
                   <button
                     onClick={() => dispatch({ type: 'UNEQUIP_SLOT', slot: s.id })}
                     aria-label={`Remove ${item.name}`}

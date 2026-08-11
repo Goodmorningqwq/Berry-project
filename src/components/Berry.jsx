@@ -1,58 +1,25 @@
-import { useId } from 'react'
 import { ITEMS_BY_ID } from '../data/items.js'
-import { ART_BY_SLOT } from './BerryArt.jsx'
+import { ART_HEAD, ART_NECK, ART_WIDTH, DEFAULT_LOOK, LOOKS_BY_ID } from '../data/looks.js'
+import { ACCESSORY_ART, HAT_ART } from './BerryArt.jsx'
 
 /**
- * The bear himself.
+ * Berry, rendered from the official sprite with SVG props layered over it.
  *
- * Layer order matters: legs → arms → body → outfit → ears → head → face →
- * accessory → hat. Everything lives in a 200x240 viewBox so the wardrobe art
- * in BerryArt.jsx can use absolute coordinates.
+ * Props can declare a `Behind` part that renders *under* the sprite — that's
+ * what puts the neck pillow behind his head instead of across his face.
  */
 
-const FUR = '#C7C9D6'
-const FUR_DARK = '#AEB1C3'
-const MUZZLE = '#EDEEF4'
-const NOSE = '#6D2E8C'
-const INNER_EAR = '#C39BD8'
+const MOOD_CLASS = {
+  sleepy: 'berry--sleepy',
+  happy: 'berry--happy',
+  excited: 'berry--happy'
+}
 
-function Eyes({ mood }) {
-  if (mood === 'sleepy') {
-    return (
-      <g stroke="#3B2A57" strokeWidth="4" strokeLinecap="round" fill="none">
-        <path d="M70 86 q10 8 20 0" />
-        <path d="M110 86 q10 8 20 0" />
-      </g>
-    )
-  }
-  if (mood === 'happy') {
-    return (
-      <g stroke="#3B2A57" strokeWidth="5" strokeLinecap="round" fill="none">
-        <path d="M70 90 q10 -12 20 0" />
-        <path d="M110 90 q10 -12 20 0" />
-      </g>
-    )
-  }
-  if (mood === 'excited') {
-    return (
-      <g fill="#3B2A57">
-        {[80, 120].map((cx) => (
-          <path
-            key={cx}
-            d={`M${cx} 76 L${cx + 4} 84 L${cx + 12} 88 L${cx + 4} 92 L${cx} 100 L${cx - 4} 92 L${cx - 12} 88 L${cx - 4} 84 Z`}
-          />
-        ))}
-      </g>
-    )
-  }
-  return (
-    <g className="berry-eyes">
-      <ellipse cx="80" cy="88" rx="7" ry="8" fill="#3B2A57" />
-      <ellipse cx="120" cy="88" rx="7" ry="8" fill="#3B2A57" />
-      <circle cx="82.5" cy="85" r="2.4" fill="#fff" />
-      <circle cx="122.5" cy="85" r="2.4" fill="#fff" />
-    </g>
-  )
+/** Maps the prop art's reference point onto this look's anchor. */
+function anchorTransform(anchor, ref, viewWidth, viewHeight, scale) {
+  const x = anchor.x * viewWidth
+  const y = anchor.y * viewHeight
+  return `translate(${x - ref.x * scale} ${y - ref.y * scale}) scale(${scale})`
 }
 
 export default function Berry({
@@ -60,82 +27,65 @@ export default function Berry({
   mood = 'idle',
   size = 200,
   animate = true,
+  effect = null,
   className = ''
 }) {
-  const uid = useId().replace(/:/g, '')
-  const clip = `berry-body-${uid}`
+  const look = LOOKS_BY_ID[equipped.look] ?? LOOKS_BY_ID[DEFAULT_LOOK]
 
-  const layer = (slot) => {
-    const item = ITEMS_BY_ID[equipped[slot]]
-    if (!item) return null
-    const Art = ART_BY_SLOT[slot]?.[item.art]
-    return Art ? <Art clip={clip} /> : null
+  const viewWidth = ART_WIDTH
+  const viewHeight = Math.round(ART_WIDTH / look.aspect)
+  const scale = look.head.scale
+
+  const headTransform = anchorTransform(look.head, ART_HEAD, viewWidth, viewHeight, scale)
+  const neckTransform = anchorTransform(look.neck, ART_NECK, viewWidth, viewHeight, scale)
+
+  const hat = ITEMS_BY_ID[equipped.hat]
+  const accessory = ITEMS_BY_ID[equipped.accessory]
+  const arts = [accessory ? ACCESSORY_ART[accessory.art] : null, hat ? HAT_ART[hat.art] : null]
+
+  // Each drawing declares whether it hangs off the head or the neck, so a face
+  // prop in the accessory slot (sunglasses, snorkel) still lands on the face.
+  const layer = (art, part, key) => {
+    const Part = art?.[part]
+    if (!Part) return null
+    return (
+      <g key={key} transform={art.anchor === 'head' ? headTransform : neckTransform}>
+        <Part />
+      </g>
+    )
   }
 
-  const blushing = mood === 'happy' || mood === 'excited'
+  const overlay = (part) => (
+    <svg
+      viewBox={`0 0 ${viewWidth} ${viewHeight}`}
+      className="berry__layer"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {arts.map((art, i) => layer(art, part, i))}
+    </svg>
+  )
 
   return (
-    <svg
-      viewBox="0 0 200 240"
-      width={size}
-      height={size * 1.2}
-      className={`berry ${animate ? 'berry--animate' : ''} ${className}`}
+    <div
+      className={`berry ${animate ? 'berry--animate' : ''} ${MOOD_CLASS[mood] ?? ''} ${className}`}
+      style={{ width: size, height: size / look.aspect }}
       role="img"
-      aria-label="Berry the bear"
+      aria-label={`Berry the bear wearing ${look.name}`}
     >
-      <defs>
-        <clipPath id={clip}>
-          <ellipse cx="100" cy="172" rx="44" ry="46" />
-        </clipPath>
-      </defs>
+      {overlay('Behind')}
+      <img className="berry__sprite" src={look.sprite} alt="" draggable="false" />
+      {overlay('Front')}
 
-      {/* legs */}
-      <ellipse cx="79" cy="213" rx="17" ry="12" fill={FUR_DARK} />
-      <ellipse cx="121" cy="213" rx="17" ry="12" fill={FUR_DARK} />
-
-      {/* arms, tucked behind the body so only the paws show */}
-      <ellipse cx="58" cy="168" rx="15" ry="27" fill={FUR_DARK} transform="rotate(-8 58 168)" />
-      <ellipse cx="142" cy="168" rx="15" ry="27" fill={FUR_DARK} transform="rotate(8 142 168)" />
-
-      {/* body */}
-      <ellipse cx="100" cy="172" rx="44" ry="46" fill={FUR} />
-      <ellipse cx="100" cy="178" rx="27" ry="30" fill={MUZZLE} opacity="0.55" />
-
-      {layer('outfit')}
-
-      {/* ears */}
-      <g>
-        <circle cx="60" cy="46" r="25" fill={FUR} />
-        <circle cx="140" cy="46" r="25" fill={FUR} />
-        <circle cx="60" cy="46" r="13" fill={INNER_EAR} />
-        <circle cx="140" cy="46" r="13" fill={INNER_EAR} />
-      </g>
-
-      {/* head */}
-      <circle cx="100" cy="84" r="52" fill={FUR} />
-      <ellipse cx="100" cy="104" rx="26" ry="20" fill={MUZZLE} />
-
-      {blushing && (
-        <g fill="#F2A0BE" opacity="0.65">
-          <ellipse cx="62" cy="104" rx="11" ry="7" />
-          <ellipse cx="138" cy="104" rx="11" ry="7" />
-        </g>
+      {effect === 'hearts' && (
+        <div className="berry__hearts" aria-hidden="true">
+          {['💜', '💛', '💜'].map((h, i) => (
+            <span key={i} style={{ animationDelay: `${i * 0.14}s` }}>
+              {h}
+            </span>
+          ))}
+        </div>
       )}
-
-      <Eyes mood={mood} />
-
-      {/* nose + mouth */}
-      <path d="M92 98 q8 -6 16 0 q0 9 -8 12 q-8 -3 -8 -12 z" fill={NOSE} />
-      <path
-        d={mood === 'sleepy' ? 'M94 116 q6 4 12 0' : 'M88 114 q6 8 12 1 q6 7 12 -1'}
-        fill="none"
-        stroke={NOSE}
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-
-      {layer('accessory')}
-      {layer('hat')}
-    </svg>
+    </div>
   )
 }

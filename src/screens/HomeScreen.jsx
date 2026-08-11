@@ -1,8 +1,14 @@
-import { useEffect, useRef } from 'react'
-import { useStore, CHECK_IN_COINS, MILESTONE_DAYS, prettyDate } from '../state/store.jsx'
+import { useEffect, useRef, useState } from 'react'
+import {
+  useStore,
+  CHECK_IN_COINS,
+  FEED_REWARDS,
+  MILESTONE_DAYS,
+  prettyDate
+} from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
-import { Coin } from '../components/ui.jsx'
+import { Coin, Empty, Modal } from '../components/ui.jsx'
 import { BASIC_ITEMS, BASIC_ITEMS_BY_ID, ITEMS_BY_ID } from '../data/items.js'
 import { nextTrip } from '../data/destinations.js'
 
@@ -25,12 +31,34 @@ export default function HomeScreen() {
   const { state, dispatch, checkedInToday, today } = useStore()
   const toast = useToast()
   const prev = useRef(state)
+  const [caring, setCaring] = useState(false)
+  const [effect, setEffect] = useState(null)
+  const effectTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(effectTimer.current), [])
+
+  const care = (item) => {
+    dispatch({ type: 'FEED_BERRY', itemId: item.id })
+    const reward = FEED_REWARDS[item.id] ?? 10
+    toast(
+      item.kind === 'wash'
+        ? `Berry is squeaky clean · +${reward} berry coins`
+        : `Berry loved that · +${reward} berry coins`,
+      item.emoji
+    )
+    setCaring(false)
+    setEffect('hearts')
+    clearTimeout(effectTimer.current)
+    effectTimer.current = setTimeout(() => setEffect(null), 1600)
+  }
 
   // The reducer decides the daily bonus, so we read the result back out of
   // state rather than duplicating the roll here.
   useEffect(() => {
     const p = prev.current
-    if (state.lastCheckIn && state.lastCheckIn !== p.lastCheckIn) {
+    // Only a real check-in toasts — the presenter's streak shortcut also moves
+    // lastCheckIn, but backwards to yesterday.
+    if (state.lastCheckIn === today && state.lastCheckIn !== p.lastCheckIn) {
       toast(`Day ${state.streak} check-in · +${CHECK_IN_COINS} berry coins`, '🎁')
 
       if (state.blindboxTickets > p.blindboxTickets) {
@@ -49,7 +77,7 @@ export default function HomeScreen() {
       }
     }
     prev.current = state
-  }, [state, toast])
+  }, [state, today, toast])
 
   const cyclePosition = state.streak === 0 ? 0 : ((state.streak - 1) % 7) + 1
   const milestonePct = Math.min(100, (state.streak / MILESTONE_DAYS) * 100)
@@ -75,7 +103,8 @@ export default function HomeScreen() {
 
         <Berry
           equipped={state.equipped}
-          mood={checkedInToday ? 'happy' : 'sleepy'}
+          mood={effect ? 'happy' : checkedInToday ? 'happy' : 'sleepy'}
+          effect={effect}
           size={182}
         />
       </section>
@@ -130,10 +159,27 @@ export default function HomeScreen() {
         </p>
       </div>
 
-      {basics.length > 0 && (
-        <div className="card">
-          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Berry’s stash</div>
-          <div style={{ display: 'flex', gap: 14 }}>
+      <div className="card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 800, fontSize: 15 }}>Berry’s stash</div>
+            <p className="muted" style={{ marginTop: 2 }}>
+              {basics.length > 0
+                ? 'Feed Berry a treat and he’ll share his coins.'
+                : 'Check in daily to collect snacks for Berry.'}
+            </p>
+          </div>
+          <button
+            className={`btn ${basics.length > 0 ? 'btn--gold' : ''}`}
+            onClick={() => setCaring(true)}
+            disabled={basics.length === 0}
+          >
+            🍪 Feed Berry
+          </button>
+        </div>
+
+        {basics.length > 0 && (
+          <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
             {basics.map((item) => (
               <div key={item.id} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 26 }}>{item.emoji}</div>
@@ -143,8 +189,48 @@ export default function HomeScreen() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      <Modal open={caring} onClose={() => setCaring(false)} label="Care for Berry">
+        <h3 style={{ fontSize: 17 }}>Care for Berry</h3>
+        <p className="muted" style={{ marginTop: 4 }}>
+          Treats come from your daily check-ins. Berry pays you back in coins.
+        </p>
+
+        {basics.length === 0 ? (
+          <Empty
+            emoji="🍪"
+            title="Berry’s bowl is empty"
+            hint="Check in tomorrow — treats drop as a check-in bonus."
+          />
+        ) : (
+          <div style={{ marginTop: 12 }}>
+            {basics.map((item) => (
+              <button key={item.id} className="reward-row" onClick={() => care(item)}>
+                <div className="reward-row__emoji">{item.emoji}</div>
+                <div className="reward-row__body">
+                  <div className="reward-row__name">
+                    {item.name} <span className="tiny">×{state.inventory[item.id]}</span>
+                  </div>
+                  <p className="tiny">{item.note}</p>
+                </div>
+                <span className="chip chip--gold">
+                  <Coin small /> +{FEED_REWARDS[item.id]}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <button
+          className="btn btn--ghost btn--block"
+          style={{ marginTop: 14 }}
+          onClick={() => setCaring(false)}
+        >
+          Close
+        </button>
+      </Modal>
 
       <div className="tiles">
         <button className="tile" onClick={() => dispatch({ type: 'NAVIGATE', screen: 'play' })}>

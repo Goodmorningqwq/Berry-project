@@ -1,16 +1,30 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
-import { BLINDBOX_POOL, BASIC_ITEMS, ITEMS_BY_ID, MILESTONE_ITEM_ID } from '../data/items.js'
+import {
+  BLINDBOX_POOL,
+  BASIC_ITEMS,
+  BASIC_ITEMS_BY_ID,
+  ITEMS_BY_ID,
+  MILESTONE_ITEM_ID,
+  STARTER_ITEM_ID
+} from '../data/items.js'
 import { DESTINATIONS_BY_CODE } from '../data/destinations.js'
 import { MEDALS } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 1
+const SCHEMA_VERSION = 2
 
 export const CHECK_IN_COINS = 10
-export const BLINDBOX_COST = 60
+export const BLINDBOX_COST = 150
 export const MILESTONE_DAYS = 30
 export const DAILY_PLAYS_PER_GAME = 3
+
+/** Coins paid for caring for Berry. Supply is limited by the check-in drop. */
+export const FEED_REWARDS = {
+  'berry-snack': 25,
+  'berry-juice': 20,
+  'berry-soap': 15
+}
 
 /* ------------------------------------------------------------------ */
 /* Virtual clock                                                       */
@@ -62,9 +76,10 @@ function initialState() {
     lastCheckIn: null,
     dayOffset: 0,
     blindboxTickets: 0,
-    ownedItems: ['tee-basic'],
-    equipped: { outfit: null, hat: null, accessory: null },
+    ownedItems: [STARTER_ITEM_ID],
+    equipped: { look: STARTER_ITEM_ID, hat: null, accessory: null },
     inventory: {},
+    fedCount: 0,
     stamps: [],
     flights: [],
     vouchers: [],
@@ -184,14 +199,33 @@ function reducer(state, action) {
       const item = ITEMS_BY_ID[action.itemId]
       if (!item || !state.ownedItems.includes(action.itemId)) return state
       const current = state.equipped[item.slot]
-      return {
-        ...state,
-        equipped: { ...state.equipped, [item.slot]: current === action.itemId ? null : action.itemId }
-      }
+      // Berry always wears *some* look, so that slot swaps rather than toggles.
+      const next = current === action.itemId && item.slot !== 'look' ? null : action.itemId
+      return { ...state, equipped: { ...state.equipped, [item.slot]: next } }
     }
 
     case 'UNEQUIP_SLOT':
+      if (action.slot === 'look') return state
       return { ...state, equipped: { ...state.equipped, [action.slot]: null } }
+
+    case 'FEED_BERRY': {
+      const item = BASIC_ITEMS_BY_ID[action.itemId]
+      const held = state.inventory[action.itemId] || 0
+      if (!item || held < 1) return state
+
+      const reward = FEED_REWARDS[action.itemId] ?? 10
+      const inventory = { ...state.inventory }
+      if (held > 1) inventory[action.itemId] = held - 1
+      else delete inventory[action.itemId]
+
+      return {
+        ...state,
+        inventory,
+        fedCount: state.fedCount + 1,
+        coins: state.coins + reward,
+        lifetimeCoins: state.lifetimeCoins + reward
+      }
+    }
 
     case 'COMPLETE_FLIGHT': {
       const dest = DESTINATIONS_BY_CODE[action.code]
@@ -247,6 +281,16 @@ function reducer(state, action) {
         bestStreak: Math.max(state.bestStreak, days),
         lastCheckIn: dayKey(state.dayOffset - 1)
       }
+    }
+
+    case 'DEMO_GRANT_ITEMS': {
+      // Food only drops from the check-in bonus roll, which is too random to
+      // rely on when there's an audience watching.
+      const inventory = { ...state.inventory }
+      BASIC_ITEMS.forEach((item) => {
+        inventory[item.id] = (inventory[item.id] || 0) + 2
+      })
+      return { ...state, inventory }
     }
 
     case 'DEMO_GRANT_COINS':

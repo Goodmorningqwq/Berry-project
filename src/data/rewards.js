@@ -13,7 +13,7 @@ export const REWARDS = [
     kind: 'meal',
     name: 'HK$20 off an inflight meal',
     detail: 'Applies to any hot meal on your next UO flight',
-    cost: 120,
+    cost: 350,
     emoji: '🍱'
   },
   {
@@ -21,7 +21,7 @@ export const REWARDS = [
     kind: 'meal',
     name: 'HK$50 off an inflight meal combo',
     detail: 'Meal + drink combo on your next UO flight',
-    cost: 260,
+    cost: 800,
     emoji: '🍛'
   },
   {
@@ -29,7 +29,7 @@ export const REWARDS = [
     kind: 'meal',
     name: 'Free inflight hot drink',
     detail: 'Coffee, tea or hot chocolate',
-    cost: 80,
+    cost: 200,
     emoji: '☕'
   },
   {
@@ -37,7 +37,7 @@ export const REWARDS = [
     kind: 'merch',
     name: 'Berry tote bag voucher',
     detail: 'Redeem at the UO online shop',
-    cost: 300,
+    cost: 900,
     emoji: '👜'
   },
   {
@@ -45,7 +45,7 @@ export const REWARDS = [
     kind: 'merch',
     name: 'Berry plush voucher',
     detail: 'The one everyone posts about',
-    cost: 500,
+    cost: 2000,
     emoji: '🧸'
   },
   {
@@ -53,7 +53,7 @@ export const REWARDS = [
     kind: 'merch',
     name: 'Berry luggage tag',
     detail: 'Collect at the airport UO counter',
-    cost: 180,
+    cost: 450,
     emoji: '🏷️'
   },
   {
@@ -61,7 +61,7 @@ export const REWARDS = [
     kind: 'ancillary',
     name: '3kg extra baggage',
     detail: 'Added to your next booking',
-    cost: 400,
+    cost: 1200,
     emoji: '🧳'
   },
   {
@@ -69,7 +69,7 @@ export const REWARDS = [
     kind: 'ancillary',
     name: 'Front-row seat selection',
     detail: 'Subject to availability',
-    cost: 450,
+    cost: 1400,
     emoji: '💺'
   }
 ]

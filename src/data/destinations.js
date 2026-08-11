@@ -4,18 +4,18 @@
  */
 
 export const DESTINATIONS = [
-  { code: 'NRT', city: 'Tokyo', country: 'Japan', region: 'Japan', emoji: '🗼', hue: 340, reward: 'kimono' },
+  { code: 'NRT', city: 'Tokyo', country: 'Japan', region: 'Japan', emoji: '🗼', hue: 340, reward: 'sakura-clip' },
   { code: 'KIX', city: 'Osaka', country: 'Japan', region: 'Japan', emoji: '🐙', hue: 18, reward: 'takoyaki-hat' },
   { code: 'FUK', city: 'Fukuoka', country: 'Japan', region: 'Japan', emoji: '🍜', hue: 32, reward: 'ramen-bowl' },
-  { code: 'ISG', city: 'Ishigaki', country: 'Japan', region: 'Japan', emoji: '🐠', hue: 190, reward: 'diving-fins' },
-  { code: 'ICN', city: 'Seoul', country: 'Korea', region: 'Korea', emoji: '🏯', hue: 210, reward: 'hanbok' },
+  { code: 'ISG', city: 'Ishigaki', country: 'Japan', region: 'Japan', emoji: '🐠', hue: 190, reward: 'shell-necklace' },
+  { code: 'ICN', city: 'Seoul', country: 'Korea', region: 'Korea', emoji: '🏯', hue: 210, reward: 'hanbok-band' },
   { code: 'CJU', city: 'Jeju', country: 'Korea', region: 'Korea', emoji: '🍊', hue: 28, reward: 'jeju-hat' },
   { code: 'TPE', city: 'Taipei', country: 'Taiwan', region: 'Greater China', emoji: '🧋', hue: 268, reward: 'bubble-tea' },
   { code: 'BKK', city: 'Bangkok', country: 'Thailand', region: 'Southeast Asia', emoji: '🛕', hue: 45, reward: 'thai-garland' },
   { code: 'HKT', city: 'Phuket', country: 'Thailand', region: 'Southeast Asia', emoji: '🏝️', hue: 172, reward: 'snorkel' },
   { code: 'CNX', city: 'Chiang Mai', country: 'Thailand', region: 'Southeast Asia', emoji: '🏮', hue: 5, reward: 'lantern' },
   { code: 'DAD', city: 'Da Nang', country: 'Vietnam', region: 'Southeast Asia', emoji: '🌉', hue: 130, reward: 'conical-hat' },
-  { code: 'BKI', city: 'Kota Kinabalu', country: 'Malaysia', region: 'Southeast Asia', emoji: '🌅', hue: 300, reward: 'kota-shirt' }
+  { code: 'BKI', city: 'Kota Kinabalu', country: 'Malaysia', region: 'Southeast Asia', emoji: '🌅', hue: 300, reward: 'batik-bandana' }
 ]
 
 export const DESTINATIONS_BY_CODE = Object.fromEntries(DESTINATIONS.map((d) => [d.code, d]))

@@ -86,9 +86,19 @@ export default function DemoPanel() {
               🛬 Simulate flight
               <small>Stamp + destination exclusive</small>
             </button>
-            <button className="demo-btn" onClick={() => grant(500)}>
-              🪙 Grant 500 coins
-              <small>Skip the grind to reach the shop</small>
+            <button className="demo-btn" onClick={() => grant(2000)}>
+              🪙 Grant 2,000 coins
+              <small>Reaches the top redemption tier</small>
+            </button>
+            <button
+              className="demo-btn"
+              onClick={() => {
+                dispatch({ type: 'DEMO_GRANT_ITEMS' })
+                toast('Treats added to Berry’s stash', '🍪')
+              }}
+            >
+              🍪 Give treats
+              <small>So Feed Berry can be shown on cue</small>
             </button>
             <button className="demo-btn demo-btn--danger" onClick={reset}>
               ↺ Reset demo
