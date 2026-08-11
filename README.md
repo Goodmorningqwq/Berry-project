@@ -17,7 +17,7 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 
 | Loop | What it does |
 | --- | --- |
-| **Daily check-in** | +10 berry coins, streak tracking, a bonus blindbox every 7 days, and the Pilot Berry look at 30 consecutive days |
+| **Daily check-in** | +10 berry coins, streak tracking, a bonus blindbox every 7 days, and the Pilot Berry look at 30 consecutive days. The reveal then previews what tomorrow pays |
 | **Feed Berry** | Treats dropped by check-ins can be fed to Berry, who pays coins back (snack +25, juice +20, soap +15) |
 | **Minigames** | Cloud Dash, Baggage Match and Candy Rush, 3 rewarded plays each per day |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
@@ -61,6 +61,18 @@ Five medals climb **Copper → Silver → Gold → Diamond**, each showing how f
 
 Below them sit four region badges — Japan, Korea, Greater China, Southeast Asia — earned by stamping
 a whole region. All of it derives from state in `src/data/medals.js`; the store tracks no medal data.
+
+### Drop rates
+
+Every random reward is disclosed in-app behind the **View odds** link on the blindbox and on the
+check-in reveal. `src/components/OddsSheet.jsx` reads the same constants and pools the rolls use, so
+the published numbers can't drift from the code:
+
+- **Blindbox** — Common 60%, Rare 30%, Epic 10%. The rarity is picked first, then an item within it,
+  preferring anything not yet owned; an unavoidable duplicate refunds 20 coins. (Measured over
+  200,000 rolls: 59.94 / 30.04 / 10.02.)
+- **Check-in** — +10 coins always; a free blindbox guaranteed on every 7th streak day; a 30% treat
+  chance on all other days, split evenly across snack, juice and soap.
 
 ### Economy
 

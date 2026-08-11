@@ -44,6 +44,10 @@ html,
 body {
   margin: 0;
   padding: 0;
+  /* The page itself never scrolls — only .app__body does. That's what keeps
+     the header and tab bar locked like a native app. */
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -78,8 +82,8 @@ p {
   position: relative;
   width: 100%;
   max-width: var(--app-width);
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   margin: 0 auto;
   background: var(--bg);
   display: flex;
@@ -90,16 +94,20 @@ p {
 
 .app__body {
   flex: 1;
+  /* Without this a flex item defaults to min-height:auto and refuses to shrink
+     below its content, which pushes .app past the viewport and makes the whole
+     window scroll instead of this container. */
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 0 18px calc(var(--nav-height) + 28px);
+  padding: 0 18px 28px;
 }
 
 /* ---------------- top bar ---------------- */
 
 .topbar {
-  position: sticky;
-  top: 0;
+  flex: none;
   z-index: 20;
   background: linear-gradient(135deg, var(--purple-800), var(--purple-600));
   color: #fff;
@@ -288,8 +296,7 @@ p {
 /* ---------------- bottom nav ---------------- */
 
 .nav {
-  position: sticky;
-  bottom: 0;
+  flex: none;
   z-index: 30;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -869,11 +876,82 @@ p {
 
 /* ---------------- check-in reveal ---------------- */
 
-.checkin-reveal__body {
+/* The two steps are stacked siblings that cross-slide. Both live in a
+   min-height box so the card never animates its own height — transform and
+   opacity only, so nothing hits layout. */
+.checkin-reveal__steps {
   position: relative;
+  min-height: 430px;
+  overflow: hidden;
+}
+
+.checkin-reveal__step {
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: transform 0.42s cubic-bezier(0.3, 0.9, 0.3, 1), opacity 0.32s ease;
+  will-change: transform, opacity;
+}
+
+.checkin-reveal__step--next,
+.checkin-reveal__step--past {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.checkin-reveal__step--past {
+  transform: translateX(-38%);
+}
+
+.checkin-reveal__step--next {
+  transform: translateX(38%);
+}
+
+.checkin-reveal__step--in {
+  position: relative;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.checkin-reveal__title {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--purple-900);
+  margin-top: 14px;
+}
+
+.checkin-reveal__odds {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+.odds-row {
+  background: #fff;
+  border-radius: 14px;
+  padding: 11px 13px;
+  box-shadow: var(--shadow);
+  margin-bottom: 8px;
+}
+
+.odds-row__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.odds-row__head b {
+  font-size: 15px;
+  color: var(--purple-800);
 }
 
 .checkin-reveal__day {

@@ -92,28 +92,61 @@ function initialState() {
 /* Reducer                                                             */
 /* ------------------------------------------------------------------ */
 
+/** Check-in odds, published to the player in OddsSheet. */
+export const BLINDBOX_STREAK_DAY = 7
+export const TREAT_CHANCE = 0.3
+
 function rollDailyBonus(streak) {
   // Deterministic beats on the streak so the demo tells a legible story,
   // with a light random sprinkle of basic items in between.
-  if (streak > 0 && streak % 7 === 0) return { type: 'blindbox' }
-  if (Math.random() < 0.3) {
+  if (streak > 0 && streak % BLINDBOX_STREAK_DAY === 0) return { type: 'blindbox' }
+  if (Math.random() < TREAT_CHANCE) {
     const item = BASIC_ITEMS[Math.floor(Math.random() * BASIC_ITEMS.length)]
     return { type: 'item', id: item.id, name: item.name }
   }
   return null
 }
 
+/**
+ * Published blindbox odds. These are displayed to the player in OddsSheet, so
+ * the roll below has to honour them exactly.
+ */
+export const RARITY_ODDS = [
+  { rarity: 'common', chance: 0.6 },
+  { rarity: 'rare', chance: 0.3 },
+  { rarity: 'epic', chance: 0.1 }
+]
+
+/**
+ * Rarity first, then an item inside it.
+ *
+ * Weighting each *item* by its rarity and summing across the pool (the previous
+ * approach) makes the class odds depend on how many items sit in each tier —
+ * with the current pool that worked out to roughly 52/47/2, so no honest label
+ * could read "10% epic". Choosing the tier first keeps the published numbers
+ * true however the pool grows.
+ */
 function pickBlindboxItem(ownedItems) {
-  const unowned = BLINDBOX_POOL.filter((i) => !ownedItems.includes(i.id))
-  const pool = unowned.length ? unowned : BLINDBOX_POOL
-  const weights = { common: 60, rare: 30, epic: 10 }
-  const total = pool.reduce((sum, i) => sum + weights[i.rarity], 0)
-  let roll = Math.random() * total
-  for (const item of pool) {
-    roll -= weights[item.rarity]
-    if (roll <= 0) return item
+  let roll = Math.random()
+  let tier = RARITY_ODDS[RARITY_ODDS.length - 1].rarity
+  for (const band of RARITY_ODDS) {
+    if (roll < band.chance) {
+      tier = band.rarity
+      break
+    }
+    roll -= band.chance
   }
-  return pool[pool.length - 1]
+
+  // A tier can only be empty if the pool is edited badly; fall back rather than
+  // hand back undefined.
+  const inTier = BLINDBOX_POOL.filter((i) => i.rarity === tier)
+  const candidates = inTier.length ? inTier : BLINDBOX_POOL
+
+  // Duplicate protection stays: prefer something not owned yet within the tier.
+  const unowned = candidates.filter((i) => !ownedItems.includes(i.id))
+  const pool = unowned.length ? unowned : candidates
+
+  return pool[Math.floor(Math.random() * pool.length)]
 }
 
 function voucherCode() {

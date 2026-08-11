@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useStore, BLINDBOX_COST } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
+import OddsSheet from '../components/OddsSheet.jsx'
 import { Coin, Empty } from '../components/ui.jsx'
 import { ITEMS_BY_ID, RARITY_LABEL } from '../data/items.js'
 import { REDEMPTION_WINDOW, REWARDS, REWARD_KINDS, REWARDS_BY_ID } from '../data/rewards.js'
@@ -38,6 +39,7 @@ export default function ShopScreen() {
   const toast = useToast()
   const [shaking, setShaking] = useState(false)
   const [kind, setKind] = useState('meal')
+  const [oddsOpen, setOddsOpen] = useState(false)
 
   const free = state.blindboxTickets > 0
   const canOpen = free || state.coins >= BLINDBOX_COST
@@ -99,7 +101,12 @@ export default function ShopScreen() {
             You need {BLINDBOX_COST - state.coins} more coins — play a round in Play &amp; earn.
           </p>
         )}
+        <button className="checkin-reveal__odds" onClick={() => setOddsOpen(true)}>
+          View odds
+        </button>
       </div>
+
+      <OddsSheet open={oddsOpen} onClose={() => setOddsOpen(false)} />
 
       <h3 className="section-title">Redeem your coins</h3>
       <p className="tiny" style={{ marginTop: -4 }}>
