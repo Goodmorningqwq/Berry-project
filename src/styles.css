@@ -791,9 +791,18 @@ p {
   outline-offset: 2px;
 }
 
-/* Reuses the check-in reveal's landing squash so a poke reads as a reaction. */
-.room__pet--poked .berry {
-  animation: berry-land 0.6s cubic-bezier(0.2, 1.4, 0.35, 1);
+/* Scenery on the floor, left of Berry and behind him in the stacking order so
+   it can never cover him. Percentages keep it placed at any width. */
+.room__bed {
+  position: absolute;
+  left: 2%;
+  bottom: 4%;
+  /* Sized to stop short of Berry's sprite — he's centred and 168px wide, so
+     anything past ~28% of the room starts sitting behind him. */
+  width: 26%;
+  height: auto;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .speech {

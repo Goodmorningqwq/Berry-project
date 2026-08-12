@@ -20,6 +20,32 @@ const CLOUDS = [
   { top: 30, left: 40, w: 34, h: 12, o: 0.7 }
 ]
 
+/**
+ * Room scenery, drawn in the same ink style as Berry's props — heavy outline,
+ * flat fills. It lives here rather than in BerryArt.jsx because that file is
+ * the wardrobe; this is furniture.
+ */
+function RoomBed() {
+  const ink = { stroke: '#141414', strokeWidth: 3, strokeLinejoin: 'round', strokeLinecap: 'round' }
+  return (
+    <svg className="room__bed" viewBox="0 0 120 76" aria-hidden="true" focusable="false">
+      {/* headboard */}
+      <path d="M6 20 q0 -10 10 -10 h14 q10 0 10 10 v34 h-34 z" fill="#B07A4A" {...ink} />
+      {/* mattress */}
+      <rect x="24" y="34" width="92" height="20" rx="7" fill="#FBF3E8" {...ink} />
+      {/* pillow */}
+      <rect x="30" y="26" width="30" height="15" rx="6" fill="#fff" {...ink} />
+      {/* blanket */}
+      <path d="M62 34 h50 q4 0 4 5 v10 q0 5 -4 5 h-50 z" fill="#9046B8" {...ink} />
+      <path d="M62 44 h54" stroke="#7A38A0" strokeWidth="2.5" />
+      {/* frame and legs */}
+      <rect x="24" y="52" width="92" height="8" rx="3" fill="#C98A54" {...ink} />
+      <rect x="28" y="58" width="8" height="12" rx="3" fill="#B07A4A" {...ink} />
+      <rect x="104" y="58" width="8" height="12" rx="3" fill="#B07A4A" {...ink} />
+    </svg>
+  )
+}
+
 function Trophy({ emoji, label, earned, color, onClick }) {
   return (
     <button
@@ -40,20 +66,17 @@ export default function BerryRoom({ mood, effect, speech }) {
   const { state, dispatch, medals, regionBadges, hungry, offline, checkedInToday } = useStore()
 
   const [tapLine, setTapLine] = useState(null)
-  const [poked, setPoked] = useState(false)
   const lineTimer = useRef(null)
-  const pokeTimer = useRef(null)
 
-  useEffect(
-    () => () => {
-      clearTimeout(lineTimer.current)
-      clearTimeout(pokeTimer.current)
-    },
-    []
-  )
+  useEffect(() => () => clearTimeout(lineTimer.current), [])
 
   const openMedals = () => dispatch({ type: 'NAVIGATE', screen: 'collect' })
 
+  /**
+   * Petting is conversational only — Berry doesn't move. Repeated taps would
+   * otherwise leave him wobbling constantly; the speech bubble's own pop is
+   * the signal that something changed.
+   */
   const pet = () => {
     const ctx = {
       hungry,
@@ -65,11 +88,6 @@ export default function BerryRoom({ mood, effect, speech }) {
       look: state.equipped.look
     }
     setTapLine(pickLine(ctx, tapLine ?? speech))
-
-    // Restart the squash so rapid taps keep reacting rather than sitting still.
-    setPoked(false)
-    clearTimeout(pokeTimer.current)
-    pokeTimer.current = setTimeout(() => setPoked(true), 0)
 
     clearTimeout(lineTimer.current)
     lineTimer.current = setTimeout(() => setTapLine(null), TAP_LINE_MS)
@@ -114,6 +132,7 @@ export default function BerryRoom({ mood, effect, speech }) {
       </div>
 
       <div className="room__floor" aria-hidden="true" />
+      <RoomBed />
 
       <div className="room__stage">
         <p className="stage__greeting">Your travel buddy</p>
@@ -122,18 +141,12 @@ export default function BerryRoom({ mood, effect, speech }) {
           {tapLine ?? speech}
         </p>
 
-        <button
-          className={`room__pet ${poked ? 'room__pet--poked' : ''}`}
-          onClick={pet}
-          aria-label="Pet Berry"
-        >
-          <Berry
-            equipped={state.equipped}
-            mood={tapLine ? 'happy' : mood}
-            // Feeding hearts still win — petting only adds hearts of its own.
-            effect={effect ?? (poked ? 'hearts' : null)}
-            size={168}
-          />
+        <button className="room__pet" onClick={pet} aria-label="Pet Berry">
+          {/* mood and effect pass straight through: a tap must not change how
+              Berry looks or moves, and hearts stay reserved for feeding. Note
+              the happy mood also speeds up his idle bob, so overriding it here
+              would count as movement too. */}
+          <Berry equipped={state.equipped} mood={mood} effect={effect} size={168} />
         </button>
       </div>
     </section>
