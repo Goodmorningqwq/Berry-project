@@ -778,6 +778,33 @@ p {
   padding: 6px 16px 8px;
 }
 
+/* Berry is tappable — a button so it's keyboard reachable, not just touchable. */
+.room__pet {
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 24px;
+}
+
+.room__pet:focus-visible {
+  outline: 3px solid var(--purple-500);
+  outline-offset: 2px;
+}
+
+/* Reuses the check-in reveal's landing squash so a poke reads as a reaction. */
+.room__pet--poked .berry {
+  animation: berry-land 0.6s cubic-bezier(0.2, 1.4, 0.35, 1);
+}
+
+.speech {
+  animation: speech-pop 0.28s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@keyframes speech-pop {
+  0% { transform: scale(0.9) translateY(4px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
 .stage__clouds span {
   position: absolute;
   border-radius: 999px;
@@ -2178,14 +2205,52 @@ p {
   font-size: 16px;
 }
 
+/* The combo lands over the middle of the board, where the player is already
+   looking, rather than in a corner. */
+.rush-board {
+  position: relative;
+}
+
 .rush-combo {
-  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-  color: #4a3200;
-  border-radius: 999px;
-  padding: 4px 11px;
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  z-index: 2;
+  /* Never eat a tile tap. */
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  color: var(--purple-700);
+  text-shadow: 0 3px 0 #fff, 0 0 18px rgba(255, 255, 255, 0.95);
+  animation: combo-pop 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.rush-combo--hot {
+  color: var(--gold-dark);
+}
+
+.rush-combo__label {
+  font-size: 13px;
   font-weight: 800;
-  font-size: 12px;
-  animation: reveal-pop 0.3s cubic-bezier(0.2, 1.5, 0.4, 1);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* Grows with the chain, so a x5 visibly outranks a x2. */
+.rush-combo__x {
+  font-size: calc(34px + (var(--combo) - 2) * 7px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+@keyframes combo-pop {
+  0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+  30% { transform: translate(-50%, -50%) scale(1.18); opacity: 1; }
+  55% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -78%) scale(1.05); opacity: 0; }
 }
 
 .rush-grid {

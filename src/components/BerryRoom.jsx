@@ -1,4 +1,6 @@
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../state/store.jsx'
+import { pickLine } from '../data/dialogue.js'
 import Berry from './Berry.jsx'
 
 /**
@@ -32,10 +34,46 @@ function Trophy({ emoji, label, earned, color, onClick }) {
   )
 }
 
+const TAP_LINE_MS = 4200
+
 export default function BerryRoom({ mood, effect, speech }) {
-  const { state, dispatch, medals, regionBadges } = useStore()
+  const { state, dispatch, medals, regionBadges, hungry, offline, checkedInToday } = useStore()
+
+  const [tapLine, setTapLine] = useState(null)
+  const [poked, setPoked] = useState(false)
+  const lineTimer = useRef(null)
+  const pokeTimer = useRef(null)
+
+  useEffect(
+    () => () => {
+      clearTimeout(lineTimer.current)
+      clearTimeout(pokeTimer.current)
+    },
+    []
+  )
 
   const openMedals = () => dispatch({ type: 'NAVIGATE', screen: 'collect' })
+
+  const pet = () => {
+    const ctx = {
+      hungry,
+      offline,
+      checkedInToday,
+      streak: state.streak,
+      stamps: state.stamps.length,
+      tickets: state.blindboxTickets,
+      look: state.equipped.look
+    }
+    setTapLine(pickLine(ctx, tapLine ?? speech))
+
+    // Restart the squash so rapid taps keep reacting rather than sitting still.
+    setPoked(false)
+    clearTimeout(pokeTimer.current)
+    pokeTimer.current = setTimeout(() => setPoked(true), 0)
+
+    clearTimeout(lineTimer.current)
+    lineTimer.current = setTimeout(() => setTapLine(null), TAP_LINE_MS)
+  }
 
   return (
     <section className="room">
@@ -80,8 +118,23 @@ export default function BerryRoom({ mood, effect, speech }) {
       <div className="room__stage">
         <p className="stage__greeting">Your travel buddy</p>
         <h1 className="stage__name">Berry</h1>
-        <p className="speech">{speech}</p>
-        <Berry equipped={state.equipped} mood={mood} effect={effect} size={168} />
+        <p className="speech" key={tapLine ?? speech}>
+          {tapLine ?? speech}
+        </p>
+
+        <button
+          className={`room__pet ${poked ? 'room__pet--poked' : ''}`}
+          onClick={pet}
+          aria-label="Pet Berry"
+        >
+          <Berry
+            equipped={state.equipped}
+            mood={tapLine ? 'happy' : mood}
+            // Feeding hearts still win — petting only adds hearts of its own.
+            effect={effect ?? (poked ? 'hearts' : null)}
+            size={168}
+          />
+        </button>
       </div>
     </section>
   )

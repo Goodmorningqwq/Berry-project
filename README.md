@@ -89,6 +89,11 @@ tiered medals on top, the four region badges below — each earned one tinted wi
 each empty one left as a dashed outline, because a trophy room only works if the gaps show. Tapping
 any trophy jumps to Collection → Medals.
 
+**Tap Berry** and he answers. `src/data/dialogue.js` checks context first — hungry, in-flight, not
+checked in, long streak, no stamps yet, what he's wearing, blindboxes waiting — and falls back to a
+pool of general chatter, never repeating the line already on screen. He squashes, hearts float up,
+and the bubble reverts to its default line after a few seconds.
+
 ### In-flight mode
 
 A presenter toggle (and the browser's real `online`/`offline` events) puts the app in flight mode.

@@ -241,29 +241,45 @@ export default function CandyRush({ offline, onExit, onFinish }) {
           <span>
             <b>{moves}</b> moves left
           </span>
-          {combo > 1 && <span className="rush-combo">Combo ×{combo}</span>}
         </div>
 
-        <div className="rush-grid">
-          {grid.map((tile, i) => (
-            <button
-              key={i}
-              className={`rush-tile ${selected === i ? 'rush-tile--on' : ''} ${
-                clearing.has(i) ? 'rush-tile--pop' : ''
-              } ${shake === i ? 'rush-tile--nope' : ''}`}
-              onPointerDown={(e) => {
-                e.preventDefault()
-                tap(i)
-              }}
-              onPointerEnter={(e) => {
-                // Drag shortcut: holding down and moving onto a neighbour swaps.
-                if (e.buttons === 1 && selected !== null && adjacent(selected, i)) attemptSwap(selected, i)
-              }}
-              aria-label={`Tile ${tile}`}
+        <div className="rush-board">
+          {/* Keyed on the multiplier so each cascade remounts it and the pop
+              replays. pointer-events:none in CSS — it must never eat a tap. */}
+          {combo > 1 && (
+            <div
+              className={`rush-combo ${combo >= 4 ? 'rush-combo--hot' : ''}`}
+              key={combo}
+              style={{ '--combo': combo }}
+              aria-hidden="true"
             >
-              {tile}
-            </button>
-          ))}
+              <span className="rush-combo__label">Combo</span>
+              <span className="rush-combo__x">×{combo}</span>
+            </div>
+          )}
+
+          <div className="rush-grid">
+            {grid.map((tile, i) => (
+              <button
+                key={i}
+                className={`rush-tile ${selected === i ? 'rush-tile--on' : ''} ${
+                  clearing.has(i) ? 'rush-tile--pop' : ''
+                } ${shake === i ? 'rush-tile--nope' : ''}`}
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  tap(i)
+                }}
+                onPointerEnter={(e) => {
+                  // Drag shortcut: holding down and moving onto a neighbour swaps.
+                  if (e.buttons === 1 && selected !== null && adjacent(selected, i))
+                    attemptSwap(selected, i)
+                }}
+                aria-label={`Tile ${tile}`}
+              >
+                {tile}
+              </button>
+            ))}
+          </div>
         </div>
 
         <p className="tiny" style={{ textAlign: 'center', padding: '0 24px 20px' }}>
