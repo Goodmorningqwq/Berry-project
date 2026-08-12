@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import Berry from './Berry.jsx'
 
 /** Bottom-sheet modal. Closes on backdrop click and Escape. */
 export function Modal({ open, onClose, children, label }) {
@@ -43,11 +44,16 @@ export function ProgressBar({ current, target }) {
   )
 }
 
-export function Empty({ emoji, title, hint }) {
+/**
+ * Empty states lead with Berry rather than an icon — a mascot has to live in
+ * the interface to read as part of it.
+ */
+export function Empty({ emoji, title, hint, mood = 'sleepy' }) {
   return (
     <div className="empty">
-      <span className="empty__emoji">{emoji}</span>
-      <b>{title}</b>
+      <Berry equipped={{ look: 'everyday' }} mood={mood} size={96} animate={false} />
+      {emoji && <span className="empty__emoji empty__emoji--badge">{emoji}</span>}
+      <b style={{ display: 'block', marginTop: 4 }}>{title}</b>
       {hint && <p style={{ marginTop: 6 }}>{hint}</p>}
     </div>
   )

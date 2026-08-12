@@ -17,8 +17,8 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 
 | Loop | What it does |
 | --- | --- |
-| **Daily check-in** | +10 berry coins, streak tracking, a bonus blindbox every 7 days, and the Pilot Berry look at 30 consecutive days. The reveal then previews what tomorrow pays |
-| **Feed Berry** | Treats dropped by check-ins can be fed to Berry, who pays coins back (snack +25, juice +20, soap +15) |
+| **Daily check-in** | A fixed 7-day calendar (see below), a celebration reveal, and the Pilot Berry look at 30 consecutive days. The reveal then previews what tomorrow pays |
+| **Feed Berry** | Treats from check-ins are fed to Berry; every 5 fed earns a free blindbox |
 | **Minigames** | Cloud Dash, Baggage Match and Candy Rush, 3 rewarded plays each per day |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
 | **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
@@ -62,6 +62,26 @@ Five medals climb **Copper → Silver → Gold → Diamond**, each showing how f
 Below them sit four region badges — Japan, Korea, Greater China, Southeast Asia — earned by stamping
 a whole region. All of it derives from state in `src/data/medals.js`; the store tracks no medal data.
 
+### It opens from the real UO app
+
+The demo starts on a screenshot of the HK Express home screen with a live **Fly with Berry** row
+added to "Get Prepared For Your Trip". Tapping it pushes the extension in from the right; a back
+chevron returns. The palette is sampled from that screenshot — `#6F2B90` header, `#77279A` headings,
+`#5B0E80` nav active, `#F5F5F5` page — so the extension reads as part of the host app rather than a
+separate product. Berry's own content is where the softer, cuter styling lives.
+
+### The 7-day check-in calendar
+
+Nothing about the check-in is random — the cycle always pays the same thing on the same day, so the
+Home strip can promise it in advance:
+
+| Day | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Coins | +10 | +5 | +10 | +5 | **+25** | +5 | +10 |
+| Bonus | — | 🍪 | — | 🧃 | — | 🧼 | 🎁 blindbox |
+
+70 coins a week, the same as the flat 10/day it replaced. Treats are what feed Berry.
+
 ### Drop rates
 
 Every random reward is disclosed in-app behind the **View odds** link on the blindbox and on the
@@ -71,8 +91,8 @@ the published numbers can't drift from the code:
 - **Blindbox** — Common 60%, Rare 30%, Epic 10%. The rarity is picked first, then an item within it,
   preferring anything not yet owned; an unavoidable duplicate refunds 20 coins. (Measured over
   200,000 rolls: 59.94 / 30.04 / 10.02.)
-- **Check-in** — +10 coins always; a free blindbox guaranteed on every 7th streak day; a 30% treat
-  chance on all other days, split evenly across snack, juice and soap.
+- **Check-in** — nothing random; the sheet lists the full 7-day calendar.
+- **Feeding** — no coins; every 5 treats fed earns a free blindbox.
 
 ### Economy
 
@@ -130,6 +150,8 @@ product — it exists so a 30-day habit loop can be shown in five minutes:
 
 ```
 public/berry/          the official Berry sprites
+public/host/           the HK Express screenshot the demo opens on
+public/fonts/          self-hosted Nunito (no CDN, works offline)
 src/
   state/store.jsx      reducer, localStorage persistence, virtual clock
   data/                looks, items, destinations, rewards, medals — all tunable content

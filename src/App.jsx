@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from './state/store.jsx'
 import { Icons } from './components/ui.jsx'
-import Berry from './components/Berry.jsx'
+import HostScreen from './components/HostScreen.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import PlayScreen from './screens/PlayScreen.jsx'
 import CollectScreen from './screens/CollectScreen.jsx'
@@ -17,24 +17,7 @@ const TABS = [
   { id: 'trips', label: 'Trips', Icon: Icons.trips, Screen: TripsScreen }
 ]
 
-function Intro({ onStart }) {
-  return (
-    <div className="intro">
-      <span className="intro__badge">HK Express · Concept</span>
-      <Berry mood="happy" size={168} equipped={{ outfit: 'tee-basic' }} />
-      <h1>Fly with Berry</h1>
-      <p>
-        Your travel buddy inside the UO app. Check in daily, play, collect stamps from every
-        destination — and turn it all into real inflight rewards.
-      </p>
-      <button className="btn btn--gold btn--lg" onClick={onStart}>
-        Meet Berry
-      </button>
-    </div>
-  )
-}
-
-function TopBar() {
+function TopBar({ onBack }) {
   const { state, checkedInToday } = useStore()
   const [bump, setBump] = useState(false)
   const prevCoins = useRef(state.coins)
@@ -52,6 +35,9 @@ function TopBar() {
     <header className="topbar">
       <div className="topbar__row">
         <div className="topbar__brand">
+          <button className="topbar__back" onClick={onBack} aria-label="Back to HK Express">
+            ‹
+          </button>
           Fly with Berry <span className="tag">UO</span>
         </div>
         <div className="topbar__stats">
@@ -71,6 +57,9 @@ function TopBar() {
 export default function App() {
   const { state, dispatch } = useStore()
   const bodyRef = useRef(null)
+  // 'in' while the extension pushes over the host app, 'out' while it leaves.
+  const [pushPhase, setPushPhase] = useState(null)
+  const pushTimer = useRef(null)
 
   const active = TABS.find((t) => t.id === state.screen) ?? TABS[0]
   const Screen = active.Screen
@@ -80,40 +69,69 @@ export default function App() {
     bodyRef.current?.scrollTo({ top: 0 })
   }, [state.screen])
 
+  useEffect(() => () => clearTimeout(pushTimer.current), [])
+
+  const openBerry = () => {
+    setPushPhase('in')
+    dispatch({ type: 'SEEN_INTRO' })
+    clearTimeout(pushTimer.current)
+    pushTimer.current = setTimeout(() => setPushPhase(null), 420)
+  }
+
+  const backToHost = () => {
+    setPushPhase('out')
+    clearTimeout(pushTimer.current)
+    // Let the slide finish before the host screen takes over.
+    pushTimer.current = setTimeout(() => {
+      dispatch({ type: 'GO_HOST' })
+      setPushPhase(null)
+    }, 300)
+  }
+
   if (!state.seenIntro) {
     return (
       <div className="app">
-        <Intro onStart={() => dispatch({ type: 'SEEN_INTRO' })} />
+        <HostScreen onOpen={openBerry} />
       </div>
     )
   }
 
   return (
     <div className="app">
-      <TopBar />
-
-      <main className="app__body" ref={bodyRef}>
-        <div className="fade-in" key={active.id}>
-          <Screen />
+      {/* The host screen stays behind for the length of the transition, so the
+          extension reads as pushing in over the app rather than replacing it. */}
+      {pushPhase && (
+        <div className="app__host-under" aria-hidden="true">
+          <HostScreen onOpen={() => {}} />
         </div>
-      </main>
+      )}
 
-      <nav className="nav">
-        {TABS.map(({ id, label, Icon }) => (
-          <button
-            key={id}
-            className={`nav__item ${state.screen === id ? 'nav__item--active' : ''}`}
-            onClick={() => dispatch({ type: 'NAVIGATE', screen: id })}
-            aria-current={state.screen === id ? 'page' : undefined}
-          >
-            <Icon />
-            {label}
-            {id === 'shop' && state.blindboxTickets > 0 && (
-              <span className="nav__badge">{state.blindboxTickets}</span>
-            )}
-          </button>
-        ))}
-      </nav>
+      <div className={`app__shell ${pushPhase ? `app__shell--${pushPhase}` : ''}`}>
+        <TopBar onBack={backToHost} />
+
+        <main className="app__body" ref={bodyRef}>
+          <div className="fade-in" key={active.id}>
+            <Screen />
+          </div>
+        </main>
+
+        <nav className="nav">
+          {TABS.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              className={`nav__item ${state.screen === id ? 'nav__item--active' : ''}`}
+              onClick={() => dispatch({ type: 'NAVIGATE', screen: id })}
+              aria-current={state.screen === id ? 'page' : undefined}
+            >
+              <Icon />
+              {label}
+              {id === 'shop' && state.blindboxTickets > 0 && (
+                <span className="nav__badge">{state.blindboxTickets}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+      </div>
 
       <DemoPanel />
     </div>

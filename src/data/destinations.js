@@ -94,12 +94,10 @@ const TIMES = [
 
 export const ORIGIN = { code: 'HKG', city: 'Hong Kong' }
 
-/**
- * The next unflown destination becomes the "upcoming trip". Completing a trip
- * advances it, so the demo always has somewhere new to fly to.
- */
-export function nextTrip(stamps = []) {
-  const dest = DESTINATIONS.find((d) => !stamps.includes(d.code)) ?? DESTINATIONS[0]
+/** The flight details for a given destination. Deterministic, so a trip always
+ *  carries the same number and times however it was started. */
+export function tripFor(code) {
+  const dest = DESTINATIONS_BY_CODE[code] ?? DESTINATIONS[0]
   const i = DESTINATIONS.indexOf(dest)
   const [depart, arrive] = TIMES[i % TIMES.length]
   return {
@@ -112,4 +110,13 @@ export function nextTrip(stamps = []) {
     gate: String(12 + (i % 40)),
     seat: `${12 + (i % 20)}A`
   }
+}
+
+/**
+ * The next unflown destination becomes the "upcoming trip". Completing a trip
+ * advances it, so the demo always has somewhere new to fly to.
+ */
+export function nextTrip(stamps = []) {
+  const dest = DESTINATIONS.find((d) => !stamps.includes(d.code)) ?? DESTINATIONS[0]
+  return tripFor(dest.code)
 }

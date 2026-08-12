@@ -7,24 +7,27 @@ import {
   MILESTONE_ITEM_ID,
   STARTER_ITEM_ID
 } from '../data/items.js'
-import { COUNTRIES_BY_ID, DESTINATIONS_BY_CODE } from '../data/destinations.js'
+import { COUNTRIES_BY_ID, DESTINATIONS_BY_CODE, tripFor } from '../data/destinations.js'
+import { CYCLE_LENGTH, rewardForStreak } from '../data/checkin.js'
 import { REGION_BADGES, TIERED_MEDALS, tierFor } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 3
+const SCHEMA_VERSION = 4
 
-export const CHECK_IN_COINS = 10
 export const BLINDBOX_COST = 150
 export const MILESTONE_DAYS = 30
 export const DAILY_PLAYS_PER_GAME = 3
 
-/** Coins paid for caring for Berry. Supply is limited by the check-in drop. */
-export const FEED_REWARDS = {
-  'berry-snack': 25,
-  'berry-juice': 20,
-  'berry-soap': 15
-}
+/**
+ * Feeding earns blindbox tickets rather than coins. Paying coins for a treat
+ * that was itself a reward made the care loop circular — you were just
+ * converting an item back into money.
+ */
+export const FEEDS_PER_TICKET = 5
+
+/** Days without feeding before Berry looks glum. Nothing is ever deducted. */
+export const HUNGRY_AFTER_DAYS = 2
 
 /* ------------------------------------------------------------------ */
 /* Virtual clock                                                       */
@@ -80,6 +83,8 @@ function initialState() {
     equipped: { look: STARTER_ITEM_ID, hat: null, accessory: null },
     inventory: {},
     fedCount: 0,
+    feedProgress: 0,
+    lastFed: null,
     stamps: [],
     flights: [],
     vouchers: [],
@@ -92,20 +97,7 @@ function initialState() {
 /* Reducer                                                             */
 /* ------------------------------------------------------------------ */
 
-/** Check-in odds, published to the player in OddsSheet. */
-export const BLINDBOX_STREAK_DAY = 7
-export const TREAT_CHANCE = 0.3
-
-function rollDailyBonus(streak) {
-  // Deterministic beats on the streak so the demo tells a legible story,
-  // with a light random sprinkle of basic items in between.
-  if (streak > 0 && streak % BLINDBOX_STREAK_DAY === 0) return { type: 'blindbox' }
-  if (Math.random() < TREAT_CHANCE) {
-    const item = BASIC_ITEMS[Math.floor(Math.random() * BASIC_ITEMS.length)]
-    return { type: 'item', id: item.id, name: item.name }
-  }
-  return null
-}
+export const BLINDBOX_STREAK_DAY = CYCLE_LENGTH
 
 /**
  * Published blindbox odds. These are displayed to the player in OddsSheet, so
@@ -164,27 +156,40 @@ function reducer(state, action) {
     case 'SEEN_INTRO':
       return { ...state, seenIntro: true }
 
+    /** Back out to the host HK Express screen. Progress is untouched. */
+    case 'GO_HOST':
+      return { ...state, seenIntro: false }
+
     case 'CHECK_IN': {
       const today = dayKey(state.dayOffset)
       if (state.lastCheckIn === today) return state
 
       const continued = state.lastCheckIn && daysBetween(state.lastCheckIn, today) === 1
       const streak = continued ? state.streak + 1 : 1
-      const bonus = rollDailyBonus(streak)
+
+      // The calendar decides the payout, so nothing here is random and the
+      // Home strip can promise each day's reward in advance.
+      const reward = rewardForStreak(streak)
 
       let next = {
         ...state,
         lastCheckIn: today,
         streak,
         bestStreak: Math.max(state.bestStreak, streak),
-        coins: state.coins + CHECK_IN_COINS,
-        lifetimeCoins: state.lifetimeCoins + CHECK_IN_COINS
+        coins: state.coins + reward.coins,
+        lifetimeCoins: state.lifetimeCoins + reward.coins
       }
 
-      if (bonus?.type === 'blindbox') {
+      let bonus = null
+      if (reward.blindbox) {
         next.blindboxTickets = state.blindboxTickets + 1
-      } else if (bonus?.type === 'item') {
-        next.inventory = { ...state.inventory, [bonus.id]: (state.inventory[bonus.id] || 0) + 1 }
+        bonus = { type: 'blindbox' }
+      } else if (reward.treat) {
+        next.inventory = {
+          ...state.inventory,
+          [reward.treat]: (state.inventory[reward.treat] || 0) + 1
+        }
+        bonus = { type: 'item', id: reward.treat }
       }
 
       // 30 consecutive days unlocks the exclusive look.
@@ -195,7 +200,8 @@ function reducer(state, action) {
       // trying to infer what was awarded by diffing the previous state.
       next.lastCheckInResult = {
         day: streak,
-        coins: CHECK_IN_COINS,
+        coins: reward.coins,
+        peak: !!reward.peak,
         bonus,
         milestone: milestone ? MILESTONE_ITEM_ID : null
       }
@@ -260,18 +266,28 @@ function reducer(state, action) {
       const held = state.inventory[action.itemId] || 0
       if (!item || held < 1) return state
 
-      const reward = FEED_REWARDS[action.itemId] ?? 10
       const inventory = { ...state.inventory }
       if (held > 1) inventory[action.itemId] = held - 1
       else delete inventory[action.itemId]
+
+      // Care feeds the collection loop instead of paying cash.
+      const progress = state.feedProgress + 1
+      const earnedTicket = progress >= FEEDS_PER_TICKET
 
       return {
         ...state,
         inventory,
         fedCount: state.fedCount + 1,
-        coins: state.coins + reward,
-        lifetimeCoins: state.lifetimeCoins + reward
+        lastFed: dayKey(state.dayOffset),
+        feedProgress: earnedTicket ? 0 : progress,
+        blindboxTickets: state.blindboxTickets + (earnedTicket ? 1 : 0),
+        lastFeedResult: { itemId: action.itemId, earnedTicket, progress: earnedTicket ? 0 : progress }
       }
+    }
+
+    case 'CLEAR_FEED': {
+      const { lastFeedResult, ...rest } = state
+      return rest
     }
 
     case 'COMPLETE_FLIGHT': {
@@ -286,10 +302,25 @@ function reducer(state, action) {
       const countryReward = COUNTRIES_BY_ID[dest.country]?.reward
       const unlocks = countryReward && !state.ownedItems.includes(countryReward)
 
+      // Snapshot the whole trip: a travel record should be a record, not
+      // something re-derived from the destination later.
+      const trip = tripFor(action.code)
+      const flight = {
+        code: action.code,
+        date: today,
+        number: trip.number,
+        depart: trip.depart,
+        arrive: trip.arrive,
+        gate: trip.gate,
+        seat: trip.seat,
+        coins: reward,
+        unlocked: unlocks ? countryReward : null
+      }
+
       return {
         ...state,
         stamps: newStamp ? [...state.stamps, action.code] : state.stamps,
-        flights: [...state.flights, { code: action.code, date: today }],
+        flights: [...state.flights, flight],
         ownedItems: unlocks ? [...state.ownedItems, countryReward] : state.ownedItems,
         coins: state.coins + reward,
         lifetimeCoins: state.lifetimeCoins + reward
@@ -397,11 +428,17 @@ export function StoreProvider({ children }) {
 
   const value = useMemo(() => {
     const today = dayKey(state.dayOffset)
+    const treatsHeld = Object.values(state.inventory).reduce((n, v) => n + v, 0)
     return {
       state,
       dispatch,
       today,
       checkedInToday: state.lastCheckIn === today,
+      treatsHeld,
+      // Glum only — feeding is never punished, just missed.
+      hungry:
+        treatsHeld > 0 &&
+        (!state.lastFed || daysBetween(state.lastFed, today) >= HUNGRY_AFTER_DAYS),
       playsLeft: (gameId) => {
         const used = state.plays.day === today ? state.plays.counts[gameId] || 0 : 0
         return Math.max(0, DAILY_PLAYS_PER_GAME - used)

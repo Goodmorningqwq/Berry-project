@@ -1,12 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import {
-  BLINDBOX_STREAK_DAY,
-  CHECK_IN_COINS,
-  MILESTONE_DAYS,
-  TREAT_CHANCE
-} from '../state/store.jsx'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { MILESTONE_DAYS } from '../state/store.jsx'
+import { CHECK_IN_CALENDAR, rewardForStreak } from '../data/checkin.js'
 import { BASIC_ITEMS_BY_ID, ITEMS_BY_ID } from '../data/items.js'
 import Berry from './Berry.jsx'
+import Celebration from './Celebration.jsx'
 import OddsSheet from './OddsSheet.jsx'
 import { Coin } from './ui.jsx'
 
@@ -14,13 +11,13 @@ import { Coin } from './ui.jsx'
  * The daily check-in payoff, in two beats: what you just earned, then what
  * tomorrow pays.
  *
- * Renders straight from the reducer's `lastCheckInResult`, so what's shown is
- * exactly what was awarded. Only transform and opacity are animated, and the
- * coin count is driven by requestAnimationFrame rather than a timer, so the
- * whole thing stays on the compositor.
+ * Beat one is staged — anticipate, burst, settle — because the anticipation is
+ * where a reward moment actually lands. Tapping anywhere skips to the settled
+ * state, so a presenter is never waiting on an animation mid-sentence.
  */
 
 const COUNT_MS = 900
+const ANTICIPATE_MS = 480
 const easeOut = (t) => 1 - Math.pow(1 - t, 3)
 
 function useCountUp(target, enabled) {
@@ -71,13 +68,40 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
+  const [phase, setPhase] = useState(reduced ? 'settled' : 'anticipate')
   const [step, setStep] = useState('reward')
   const [oddsOpen, setOddsOpen] = useState(false)
-  const coins = useCountUp(result.coins, !reduced)
+  const timer = useRef(null)
+
+  const settled = phase === 'settled'
+  const coins = useCountUp(result.coins, !reduced && settled)
+
+  useEffect(() => {
+    if (reduced) return
+    timer.current = setTimeout(() => setPhase('settled'), ANTICIPATE_MS)
+    return () => clearTimeout(timer.current)
+  }, [reduced])
+
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  /** Any tap during the build-up jumps straight to the payoff. */
+  const skip = useCallback(() => {
+    if (phase !== 'settled') {
+      clearTimeout(timer.current)
+      setPhase('settled')
+    }
+  }, [phase])
+
+  /* Bigger rewards get a bigger celebration. */
+  const intensity = result.milestone
+    ? 'epic'
+    : result.bonus?.type === 'blindbox' || result.peak
+      ? 'bonus'
+      : 'normal'
 
   const bonuses = []
   if (result.bonus?.type === 'blindbox') {
-    bonuses.push({ key: 'box', emoji: '🎉', title: 'Free blindbox', detail: '7-day streak bonus' })
+    bonuses.push({ key: 'box', emoji: '🎉', title: 'Free blindbox', detail: 'Your day 7 reward' })
   }
   if (result.bonus?.type === 'item') {
     const item = BASIC_ITEMS_BY_ID[result.bonus.id]
@@ -95,17 +119,24 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
     })
   }
 
-  /* ---- what tomorrow pays ---- */
+  /* ---- what tomorrow pays, straight off the calendar ---- */
   const nextDay = result.day + 1
-  const nextIsBlindbox = nextDay % BLINDBOX_STREAK_DAY === 0
+  const nextReward = rewardForStreak(nextDay)
+  const nextTreat = nextReward.treat ? BASIC_ITEMS_BY_ID[nextReward.treat] : null
   const nextIsMilestone = nextDay === MILESTONE_DAYS
   const daysToMilestone = Math.max(0, MILESTONE_DAYS - result.day)
   const milestoneItem = ITEMS_BY_ID['pilot']
 
   return (
-    <div className="reveal" onClick={step === 'tomorrow' ? onCollect : undefined}>
-      <div className="reveal__card checkin-reveal" onClick={(e) => e.stopPropagation()}>
-        <div className="reveal__burst" aria-hidden="true" />
+    <div className="reveal" onClick={settled && step === 'tomorrow' ? onCollect : skip}>
+      <div
+        className={`reveal__card checkin-reveal checkin-reveal--${phase}`}
+        onClick={(e) => {
+          e.stopPropagation()
+          skip()
+        }}
+      >
+        {settled && step === 'reward' && <Celebration intensity={intensity} />}
 
         <div className="checkin-reveal__steps">
           {/* Step 1 — what you just earned */}
@@ -117,31 +148,46 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
           >
             <span className="checkin-reveal__day">🔥 Day {result.day}</span>
 
-            <div className="checkin-reveal__berry">
-              <Berry equipped={equipped} mood="happy" size={112} animate={false} effect="hearts" />
+            <div className={`checkin-reveal__berry ${settled ? 'checkin-reveal__berry--land' : ''}`}>
+              <Berry
+                equipped={equipped}
+                mood="happy"
+                size={112}
+                animate={false}
+                effect={settled ? 'hearts' : null}
+              />
             </div>
 
-            <div className="checkin-reveal__coins">
-              <Coin />
-              <span>+{coins}</span>
-            </div>
-            <p className="muted">berry coins</p>
+            {settled ? (
+              <>
+                <div className="checkin-reveal__coins">
+                  <Coin />
+                  <span>+{coins}</span>
+                </div>
+                <p className="muted">{result.peak ? 'berry coins — the week’s best day!' : 'berry coins'}</p>
 
-            {bonuses.length > 0 && (
-              <div className="checkin-reveal__bonuses">
-                {bonuses.map((b, i) => (
-                  <BonusRow key={b.key} {...b} delay={0.5 + i * 0.18} />
-                ))}
-              </div>
+                {bonuses.length > 0 && (
+                  <div className="checkin-reveal__bonuses">
+                    {bonuses.map((b, i) => (
+                      <BonusRow key={b.key} {...b} delay={0.45 + i * 0.16} />
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  className="btn btn--gold btn--block"
+                  style={{ marginTop: 18 }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setStep('tomorrow')
+                  }}
+                >
+                  Collect
+                </button>
+              </>
+            ) : (
+              <p className="checkin-reveal__teasing">Opening your reward…</p>
             )}
-
-            <button
-              className="btn btn--gold btn--block"
-              style={{ marginTop: 18 }}
-              onClick={() => setStep('tomorrow')}
-            >
-              Collect
-            </button>
           </div>
 
           {/* Step 2 — what's waiting tomorrow */}
@@ -163,22 +209,23 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
             <div className="checkin-reveal__bonuses">
               <BonusRow
                 emoji="🪙"
-                title={`+${CHECK_IN_COINS} berry coins`}
-                detail="Guaranteed, every day"
+                title={`+${nextReward.coins} berry coins`}
+                detail={nextReward.peak ? 'The week’s biggest coin day' : 'Guaranteed'}
                 delay={0.06}
               />
-              {nextIsBlindbox ? (
+              {nextReward.blindbox && (
                 <BonusRow
                   emoji="🎁"
                   title="Free blindbox"
-                  detail="Guaranteed — it’s a 7-day streak day"
+                  detail="Guaranteed — it’s day 7"
                   delay={0.18}
                 />
-              ) : (
+              )}
+              {nextTreat && (
                 <BonusRow
-                  emoji="🍪"
-                  title="A treat for Berry"
-                  detail={`${Math.round(TREAT_CHANCE * 100)}% chance`}
+                  emoji={nextTreat.emoji}
+                  title={nextTreat.name}
+                  detail="A treat for Berry — guaranteed"
                   delay={0.18}
                 />
               )}
@@ -199,11 +246,24 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
               </p>
             )}
 
-            <button className="btn btn--primary btn--block" style={{ marginTop: 16 }} onClick={onCollect}>
+            <button
+              className="btn btn--primary btn--block"
+              style={{ marginTop: 16 }}
+              onClick={(e) => {
+                e.stopPropagation()
+                onCollect()
+              }}
+            >
               Done
             </button>
-            <button className="checkin-reveal__odds" onClick={() => setOddsOpen(true)}>
-              View odds
+            <button
+              className="checkin-reveal__odds"
+              onClick={(e) => {
+                e.stopPropagation()
+                setOddsOpen(true)
+              }}
+            >
+              See the full {CHECK_IN_CALENDAR.length}-day calendar
             </button>
           </div>
         </div>

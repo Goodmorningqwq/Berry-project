@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  useStore,
-  CHECK_IN_COINS,
-  FEED_REWARDS,
-  MILESTONE_DAYS,
-  prettyDate
-} from '../state/store.jsx'
+import { useStore, FEEDS_PER_TICKET, MILESTONE_DAYS, prettyDate } from '../state/store.jsx'
+import { CHECK_IN_CALENDAR, cyclePosition, rewardForStreak } from '../data/checkin.js'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
 import CheckInReveal from '../components/CheckInReveal.jsx'
-import { Coin, Empty, Modal } from '../components/ui.jsx'
-import { BASIC_ITEMS, ITEMS_BY_ID } from '../data/items.js'
+import { Coin, Empty, Modal, ProgressBar } from '../components/ui.jsx'
+import { BASIC_ITEMS, BASIC_ITEMS_BY_ID, ITEMS_BY_ID } from '../data/items.js'
 import { nextTrip } from '../data/destinations.js'
 
 const CLOUDS = [
@@ -20,7 +15,8 @@ const CLOUDS = [
   { top: 130, left: 82, w: 76, h: 22, o: 0.5 }
 ]
 
-function lineFor(state, checkedInToday) {
+function lineFor(state, checkedInToday, hungry) {
+  if (hungry) return 'Psst… I could really go for a snack right now 🍪'
   if (!checkedInToday) return 'You’re back! Tap check-in and I’ll get you a treat 💜'
   if (state.streak >= MILESTONE_DAYS) return 'Thirty days together. You’re my favourite human.'
   if (state.streak >= 7) return `${state.streak} days in a row — we’re on a roll!`
@@ -29,7 +25,7 @@ function lineFor(state, checkedInToday) {
 }
 
 export default function HomeScreen() {
-  const { state, dispatch, checkedInToday, today } = useStore()
+  const { state, dispatch, checkedInToday, today, hungry } = useStore()
   const toast = useToast()
   const [caring, setCaring] = useState(false)
   const [effect, setEffect] = useState(null)
@@ -38,13 +34,15 @@ export default function HomeScreen() {
   useEffect(() => () => clearTimeout(effectTimer.current), [])
 
   const care = (item) => {
+    const willEarn = state.feedProgress + 1 >= FEEDS_PER_TICKET
     dispatch({ type: 'FEED_BERRY', itemId: item.id })
-    const reward = FEED_REWARDS[item.id] ?? 10
     toast(
-      item.kind === 'wash'
-        ? `Berry is squeaky clean · +${reward} berry coins`
-        : `Berry loved that · +${reward} berry coins`,
-      item.emoji
+      willEarn
+        ? 'Berry is delighted — that’s a free blindbox!'
+        : item.kind === 'wash'
+          ? 'Berry is squeaky clean'
+          : 'Berry loved that',
+      willEarn ? '🎁' : item.emoji
     )
     setCaring(false)
     setEffect('hearts')
@@ -52,7 +50,9 @@ export default function HomeScreen() {
     effectTimer.current = setTimeout(() => setEffect(null), 1600)
   }
 
-  const cyclePosition = state.streak === 0 ? 0 : ((state.streak - 1) % 7) + 1
+  const cyclePos = cyclePosition(state.streak)
+  // What today's check-in will pay, if it hasn't been claimed yet.
+  const todaysReward = rewardForStreak(state.streak + 1)
   const milestonePct = Math.min(100, (state.streak / MILESTONE_DAYS) * 100)
   const trip = nextTrip(state.stamps)
   const basics = BASIC_ITEMS.filter((i) => state.inventory[i.id])
@@ -72,11 +72,11 @@ export default function HomeScreen() {
         <p className="stage__greeting">Your travel buddy</p>
         <h1 className="stage__name">Berry</h1>
 
-        <p className="speech">{lineFor(state, checkedInToday)}</p>
+        <p className="speech">{lineFor(state, checkedInToday, hungry)}</p>
 
         <Berry
           equipped={state.equipped}
-          mood={effect ? 'happy' : checkedInToday ? 'happy' : 'sleepy'}
+          mood={effect ? 'happy' : hungry || !checkedInToday ? 'sleepy' : 'happy'}
           effect={effect}
           size={182}
         />
@@ -97,7 +97,13 @@ export default function HomeScreen() {
             <p className="muted">
               {checkedInToday
                 ? `See you tomorrow — ${MILESTONE_DAYS - state.streak > 0 ? `${MILESTONE_DAYS - state.streak} days to the exclusive set` : 'exclusive set unlocked'}`
-                : `+${CHECK_IN_COINS} berry coins, and a bonus every 7 days`}
+                : `Day ${cyclePos + 1} pays +${todaysReward.coins} berry coins${
+                    todaysReward.blindbox
+                      ? ' and a free blindbox'
+                      : todaysReward.treat
+                        ? ' and a treat for Berry'
+                        : ''
+                  }`}
             </p>
           </div>
         </div>
@@ -111,30 +117,31 @@ export default function HomeScreen() {
           {checkedInToday ? `Come back tomorrow` : 'Check in'}
         </button>
 
-        {/* Preview of what the next seven days pay out — the retention
-            argument, made visible. */}
+        {/* The calendar is fixed, so this can promise exactly what each day
+            pays rather than quoting a probability. */}
         <div className="streak-days">
-          {Array.from({ length: 7 }, (_, i) => {
-            const day = i + 1
-            const done = day <= cyclePosition
-            const isNext = day === (checkedInToday ? cyclePosition + 1 : cyclePosition + 1)
+          {CHECK_IN_CALENDAR.map((entry) => {
+            const done = entry.day <= cyclePos
+            const isNext = entry.day === cyclePos + 1
+            const treat = entry.treat ? BASIC_ITEMS_BY_ID[entry.treat] : null
             return (
               <div
-                key={day}
+                key={entry.day}
                 className={`streak-day ${done ? 'streak-day--done' : ''} ${
                   isNext ? 'streak-day--today' : ''
-                }`}
+                } ${entry.peak ? 'streak-day--peak' : ''}`}
               >
-                <span className="streak-day__num">{day}</span>
-                <span className="streak-day__reward">
-                  {day === 7 ? '🎁' : `+${CHECK_IN_COINS}`}
+                <span className="streak-day__num">{entry.day}</span>
+                <span className="streak-day__reward">+{entry.coins}</span>
+                <span className="streak-day__bonus">
+                  {entry.blindbox ? '🎁' : treat ? treat.emoji : ''}
                 </span>
               </div>
             )
           })}
         </div>
         <p className="tiny" style={{ marginTop: 8, textAlign: 'center' }}>
-          Day 7 pays a free blindbox · day {MILESTONE_DAYS} unlocks{' '}
+          Day 5 is the big coin day · day 7 pays a free blindbox · day {MILESTONE_DAYS} unlocks{' '}
           <b>{ITEMS_BY_ID.pilot?.name ?? 'the exclusive look'}</b>
         </p>
         <p className="tiny" style={{ marginTop: 4, textAlign: 'center', opacity: 0.7 }}>
@@ -148,8 +155,8 @@ export default function HomeScreen() {
             <div style={{ fontWeight: 800, fontSize: 15 }}>Berry’s stash</div>
             <p className="muted" style={{ marginTop: 2 }}>
               {basics.length > 0
-                ? 'Feed Berry a treat and he’ll share his coins.'
-                : 'Check in daily to collect snacks for Berry.'}
+                ? `Feed Berry ${FEEDS_PER_TICKET} treats for a free blindbox.`
+                : 'Check in daily to collect treats for Berry.'}
             </p>
           </div>
           <button
@@ -159,6 +166,13 @@ export default function HomeScreen() {
           >
             🍪 Feed Berry
           </button>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <ProgressBar current={state.feedProgress} target={FEEDS_PER_TICKET} />
+          <p className="tiny" style={{ marginTop: 4 }}>
+            {state.feedProgress} of {FEEDS_PER_TICKET} fed · next free blindbox
+          </p>
         </div>
 
         {basics.length > 0 && (
@@ -186,8 +200,15 @@ export default function HomeScreen() {
       <Modal open={caring} onClose={() => setCaring(false)} label="Care for Berry">
         <h3 style={{ fontSize: 17 }}>Care for Berry</h3>
         <p className="muted" style={{ marginTop: 4 }}>
-          Treats come from your daily check-ins. Berry pays you back in coins.
+          Treats come from your daily check-ins. Every {FEEDS_PER_TICKET} you feed him earns a free
+          blindbox.
         </p>
+        <div style={{ marginTop: 10 }}>
+          <ProgressBar current={state.feedProgress} target={FEEDS_PER_TICKET} />
+          <p className="tiny" style={{ marginTop: 4 }}>
+            {state.feedProgress} of {FEEDS_PER_TICKET} fed
+          </p>
+        </div>
 
         {basics.length === 0 ? (
           <Empty
@@ -206,9 +227,7 @@ export default function HomeScreen() {
                   </div>
                   <p className="tiny">{item.note}</p>
                 </div>
-                <span className="chip chip--gold">
-                  <Coin small /> +{FEED_REWARDS[item.id]}
-                </span>
+                <span className="chip">+1 fed</span>
               </button>
             ))}
           </div>

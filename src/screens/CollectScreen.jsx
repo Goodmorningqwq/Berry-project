@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useStore } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
+import FlightRecord from '../components/FlightRecord.jsx'
 import { Empty, ProgressBar } from '../components/ui.jsx'
 import { BY_COUNTRY, DESTINATIONS } from '../data/destinations.js'
 import { COSMETICS, ITEMS_BY_ID, RARITY_LABEL, SLOTS } from '../data/items.js'
 
 function Passport() {
   const { state } = useStore()
+  const [openCode, setOpenCode] = useState(null)
   const newest = state.stamps[state.stamps.length - 1]
 
   return (
@@ -43,24 +45,28 @@ function Passport() {
               {country.cities.map((d) => {
                 const earned = state.stamps.includes(d.code)
                 return (
-                  <div
+                  <button
                     key={d.code}
                     className={`stamp ${earned ? 'stamp--earned' : 'stamp--locked'} ${
                       earned && d.code === newest ? 'stamp--new' : ''
                     }`}
                     style={{ '--hue': d.hue }}
+                    onClick={() => setOpenCode(d.code)}
+                    aria-label={`${d.city} travel record`}
                   >
                     <span className="stamp__ring" />
                     <span className="stamp__emoji">{earned ? d.emoji : '🔒'}</span>
                     <span className="stamp__city">{d.city}</span>
                     <span className="stamp__code">{d.code}</span>
-                  </div>
+                  </button>
                 )
               })}
             </div>
           </section>
         )
       })}
+
+      <FlightRecord code={openCode} onClose={() => setOpenCode(null)} />
     </>
   )
 }

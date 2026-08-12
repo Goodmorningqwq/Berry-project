@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useStore, BLINDBOX_COST } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
+import Celebration from '../components/Celebration.jsx'
 import OddsSheet from '../components/OddsSheet.jsx'
 import { Coin, Empty } from '../components/ui.jsx'
 import { ITEMS_BY_ID, RARITY_LABEL } from '../data/items.js'
@@ -10,11 +11,20 @@ import { prettyDate } from '../state/store.jsx'
 
 function Reveal({ pull, onClose }) {
   const item = ITEMS_BY_ID[pull.itemId]
+  // A 10% Epic should feel like a 10% Epic.
+  const intensity = pull.duplicate
+    ? 'normal'
+    : item.rarity === 'epic'
+      ? 'epic'
+      : item.rarity === 'rare'
+        ? 'bonus'
+        : 'normal'
+
   return (
     <div className="reveal" onClick={onClose}>
       <div className="reveal__card" onClick={(e) => e.stopPropagation()}>
-        <div className="reveal__burst" aria-hidden="true" />
-        <div style={{ position: 'relative' }}>
+        <Celebration intensity={intensity} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
           <span className={`rarity rarity--${item.rarity}`} style={{ position: 'static' }}>
             {RARITY_LABEL[item.rarity]}
           </span>

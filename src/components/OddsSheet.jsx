@@ -1,12 +1,12 @@
+import { BLINDBOX_COST, FEEDS_PER_TICKET, MILESTONE_DAYS, RARITY_ODDS } from '../state/store.jsx'
+import { CHECK_IN_CALENDAR, WEEKLY_COINS } from '../data/checkin.js'
 import {
-  BLINDBOX_COST,
-  BLINDBOX_STREAK_DAY,
-  CHECK_IN_COINS,
-  MILESTONE_DAYS,
-  RARITY_ODDS,
-  TREAT_CHANCE
-} from '../state/store.jsx'
-import { BASIC_ITEMS, BLINDBOX_POOL, ITEMS_BY_ID, MILESTONE_ITEM_ID, RARITY_LABEL } from '../data/items.js'
+  BASIC_ITEMS_BY_ID,
+  BLINDBOX_POOL,
+  ITEMS_BY_ID,
+  MILESTONE_ITEM_ID,
+  RARITY_LABEL
+} from '../data/items.js'
 import { Modal } from './ui.jsx'
 
 /**
@@ -55,40 +55,40 @@ export default function OddsSheet({ open, onClose }) {
         that tier you get a duplicate and 20 coins back.
       </p>
 
-      <h4 className="section-title">Daily check-in</h4>
+      <h4 className="section-title">
+        Daily check-in <small>{WEEKLY_COINS} coins a week</small>
+      </h4>
+      <p className="tiny" style={{ marginTop: -4, marginBottom: 8 }}>
+        Nothing here is random — the 7-day cycle always pays the same thing on the same day.
+      </p>
 
-      <div className="odds-row">
-        <div className="odds-row__head">
-          <span>
-            <span className="coin-icon coin-icon--sm">B</span> {CHECK_IN_COINS} berry coins
-          </span>
-          <b>100%</b>
-        </div>
-        <p className="tiny">Paid every single day you check in.</p>
-      </div>
-
-      <div className="odds-row">
-        <div className="odds-row__head">
-          <span>🎁 Free blindbox</span>
-          <b>100%</b>
-        </div>
-        <p className="tiny">
-          Guaranteed on every {BLINDBOX_STREAK_DAY}th day of your streak. Those days pay no treat.
-        </p>
-      </div>
-
-      <div className="odds-row">
-        <div className="odds-row__head">
-          <span>🍪 A treat for Berry</span>
-          <b>{pct(TREAT_CHANCE)}</b>
-        </div>
-        <p className="tiny">
-          On all other days. Split evenly —{' '}
-          {BASIC_ITEMS.map((i) => `${i.emoji} ${i.name} ${pct(TREAT_CHANCE / BASIC_ITEMS.length)}`).join(
-            ' · '
-          )}
-        </p>
-      </div>
+      {CHECK_IN_CALENDAR.map((entry) => {
+        const treat = entry.treat ? BASIC_ITEMS_BY_ID[entry.treat] : null
+        return (
+          <div className="odds-row" key={entry.day}>
+            <div className="odds-row__head">
+              <span>
+                Day {entry.day}
+                {entry.peak && ' ⭐'}
+              </span>
+              <b>
+                <span className="coin-icon coin-icon--sm">B</span> {entry.coins}
+                {entry.blindbox && ' + 🎁'}
+                {treat && ` + ${treat.emoji}`}
+              </b>
+            </div>
+            <p className="tiny">
+              {entry.blindbox
+                ? 'Free blindbox — the reward for a full week'
+                : treat
+                  ? `${treat.name} for Berry`
+                  : entry.peak
+                    ? 'The week’s biggest coin day'
+                    : 'Berry coins'}
+            </p>
+          </div>
+        )
+      })}
 
       <div className="odds-row">
         <div className="odds-row__head">
@@ -97,6 +97,18 @@ export default function OddsSheet({ open, onClose }) {
         </div>
         <p className="tiny">
           Guaranteed at {MILESTONE_DAYS} consecutive check-ins. Miss a day and the streak restarts.
+        </p>
+      </div>
+
+      <h4 className="section-title">Feeding Berry</h4>
+      <div className="odds-row">
+        <div className="odds-row__head">
+          <span>🎁 Free blindbox</span>
+          <b>every {FEEDS_PER_TICKET}</b>
+        </div>
+        <p className="tiny">
+          Feeding doesn’t pay coins — every {FEEDS_PER_TICKET} treats you feed Berry earns a free
+          blindbox instead.
         </p>
       </div>
 
