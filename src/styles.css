@@ -228,6 +228,113 @@ p {
   50% { transform: translateX(-50%) translateY(-3px); }
 }
 
+/* A live tab bar drawn over the screenshot's own, so Berry can take the
+   featured centre slot as a fifth tab. */
+.host__tabbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  background: #fff;
+  border-top: 1px solid #ececec;
+}
+
+.host__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 100%;
+  color: #1c1c1e;
+  position: relative;
+}
+
+.host__tab svg {
+  width: 22px;
+  height: 22px;
+}
+
+.host__tab--active {
+  color: var(--purple-700);
+}
+
+.host__tab-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.host__tab--berry {
+  color: var(--purple-700);
+}
+
+.host__tab--berry .host__tab-label {
+  font-weight: 800;
+}
+
+.host__tab-berry {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 26px;
+  overflow: hidden;
+}
+
+.host__tab-berry .berry {
+  filter: none;
+  margin-top: 4px;
+}
+
+.host__tab-ring {
+  position: absolute;
+  top: 2px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2.5px solid var(--purple-700);
+  animation: host-pulse 1.9s ease-out infinite;
+}
+
+/* Presenter control — deliberately not styled like part of the mocked app. */
+.host__placement {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(28, 6, 34, 0.82);
+  border-radius: 999px;
+  padding: 4px 5px;
+  backdrop-filter: blur(6px);
+}
+
+.host__placement-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 4px;
+}
+
+.host__placement button {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+.host__placement button.is-on {
+  background: #fff;
+  color: var(--purple-800);
+}
+
 /* The extension pushes in over the host app, iOS-style. */
 .app__host-under {
   position: absolute;
