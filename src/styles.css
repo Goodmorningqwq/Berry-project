@@ -793,15 +793,19 @@ p {
 
 /* Scenery on the floor, left of Berry and behind him in the stacking order so
    it can never cover him. Percentages keep it placed at any width. */
+/* Background furniture, not a prop at Berry's feet. It's scaled to a bear his
+   size — wide enough for him to actually lie on — and sits further back on the
+   floor so he stands in front of it. Berry's stage is z-index 1, so the overlap
+   is the depth cue rather than a collision. */
 .room__bed {
   position: absolute;
-  left: 2%;
-  bottom: 4%;
-  /* Sized to stop short of Berry's sprite — he's centred and 168px wide, so
-     anything past ~28% of the room starts sitting behind him. */
-  width: 26%;
+  left: 1%;
+  bottom: 9%;
+  width: 54%;
   height: auto;
   z-index: 0;
+  /* Eased back a touch so it reads as scenery and doesn't compete with him. */
+  opacity: 0.92;
   pointer-events: none;
 }
 

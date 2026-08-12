@@ -26,7 +26,9 @@ const CLOUDS = [
  * the wardrobe; this is furniture.
  */
 function RoomBed() {
-  const ink = { stroke: '#141414', strokeWidth: 3, strokeLinejoin: 'round', strokeLinecap: 'round' }
+  // Lighter than the props' weight: the bed renders ~1.7x its viewBox scale, so
+  // a 3px stroke would come out heavier than anything on Berry himself.
+  const ink = { stroke: '#141414', strokeWidth: 2, strokeLinejoin: 'round', strokeLinecap: 'round' }
   return (
     <svg className="room__bed" viewBox="0 0 120 76" aria-hidden="true" focusable="false">
       {/* headboard */}
