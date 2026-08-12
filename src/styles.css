@@ -1054,30 +1054,29 @@ p {
 /* The two steps are stacked siblings that cross-slide. Both live in a
    min-height box so the card never animates its own height — transform and
    opacity only, so nothing hits layout. */
+/* Both steps share one grid cell, so they stack without absolute positioning
+   and the card sizes itself to the taller of the two — no fixed height to
+   animate, and no dead space under the shorter step. */
 .checkin-reveal__steps {
   position: relative;
   z-index: 1;
-  min-height: 400px;
   overflow: hidden;
-  display: flex;
+  display: grid;
 }
 
 .checkin-reveal__step {
+  grid-area: 1 / 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* The two steps differ in height; centring inside the fixed box keeps both
-     balanced without animating the card's height. */
   justify-content: center;
-  min-height: 100%;
   transition: transform 0.42s cubic-bezier(0.3, 0.9, 0.3, 1), opacity 0.32s ease;
   will-change: transform, opacity;
 }
 
 .checkin-reveal__step--next,
 .checkin-reveal__step--past {
-  position: absolute;
-  inset: 0;
   pointer-events: none;
   opacity: 0;
 }
@@ -1091,7 +1090,6 @@ p {
 }
 
 .checkin-reveal__step--in {
-  position: relative;
   transform: translateX(0);
   opacity: 1;
 }
@@ -1631,6 +1629,10 @@ p {
 .celebration__rays {
   position: absolute;
   top: 34%;
+  /* Centred by margin rather than a transform, so the keyframes below own the
+     transform outright. */
+  left: 50%;
+  margin-left: -75%;
   width: 150%;
   aspect-ratio: 1;
   background: repeating-conic-gradient(
@@ -1658,6 +1660,8 @@ p {
 .celebration__bloom {
   position: absolute;
   top: 34%;
+  left: 50%;
+  margin-left: -45%;
   width: 90%;
   aspect-ratio: 1;
   border-radius: 50%;
