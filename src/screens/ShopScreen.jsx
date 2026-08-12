@@ -45,14 +45,14 @@ function Reveal({ pull, onClose }) {
 }
 
 export default function ShopScreen() {
-  const { state, dispatch } = useStore()
+  const { state, dispatch, offline } = useStore()
   const toast = useToast()
   const [shaking, setShaking] = useState(false)
   const [kind, setKind] = useState('meal')
   const [oddsOpen, setOddsOpen] = useState(false)
 
   const free = state.blindboxTickets > 0
-  const canOpen = free || state.coins >= BLINDBOX_COST
+  const canOpen = (free || state.coins >= BLINDBOX_COST) && !offline
 
   const openBox = () => {
     if (!canOpen || shaking) return
@@ -65,6 +65,10 @@ export default function ShopScreen() {
   }
 
   const redeem = (reward) => {
+    if (offline) {
+      toast('Vouchers are issued when you’re back online', '✈️')
+      return
+    }
     if (state.coins < reward.cost) {
       toast('Not enough berry coins yet', '🪙')
       return
@@ -98,7 +102,9 @@ export default function ShopScreen() {
           onClick={openBox}
           disabled={!canOpen || shaking}
         >
-          {free ? (
+          {offline ? (
+            '✈️ Available when you land'
+          ) : free ? (
             `Open free blindbox (${state.blindboxTickets})`
           ) : (
             <>
@@ -106,10 +112,16 @@ export default function ShopScreen() {
             </>
           )}
         </button>
-        {!canOpen && (
+        {offline ? (
           <p className="tiny" style={{ marginTop: 8 }}>
-            You need {BLINDBOX_COST - state.coins} more coins — play a round in Play &amp; earn.
+            ✈️ Blindboxes open again when you land.
           </p>
+        ) : (
+          !canOpen && (
+            <p className="tiny" style={{ marginTop: 8 }}>
+              You need {BLINDBOX_COST - state.coins} more coins — play a round in Play &amp; earn.
+            </p>
+          )
         )}
         <button className="checkin-reveal__odds" onClick={() => setOddsOpen(true)}>
           View odds
@@ -120,7 +132,9 @@ export default function ShopScreen() {
 
       <h3 className="section-title">Redeem your coins</h3>
       <p className="tiny" style={{ marginTop: -4 }}>
-        {REDEMPTION_WINDOW}.
+        {offline
+          ? '✈️ Vouchers are issued by UO, so redeeming needs a connection. Codes you already hold still work onboard.'
+          : `${REDEMPTION_WINDOW}.`}
       </p>
 
       <div className="tabs" style={{ marginTop: 10 }}>
@@ -133,7 +147,7 @@ export default function ShopScreen() {
 
       <div style={{ marginTop: 12 }}>
         {REWARDS.filter((r) => r.kind === kind).map((r) => {
-          const affordable = state.coins >= r.cost
+          const affordable = state.coins >= r.cost && !offline
           return (
             <button
               key={r.id}

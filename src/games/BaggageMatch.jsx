@@ -18,7 +18,7 @@ function shuffled() {
   return deck
 }
 
-export default function BaggageMatch({ onExit, onFinish }) {
+export default function BaggageMatch({ offline, onExit, onFinish }) {
   const [cards, setCards] = useState(shuffled)
   const [picked, setPicked] = useState([])
   const [moves, setMoves] = useState(0)
@@ -153,15 +153,21 @@ export default function BaggageMatch({ onExit, onFinish }) {
               </p>
               {solved ? (
                 <>
-                  <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
-                    <Coin /> +{reward}
-                  </div>
+                  {offline ? (
+                    <p className="tiny" style={{ marginTop: 14 }}>
+                      ✈️ No coins in flight — your rewarded plays are waiting for you when you land.
+                    </p>
+                  ) : (
+                    <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
+                      <Coin /> +{reward}
+                    </div>
+                  )}
                   <button
                     className="btn btn--gold btn--block"
                     style={{ marginTop: 16 }}
                     onClick={() => onFinish(reward)}
                   >
-                    Collect
+                    {offline ? 'Done' : 'Collect'}
                   </button>
                 </>
               ) : (

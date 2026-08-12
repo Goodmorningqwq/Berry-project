@@ -14,7 +14,7 @@ import { ITEMS_BY_ID } from '../data/items.js'
 const FLIGHT_COINS = 50
 
 export default function TripsScreen() {
-  const { state, dispatch, checkedInToday } = useStore()
+  const { state, dispatch, checkedInToday, offline } = useStore()
   const toast = useToast()
   const [picking, setPicking] = useState(false)
 
@@ -101,8 +101,15 @@ export default function TripsScreen() {
             ))}
           </div>
 
-          <button className="btn btn--primary btn--block" style={{ marginTop: 14 }} onClick={() => fly(trip.to)}>
-            Simulate landing in {trip.dest.city}
+          <button
+            className={`btn btn--block ${offline ? '' : 'btn--primary'}`}
+            style={{ marginTop: 14 }}
+            onClick={() => fly(trip.to)}
+            disabled={offline}
+          >
+            {offline
+              ? '✈️ You’re still in the air'
+              : `Simulate landing in ${trip.dest.city}`}
           </button>
           <button
             className="btn btn--ghost btn--block"

@@ -2,18 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useStore, FEEDS_PER_TICKET, MILESTONE_DAYS, prettyDate } from '../state/store.jsx'
 import { CHECK_IN_CALENDAR, cyclePosition, rewardForStreak } from '../data/checkin.js'
 import { useToast } from '../components/Toast.jsx'
-import Berry from '../components/Berry.jsx'
+import BerryRoom from '../components/BerryRoom.jsx'
 import CheckInReveal from '../components/CheckInReveal.jsx'
 import { Coin, Empty, Modal, ProgressBar } from '../components/ui.jsx'
 import { BASIC_ITEMS, BASIC_ITEMS_BY_ID, ITEMS_BY_ID } from '../data/items.js'
 import { nextTrip } from '../data/destinations.js'
-
-const CLOUDS = [
-  { top: 18, left: -10, w: 92, h: 26, o: 0.7 },
-  { top: 54, left: 74, w: 64, h: 20, o: 0.55 },
-  { top: 96, left: 8, w: 48, h: 16, o: 0.45 },
-  { top: 130, left: 82, w: 76, h: 22, o: 0.5 }
-]
 
 function lineFor(state, checkedInToday, hungry) {
   if (hungry) return 'Psst… I could really go for a snack right now 🍪'
@@ -25,7 +18,7 @@ function lineFor(state, checkedInToday, hungry) {
 }
 
 export default function HomeScreen() {
-  const { state, dispatch, checkedInToday, today, hungry } = useStore()
+  const { state, dispatch, checkedInToday, today, hungry, offline } = useStore()
   const toast = useToast()
   const [caring, setCaring] = useState(false)
   const [effect, setEffect] = useState(null)
@@ -59,28 +52,11 @@ export default function HomeScreen() {
 
   return (
     <>
-      <section className="stage">
-        <div className="stage__clouds" aria-hidden="true">
-          {CLOUDS.map((c, i) => (
-            <span
-              key={i}
-              style={{ top: c.top, left: c.left, width: c.w, height: c.h, opacity: c.o }}
-            />
-          ))}
-        </div>
-
-        <p className="stage__greeting">Your travel buddy</p>
-        <h1 className="stage__name">Berry</h1>
-
-        <p className="speech">{lineFor(state, checkedInToday, hungry)}</p>
-
-        <Berry
-          equipped={state.equipped}
-          mood={effect ? 'happy' : hungry || !checkedInToday ? 'sleepy' : 'happy'}
-          effect={effect}
-          size={182}
-        />
-      </section>
+      <BerryRoom
+        mood={effect ? 'happy' : hungry || !checkedInToday ? 'sleepy' : 'happy'}
+        effect={effect}
+        speech={lineFor(state, checkedInToday, hungry)}
+      />
 
       <div className="card" style={{ marginTop: 14 }}>
         <div className="checkin">
@@ -109,12 +85,12 @@ export default function HomeScreen() {
         </div>
 
         <button
-          className={`btn btn--block btn--lg ${checkedInToday ? '' : 'btn--primary'}`}
+          className={`btn btn--block btn--lg ${checkedInToday || offline ? '' : 'btn--primary'}`}
           style={{ marginTop: 14 }}
           onClick={() => dispatch({ type: 'CHECK_IN' })}
-          disabled={checkedInToday}
+          disabled={checkedInToday || offline}
         >
-          {checkedInToday ? `Come back tomorrow` : 'Check in'}
+          {offline ? '✈️ Available when you land' : checkedInToday ? 'Come back tomorrow' : 'Check in'}
         </button>
 
         {/* The calendar is fixed, so this can promise exactly what each day
@@ -154,15 +130,17 @@ export default function HomeScreen() {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 800, fontSize: 15 }}>Berry’s stash</div>
             <p className="muted" style={{ marginTop: 2 }}>
-              {basics.length > 0
-                ? `Feed Berry ${FEEDS_PER_TICKET} treats for a free blindbox.`
-                : 'Check in daily to collect treats for Berry.'}
+              {offline
+                ? 'Treats are safe in your bag until you land.'
+                : basics.length > 0
+                  ? `Feed Berry ${FEEDS_PER_TICKET} treats for a free blindbox.`
+                  : 'Check in daily to collect treats for Berry.'}
             </p>
           </div>
           <button
-            className={`btn ${basics.length > 0 ? 'btn--gold' : ''}`}
+            className={`btn ${basics.length > 0 && !offline ? 'btn--gold' : ''}`}
             onClick={() => setCaring(true)}
-            disabled={basics.length === 0}
+            disabled={basics.length === 0 || offline}
           >
             🍪 Feed Berry
           </button>

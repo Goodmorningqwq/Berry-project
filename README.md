@@ -82,6 +82,34 @@ Home strip can promise it in advance:
 
 70 coins a week, the same as the flat 10/day it replaced. Treats are what feed Berry.
 
+### Berry's room
+
+Home opens on Berry's room rather than a plain stage. Two shelves hold nine trophy slots — the five
+tiered medals on top, the four region badges below — each earned one tinted with its tier colour and
+each empty one left as a dashed outline, because a trophy room only works if the gaps show. Tapping
+any trophy jumps to Collection → Medals.
+
+### In-flight mode
+
+A presenter toggle (and the browser's real `online`/`offline` events) puts the app in flight mode.
+The rule is that **offline freezes the economy, not the app**:
+
+| Blocked in flight | Still works |
+| --- | --- |
+| Daily check-in | All three minigames, unlimited |
+| Opening blindboxes | Dressing Berry, browsing the wardrobe |
+| Redeeming coupons | Passport, medals, the room, flight records |
+| Feeding Berry | Vouchers you already hold stay readable |
+| Completing a flight | Everything else |
+
+Minigames stay playable but pay nothing **and don't consume a rewarded play** — burning the daily
+allowance for zero reward would be worse than blocking them outright.
+
+Because nothing at all accrues offline, there is no queue to reconcile, no cap to tune and nothing
+to farm by pulling the network. Enforcement lives in a single gate at the top of the reducer
+(`ECONOMY_ACTIONS` in `src/state/store.jsx`) rather than in the screens, so no component can bypass
+it — verified by forcing clicks on disabled controls and confirming state comes back byte-identical.
+
 ### Drop rates
 
 Every random reward is disclosed in-app behind the **View odds** link on the blindbox and on the

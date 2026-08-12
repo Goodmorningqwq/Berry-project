@@ -109,7 +109,7 @@ function freshGrid() {
   return Array.from({ length: SIZE * SIZE }, randomTile)
 }
 
-export default function CandyRush({ onExit, onFinish }) {
+export default function CandyRush({ offline, onExit, onFinish }) {
   const [grid, setGrid] = useState(freshGrid)
   const [selected, setSelected] = useState(null)
   const [clearing, setClearing] = useState(() => new Set())
@@ -295,15 +295,21 @@ export default function CandyRush({ onExit, onFinish }) {
               <p className="muted" style={{ marginTop: 6 }}>
                 {score.toLocaleString()} points
               </p>
-              <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
-                <Coin /> +{reward}
-              </div>
+              {offline ? (
+                <p className="tiny" style={{ marginTop: 14 }}>
+                  ✈️ No coins in flight — your rewarded plays are waiting for you when you land.
+                </p>
+              ) : (
+                <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
+                  <Coin /> +{reward}
+                </div>
+              )}
               <button
                 className="btn btn--gold btn--block"
                 style={{ marginTop: 16 }}
                 onClick={() => onFinish(reward)}
               >
-                Collect
+                {offline ? 'Done' : 'Collect'}
               </button>
               <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
                 Leave without collecting

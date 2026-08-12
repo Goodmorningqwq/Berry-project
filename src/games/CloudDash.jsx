@@ -20,7 +20,7 @@ const SPAWN_EVERY = 1500 // ms
 const BASE_SPEED = 2.9
 const ROUND_MS = 40000
 
-export default function CloudDash({ equipped, onExit, onFinish }) {
+export default function CloudDash({ equipped, offline, onExit, onFinish }) {
   const fieldRef = useRef(null)
   const [size, setSize] = useState({ w: 360, h: 480 })
   const [phase, setPhase] = useState('ready') // ready | running | over
@@ -251,15 +251,21 @@ export default function CloudDash({ equipped, onExit, onFinish }) {
                 <p className="muted" style={{ marginTop: 6 }}>
                   {frame.score} coins collected in the air
                 </p>
-                <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
-                  <Coin /> +{reward}
-                </div>
+                {offline ? (
+                  <p className="tiny" style={{ marginTop: 14 }}>
+                    ✈️ No coins in flight — your rewarded plays are waiting for you when you land.
+                  </p>
+                ) : (
+                  <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
+                    <Coin /> +{reward}
+                  </div>
+                )}
                 <button
                   className="btn btn--gold btn--block"
                   style={{ marginTop: 16 }}
                   onClick={() => onFinish(reward)}
                 >
-                  Collect
+                  {offline ? 'Done' : 'Collect'}
                 </button>
                 <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
                   Leave without collecting

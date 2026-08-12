@@ -370,6 +370,45 @@ p {
   to { transform: translateX(100%); }
 }
 
+/* ---------------- in-flight banner ---------------- */
+
+.offline-banner {
+  flex: none;
+  z-index: 19;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px 10px;
+  background: #fdf1d6;
+  border-bottom: 1px solid #f0dcae;
+  color: #6b4c00;
+  animation: reveal-rise 0.3s ease both;
+}
+
+.offline-banner__icon {
+  font-size: 18px;
+  flex: none;
+}
+
+.offline-banner b {
+  display: block;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.offline-banner .tiny {
+  color: #8a6a1c;
+}
+
+.demo-btn--on {
+  background: var(--purple-700);
+  color: #fff;
+}
+
+.demo-btn--on small {
+  color: rgba(255, 255, 255, 0.75);
+}
+
 /* ---------------- top bar ---------------- */
 
 /* Flat brand purple with the host app's large bottom radius, so switching
@@ -640,14 +679,103 @@ p {
 
 /* ---------------- home ---------------- */
 
-.stage {
+/* ---------------- Berry's room ---------------- */
+
+.room {
   position: relative;
   margin-top: 14px;
-  border-radius: 26px;
-  padding: 18px 16px 8px;
-  background: linear-gradient(180deg, #ded2ee 0%, #f0e6f8 55%, #fdf6e8 100%);
+  border-radius: 28px;
   overflow: hidden;
   text-align: center;
+  isolation: isolate;
+}
+
+.room__wall {
+  position: absolute;
+  inset: 0 0 26% 0;
+  background: linear-gradient(180deg, #e3d4f2 0%, #f1e7f9 100%);
+}
+
+.room__floor {
+  position: absolute;
+  inset: 74% 0 0 0;
+  background: linear-gradient(180deg, #f7e6c9 0%, #fdf4e4 100%);
+  border-top: 2px solid rgba(111, 43, 144, 0.12);
+}
+
+.room__window {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 96px;
+  height: 62px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #bfe3fa, #e7f4fd);
+  border: 3px solid #fff;
+  box-shadow: 0 3px 10px rgba(111, 43, 144, 0.12);
+  overflow: hidden;
+}
+
+.room__window span {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.room__shelves {
+  position: relative;
+  z-index: 1;
+  padding: 14px 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* The shelf plank is the border under each row. */
+.room__shelf {
+  display: flex;
+  gap: 7px;
+  padding-bottom: 5px;
+  border-bottom: 4px solid #d9b98a;
+  border-radius: 2px;
+}
+
+.trophy {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  line-height: 1;
+  transition: transform 0.16s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.trophy--earned {
+  background: var(--trophy-color, var(--purple-500));
+  border: 2.5px solid #fff;
+  box-shadow: 0 3px 8px rgba(75, 11, 87, 0.24);
+  transform: rotate(-4deg);
+}
+
+.trophy--earned:nth-child(even) {
+  transform: rotate(4deg);
+}
+
+.trophy--empty {
+  border: 2px dashed rgba(111, 43, 144, 0.28);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.trophy:active {
+  transform: scale(0.9);
+}
+
+.room__stage {
+  position: relative;
+  z-index: 1;
+  padding: 6px 16px 8px;
 }
 
 .stage__clouds span {
@@ -2414,7 +2542,7 @@ p {
   border-radius: var(--radius-lg);
 }
 
-.stage {
+.room {
   border-radius: 28px;
 }
 

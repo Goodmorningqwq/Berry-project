@@ -34,13 +34,20 @@ const GAMES = [
 ]
 
 export default function PlayScreen() {
-  const { state, dispatch, playsLeft, checkedInToday, today } = useStore()
+  const { state, dispatch, playsLeft, checkedInToday, today, offline } = useStore()
   const toast = useToast()
   const [active, setActive] = useState(null)
 
   const game = GAMES.find((g) => g.id === active)
 
   const finish = (amount) => {
+    if (offline) {
+      // Play stays free in the air — no coins, and no allowance burnt either,
+      // since spending a rewarded play for nothing would be worse than blocking.
+      toast('No coins in flight — your plays are saved for landing', '✈️')
+      setActive(null)
+      return
+    }
     dispatch({ type: 'EARN_COINS', amount })
     dispatch({ type: 'RECORD_PLAY', gameId: active })
     toast(`+${amount} berry coins earned`, '🪙')
@@ -49,7 +56,9 @@ export default function PlayScreen() {
 
   if (game) {
     const G = game.Component
-    return <G equipped={state.equipped} onExit={() => setActive(null)} onFinish={finish} />
+    return (
+      <G equipped={state.equipped} offline={offline} onExit={() => setActive(null)} onFinish={finish} />
+    )
   }
 
   const quests = [
@@ -76,13 +85,15 @@ export default function PlayScreen() {
       <div style={{ marginTop: 16 }}>
         {GAMES.map((g) => {
           const left = playsLeft(g.id)
+          // Offline the games stay open — they just don't pay.
+          const locked = left === 0 && !offline
           return (
             <button
               key={g.id}
               className="game-card"
               onClick={() => setActive(g.id)}
-              disabled={left === 0}
-              style={left === 0 ? { opacity: 0.55 } : undefined}
+              disabled={locked}
+              style={locked ? { opacity: 0.55 } : undefined}
             >
               <div className="game-card__art" style={{ background: g.tint }}>
                 {g.emoji}
@@ -92,8 +103,12 @@ export default function PlayScreen() {
                 <p className="muted" style={{ marginTop: 2 }}>
                   {g.blurb}
                 </p>
-                <span className={`chip ${left === 0 ? 'chip--out' : 'chip--gold'}`}>
-                  {left === 0 ? 'Back tomorrow' : `${left} rewarded play${left > 1 ? 's' : ''} left`}
+                <span className={`chip ${left === 0 || offline ? 'chip--out' : 'chip--gold'}`}>
+                  {offline
+                    ? '✈️ Free to play · no coins'
+                    : left === 0
+                      ? 'Back tomorrow'
+                      : `${left} rewarded play${left > 1 ? 's' : ''} left`}
                 </span>
               </div>
             </button>

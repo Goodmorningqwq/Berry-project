@@ -9,7 +9,7 @@ import { BY_COUNTRY, DESTINATIONS_BY_CODE } from '../data/destinations.js'
  * shortcut set that makes a 30-day habit loop demoable in five minutes.
  */
 export default function DemoPanel() {
-  const { state, dispatch, today, checkedInToday } = useStore()
+  const { state, dispatch, today, checkedInToday, offline } = useStore()
   const toast = useToast()
   const [open, setOpen] = useState(false)
   const [flying, setFlying] = useState(false)
@@ -85,6 +85,17 @@ export default function DemoPanel() {
             <button className="demo-btn" onClick={() => setFlying((f) => !f)}>
               🛬 Simulate flight
               <small>Stamp + destination exclusive</small>
+            </button>
+            <button
+              className={`demo-btn ${offline ? 'demo-btn--on' : ''}`}
+              onClick={() => {
+                dispatch({ type: 'TOGGLE_OFFLINE' })
+                // Coming back online is announced by App's own reconnect toast.
+                if (!offline) toast('In-flight mode on', '✈️')
+              }}
+            >
+              ✈️ In-flight mode: {offline ? 'ON' : 'off'}
+              <small>Play keeps working, earning stops</small>
             </button>
             <button className="demo-btn" onClick={() => grant(2000)}>
               🪙 Grant 2,000 coins

@@ -89,9 +89,33 @@ function initialState() {
     flights: [],
     vouchers: [],
     plays: { day: null, counts: {} },
-    seenIntro: false
+    seenIntro: false,
+    // Presenter's in-flight switch. Never restored from a save — see hydrate().
+    demoOffline: false,
+    // Mirrors the browser's real connectivity, pushed in by App so the reducer
+    // stays pure rather than reading navigator inside itself.
+    networkOnline: true
   }
 }
+
+/** In-flight if the presenter says so, or if the device genuinely has no network. */
+export const isOffline = (state) => state.demoOffline || !state.networkOnline
+
+/**
+ * Actions that move value. Offline these are refused outright: with nothing
+ * earned or spent in the air there is no queue to reconcile and nothing to
+ * exploit by pulling the network. Play and cosmetics are deliberately absent
+ * from this list — offline freezes the economy, not the app.
+ */
+const ECONOMY_ACTIONS = new Set([
+  'CHECK_IN',
+  'EARN_COINS',
+  'RECORD_PLAY',
+  'OPEN_BLINDBOX',
+  'REDEEM_REWARD',
+  'FEED_BERRY',
+  'COMPLETE_FLIGHT'
+])
 
 /* ------------------------------------------------------------------ */
 /* Reducer                                                             */
@@ -149,9 +173,19 @@ function voucherCode() {
 }
 
 function reducer(state, action) {
+  // One gate for everything that moves value, so no screen can bypass it by
+  // dispatching directly.
+  if (ECONOMY_ACTIONS.has(action.type) && isOffline(state)) return state
+
   switch (action.type) {
     case 'NAVIGATE':
       return { ...state, screen: action.screen }
+
+    case 'TOGGLE_OFFLINE':
+      return { ...state, demoOffline: action.value ?? !state.demoOffline }
+
+    case 'SET_NETWORK':
+      return { ...state, networkOnline: action.online }
 
     case 'SEEN_INTRO':
       return { ...state, seenIntro: true }
@@ -403,7 +437,14 @@ function hydrate() {
     const saved = JSON.parse(raw)
     // A stale payload resets cleanly rather than crashing mid-presentation.
     if (saved?.version !== SCHEMA_VERSION) return initialState()
-    return { ...initialState(), ...saved }
+    return {
+      ...initialState(),
+      ...saved,
+      // Connectivity is a live fact, never a restored one — a reload must not
+      // leave you stuck in the air.
+      demoOffline: false,
+      networkOnline: typeof navigator === 'undefined' ? true : navigator.onLine
+    }
   } catch {
     return initialState()
   }
@@ -434,6 +475,7 @@ export function StoreProvider({ children }) {
       dispatch,
       today,
       checkedInToday: state.lastCheckIn === today,
+      offline: isOffline(state),
       treatsHeld,
       // Glum only — feeding is never punished, just missed.
       hungry:

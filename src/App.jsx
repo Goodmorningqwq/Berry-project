@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useStore } from './state/store.jsx'
 import { Icons } from './components/ui.jsx'
 import HostScreen from './components/HostScreen.jsx'
+import OfflineBanner from './components/OfflineBanner.jsx'
+import { useToast } from './components/Toast.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import PlayScreen from './screens/PlayScreen.jsx'
 import CollectScreen from './screens/CollectScreen.jsx'
@@ -55,8 +57,10 @@ function TopBar({ onBack }) {
 }
 
 export default function App() {
-  const { state, dispatch } = useStore()
+  const { state, dispatch, offline } = useStore()
+  const toast = useToast()
   const bodyRef = useRef(null)
+  const wasOffline = useRef(offline)
   // 'in' while the extension pushes over the host app, 'out' while it leaves.
   const [pushPhase, setPushPhase] = useState(null)
   const pushTimer = useRef(null)
@@ -70,6 +74,24 @@ export default function App() {
   }, [state.screen])
 
   useEffect(() => () => clearTimeout(pushTimer.current), [])
+
+  // Real connectivity is pushed into the store so the reducer's offline gate
+  // stays pure — pulling wifi behaves exactly like the presenter's toggle.
+  useEffect(() => {
+    const sync = () => dispatch({ type: 'SET_NETWORK', online: navigator.onLine })
+    sync()
+    window.addEventListener('online', sync)
+    window.addEventListener('offline', sync)
+    return () => {
+      window.removeEventListener('online', sync)
+      window.removeEventListener('offline', sync)
+    }
+  }, [dispatch])
+
+  useEffect(() => {
+    if (wasOffline.current && !offline) toast('Back online — rewards are available again', '📶')
+    wasOffline.current = offline
+  }, [offline, toast])
 
   const openBerry = () => {
     setPushPhase('in')
@@ -108,6 +130,7 @@ export default function App() {
 
       <div className={`app__shell ${pushPhase ? `app__shell--${pushPhase}` : ''}`}>
         <TopBar onBack={backToHost} />
+        <OfflineBanner />
 
         <main className="app__body" ref={bodyRef}>
           <div className="fade-in" key={active.id}>
