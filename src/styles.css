@@ -1523,6 +1523,119 @@ p {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* ---------------- leaderboard ---------------- */
+
+.lb {
+  margin-top: 10px;
+}
+
+.lb__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 9px 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 6px;
+}
+
+.lb__row--you {
+  background: linear-gradient(135deg, var(--purple-700), var(--purple-500));
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(111, 43, 144, 0.32);
+}
+
+.lb__rank {
+  width: 26px;
+  flex: none;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  text-align: right;
+}
+
+.lb__row--you .lb__rank {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.lb__name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lb__you {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 5px;
+  padding: 2px 5px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  flex: none;
+}
+
+.lb__score {
+  font-size: 12.5px;
+  font-weight: 800;
+  flex: none;
+}
+
+.lb__row:not(.lb__row--you) .lb__score {
+  color: var(--purple-700);
+}
+
+.lb-slice {
+  width: 100%;
+  margin-top: 16px;
+  text-align: left;
+}
+
+.lb-slice__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.lb-slice__head b {
+  color: var(--purple-800);
+  font-size: 15px;
+}
+
+.lb-me {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lb-input {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: #fff;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.lb-input:focus {
+  outline: none;
+  border-color: var(--purple-500);
+}
+
 /* ---------------- collection ---------------- */
 
 .tabs {

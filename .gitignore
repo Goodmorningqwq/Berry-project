@@ -5,3 +5,9 @@ dist-ssr
 *.local
 .DS_Store
 .vite
+
+# Demo recordings and the clips exported from them — large binaries that
+# don't belong in the repo.
+demo-media/
+*.mkv
+*.mov

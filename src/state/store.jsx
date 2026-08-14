@@ -13,7 +13,7 @@ import { REGION_BADGES, TIERED_MEDALS, tierFor } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 4
+const SCHEMA_VERSION = 5
 
 export const BLINDBOX_COST = 150
 export const MILESTONE_DAYS = 30
@@ -68,10 +68,25 @@ export function daysBetween(a, b) {
 /* Initial state                                                       */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Guest registration, such as it is: a name exists from the first render so
+ * nothing ever blocks the demo with a sign-up form. In production this would be
+ * the player's UO account.
+ */
+function makeGuest() {
+  return {
+    id: `g-${Math.random().toString(36).slice(2, 10)}`,
+    name: `Traveller ${1000 + Math.floor(Math.random() * 9000)}`
+  }
+}
+
 function initialState() {
   return {
     version: SCHEMA_VERSION,
     screen: 'home',
+    guest: makeGuest(),
+    /** Best score per game id — the only thing a leaderboard needs to persist. */
+    bestScores: {},
     coins: 0,
     lifetimeCoins: 0,
     streak: 0,
@@ -114,7 +129,9 @@ const ECONOMY_ACTIONS = new Set([
   'OPEN_BLINDBOX',
   'REDEEM_REWARD',
   'FEED_BERRY',
-  'COMPLETE_FLIGHT'
+  'COMPLETE_FLIGHT',
+  // A rank is progression too — in the air you play, but you don't post.
+  'SUBMIT_SCORE'
 ])
 
 /* ------------------------------------------------------------------ */
@@ -254,6 +271,19 @@ function reducer(state, action) {
         coins: state.coins + action.amount,
         lifetimeCoins: state.lifetimeCoins + action.amount
       }
+
+    case 'SUBMIT_SCORE': {
+      const best = state.bestScores[action.gameId] ?? 0
+      // Only a genuine improvement counts, so a bad round can't erase a good one.
+      if (action.score <= best) return state
+      return { ...state, bestScores: { ...state.bestScores, [action.gameId]: action.score } }
+    }
+
+    case 'RENAME_GUEST': {
+      const name = String(action.name ?? '').trim().slice(0, 20)
+      if (!name) return state
+      return { ...state, guest: { ...state.guest, name } }
+    }
 
     case 'RECORD_PLAY': {
       const today = dayKey(state.dayOffset)

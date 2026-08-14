@@ -20,6 +20,7 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 | **Daily check-in** | A fixed 7-day calendar (see below), a celebration reveal, and the Pilot Berry look at 30 consecutive days. The reveal then previews what tomorrow pays |
 | **Feed Berry** | Treats from check-ins are fed to Berry; every 5 fed earns a free blindbox |
 | **Minigames** | Cloud Dash, Baggage Match and Candy Rush, 3 rewarded plays each per day |
+| **Leaderboards** | A ranking per game, shown right after each round and on a Play tab |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
 | **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
 | **Redemption** | Coins convert into inflight meal discounts, merchandise vouchers and travel extras — redeemable from ticket purchase until online check-in |
@@ -94,6 +95,22 @@ checked in, long streak, no stamps yet, what he's wearing, blindboxes waiting �
 pool of general chatter, never repeating the line already on screen. He squashes, hearts float up,
 and the bubble reverts to its default line after a few seconds.
 
+### Leaderboards and the guest player
+
+A guest identity is generated silently on first run — a name like `Traveller 4821`, renameable from
+the leaderboard — so nothing ever blocks the demo with a sign-up form. In production this would be
+the player's UO account.
+
+Each game keeps its own board, because the three score on completely different scales: coins caught
+in Cloud Dash, seconds to spare in Baggage Match, points in Candy Rush. Finishing a round shows your
+rank and the players either side of you; the full board lives on the Play screen's Leaderboard tab.
+
+**The rivals are sample data, not a database.** `src/data/leaderboard.js` holds a fixed roster of 20
+players with hand-tuned scores — fixed rather than generated, so the board doesn't reshuffle on every
+reload. The ranking itself is real: your best score is merged in and sorted, and a tie leaves you
+*below* the rival holding it, since beating someone should require actually beating them. A real
+deployment needs server-held scores and anti-cheat, as a client-reported score is trivially forged.
+
 ### In-flight mode
 
 A presenter toggle (and the browser's real `online`/`offline` events) puts the app in flight mode.
@@ -102,6 +119,7 @@ The rule is that **offline freezes the economy, not the app**:
 | Blocked in flight | Still works |
 | --- | --- |
 | Daily check-in | All three minigames, unlimited |
+| Posting a leaderboard score | Browsing the leaderboards |
 | Opening blindboxes | Dressing Berry, browsing the wardrobe |
 | Redeeming coupons | Passport, medals, the room, flight records |
 | Feeding Berry | Vouchers you already hold stay readable |

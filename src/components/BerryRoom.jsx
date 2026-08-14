@@ -31,8 +31,9 @@ function RoomBed() {
   const ink = { stroke: '#141414', strokeWidth: 2, strokeLinejoin: 'round', strokeLinecap: 'round' }
   return (
     <svg className="room__bed" viewBox="0 0 120 76" aria-hidden="true" focusable="false">
-      {/* headboard */}
-      <path d="M6 20 q0 -10 10 -10 h14 q10 0 10 10 v34 h-34 z" fill="#B07A4A" {...ink} />
+      {/* headboard — kept short and narrow so it reads as a bed rather than a
+          wardrobe standing behind one */}
+      <path d="M10 30 q0 -8 8 -8 h8 q8 0 8 8 v24 h-24 z" fill="#B07A4A" {...ink} />
       {/* mattress */}
       <rect x="24" y="34" width="92" height="20" rx="7" fill="#FBF3E8" {...ink} />
       {/* pillow */}

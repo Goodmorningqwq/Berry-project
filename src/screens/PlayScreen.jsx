@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useStore, DAILY_PLAYS_PER_GAME } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import { Coin } from '../components/ui.jsx'
+import Leaderboard from '../components/Leaderboard.jsx'
 import CloudDash from '../games/CloudDash.jsx'
 import BaggageMatch from '../games/BaggageMatch.jsx'
 import CandyRush from '../games/CandyRush.jsx'
@@ -33,23 +34,31 @@ const GAMES = [
   }
 ]
 
+const TABS = [
+  { id: 'games', label: 'Games' },
+  { id: 'board', label: 'Leaderboard' }
+]
+
 export default function PlayScreen() {
   const { state, dispatch, playsLeft, checkedInToday, today, offline } = useStore()
   const toast = useToast()
   const [active, setActive] = useState(null)
+  const [tab, setTab] = useState('games')
 
   const game = GAMES.find((g) => g.id === active)
 
-  const finish = (amount) => {
+  const finish = (amount, score = 0) => {
     if (offline) {
-      // Play stays free in the air — no coins, and no allowance burnt either,
-      // since spending a rewarded play for nothing would be worse than blocking.
-      toast('No coins in flight — your plays are saved for landing', '✈️')
+      // Play stays free in the air — no coins, no allowance burnt, and no rank
+      // posted, since spending a rewarded play for nothing would be worse than
+      // blocking it outright.
+      toast('No coins or ranking in flight — your plays are saved for landing', '✈️')
       setActive(null)
       return
     }
     dispatch({ type: 'EARN_COINS', amount })
     dispatch({ type: 'RECORD_PLAY', gameId: active })
+    dispatch({ type: 'SUBMIT_SCORE', gameId: active, score })
     toast(`+${amount} berry coins earned`, '🪙')
     setActive(null)
   }
@@ -57,7 +66,14 @@ export default function PlayScreen() {
   if (game) {
     const G = game.Component
     return (
-      <G equipped={state.equipped} offline={offline} onExit={() => setActive(null)} onFinish={finish} />
+      <G
+        equipped={state.equipped}
+        offline={offline}
+        gameId={game.id}
+        bestScore={state.bestScores[game.id] ?? 0}
+        onExit={() => setActive(null)}
+        onFinish={finish}
+      />
     )
   }
 
@@ -82,6 +98,18 @@ export default function PlayScreen() {
         </p>
       </div>
 
+      <div className="tabs" style={{ marginTop: 12 }}>
+        {TABS.map((t) => (
+          <button key={t.id} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'board' && <Leaderboard />}
+
+      {tab === 'games' && (
+        <>
       <div style={{ marginTop: 16 }}>
         {GAMES.map((g) => {
           const left = playsLeft(g.id)
@@ -160,6 +188,8 @@ export default function PlayScreen() {
       <p className="tiny" style={{ marginTop: 14, textAlign: 'center' }}>
         Coins earned here are spent in Rewards — on blindboxes, inflight meals and merchandise.
       </p>
+        </>
+      )}
     </>
   )
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Coin } from '../components/ui.jsx'
+import { LeaderboardSlice } from '../components/Leaderboard.jsx'
 
 /**
  * Eight pairs of travel icons on a 4x4 grid, against a 60 second clock.
@@ -18,7 +19,7 @@ function shuffled() {
   return deck
 }
 
-export default function BaggageMatch({ offline, onExit, onFinish }) {
+export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, onFinish }) {
   const [cards, setCards] = useState(shuffled)
   const [picked, setPicked] = useState([])
   const [moves, setMoves] = useState(0)
@@ -155,17 +156,22 @@ export default function BaggageMatch({ offline, onExit, onFinish }) {
                 <>
                   {offline ? (
                     <p className="tiny" style={{ marginTop: 14 }}>
-                      ✈️ No coins in flight — your rewarded plays are waiting for you when you land.
+                      ✈️ No coins or ranking in flight — your rewarded plays are waiting for you when
+                      you land.
                     </p>
                   ) : (
-                    <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
-                      <Coin /> +{reward}
-                    </div>
+                    <>
+                      <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
+                        <Coin /> +{reward}
+                      </div>
+                      {/* Score is the time you had left, so a faster clear ranks higher. */}
+                      <LeaderboardSlice gameId={gameId} score={left} isBest={left > bestScore} />
+                    </>
                   )}
                   <button
                     className="btn btn--gold btn--block"
                     style={{ marginTop: 16 }}
-                    onClick={() => onFinish(reward)}
+                    onClick={() => onFinish(reward, left)}
                   >
                     {offline ? 'Done' : 'Collect'}
                   </button>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Coin } from '../components/ui.jsx'
+import { LeaderboardSlice } from '../components/Leaderboard.jsx'
 
 /**
  * Candy Rush — a UO-themed match-3.
@@ -109,7 +110,7 @@ function freshGrid() {
   return Array.from({ length: SIZE * SIZE }, randomTile)
 }
 
-export default function CandyRush({ offline, onExit, onFinish }) {
+export default function CandyRush({ offline, gameId, bestScore = 0, onExit, onFinish }) {
   const [grid, setGrid] = useState(freshGrid)
   const [selected, setSelected] = useState(null)
   const [clearing, setClearing] = useState(() => new Set())
@@ -313,17 +314,21 @@ export default function CandyRush({ offline, onExit, onFinish }) {
               </p>
               {offline ? (
                 <p className="tiny" style={{ marginTop: 14 }}>
-                  ✈️ No coins in flight — your rewarded plays are waiting for you when you land.
+                  ✈️ No coins or ranking in flight — your rewarded plays are waiting for you when you
+                  land.
                 </p>
               ) : (
-                <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
-                  <Coin /> +{reward}
-                </div>
+                <>
+                  <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
+                    <Coin /> +{reward}
+                  </div>
+                  <LeaderboardSlice gameId={gameId} score={score} isBest={score > bestScore} />
+                </>
               )}
               <button
                 className="btn btn--gold btn--block"
                 style={{ marginTop: 16 }}
-                onClick={() => onFinish(reward)}
+                onClick={() => onFinish(reward, score)}
               >
                 {offline ? 'Done' : 'Collect'}
               </button>

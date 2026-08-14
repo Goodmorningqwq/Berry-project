@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Berry from '../components/Berry.jsx'
 import { Coin } from '../components/ui.jsx'
+import { LeaderboardSlice } from '../components/Leaderboard.jsx'
 
 /**
  * Tap-to-fly. Berry falls under gravity, a tap flaps him upward, and he
@@ -20,7 +21,7 @@ const SPAWN_EVERY = 1500 // ms
 const BASE_SPEED = 2.9
 const ROUND_MS = 40000
 
-export default function CloudDash({ equipped, offline, onExit, onFinish }) {
+export default function CloudDash({ equipped, offline, gameId, bestScore = 0, onExit, onFinish }) {
   const fieldRef = useRef(null)
   const [size, setSize] = useState({ w: 360, h: 480 })
   const [phase, setPhase] = useState('ready') // ready | running | over
@@ -253,17 +254,25 @@ export default function CloudDash({ equipped, offline, onExit, onFinish }) {
                 </p>
                 {offline ? (
                   <p className="tiny" style={{ marginTop: 14 }}>
-                    ✈️ No coins in flight — your rewarded plays are waiting for you when you land.
+                    ✈️ No coins or ranking in flight — your rewarded plays are waiting for you when
+                    you land.
                   </p>
                 ) : (
-                  <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
-                    <Coin /> +{reward}
-                  </div>
+                  <>
+                    <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
+                      <Coin /> +{reward}
+                    </div>
+                    <LeaderboardSlice
+                      gameId={gameId}
+                      score={frame.score}
+                      isBest={frame.score > bestScore}
+                    />
+                  </>
                 )}
                 <button
                   className="btn btn--gold btn--block"
                   style={{ marginTop: 16 }}
-                  onClick={() => onFinish(reward)}
+                  onClick={() => onFinish(reward, frame.score)}
                 >
                   {offline ? 'Done' : 'Collect'}
                 </button>
