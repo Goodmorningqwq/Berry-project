@@ -164,7 +164,9 @@ export default function CloudDash({ equipped, offline, gameId, bestScore = 0, on
     return () => cancelAnimationFrame(raf.current)
   }, [phase, size])
 
-  const reward = Math.min(40, 10 + frame.score * 2)
+  // A floor of 1 rather than 0: doing nothing pays a token amount, so idling
+  // through a round is never worth a ticket. 35 cap still reached at 20 coins.
+  const reward = Math.min(35, 1 + Math.floor(frame.score * 1.7))
 
   return (
     <div className="game-shell">
@@ -254,8 +256,8 @@ export default function CloudDash({ equipped, offline, gameId, bestScore = 0, on
                 </p>
                 {offline ? (
                   <p className="tiny" style={{ marginTop: 14 }}>
-                    ✈️ No coins or ranking in flight — your rewarded plays are waiting for you when
-                    you land.
+                    ✈️ No coins or ranking in flight — and no ticket spent, so they’re all waiting
+                    for you when you land.
                   </p>
                 ) : (
                   <>
@@ -274,11 +276,13 @@ export default function CloudDash({ equipped, offline, gameId, bestScore = 0, on
                   style={{ marginTop: 16 }}
                   onClick={() => onFinish(reward, frame.score)}
                 >
-                  {offline ? 'Done' : 'Collect'}
+                  {offline ? 'Done' : `Collect ${reward} coin${reward === 1 ? '' : 's'}`}
                 </button>
-                <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
-                  Leave without collecting
-                </button>
+                {!offline && (
+                  <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
+                    Leave without collecting <small>— ticket refunded</small>
+                  </button>
+                )}
               </div>
             </div>
           )}

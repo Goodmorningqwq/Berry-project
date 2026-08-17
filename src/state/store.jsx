@@ -13,11 +13,24 @@ import { REGION_BADGES, TIERED_MEDALS, tierFor } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 5
+const SCHEMA_VERSION = 6
 
-export const BLINDBOX_COST = 150
+/**
+ * The coin's valuation. Berry coins are earned by playing, not spending, so
+ * they're marketing spend rather than a rebate — priced at 1 coin = 1 HK cent,
+ * which puts a daily player at roughly HK$21/month of face value and, after
+ * ancillary margins, well inside the 1–3% of customer revenue that loyalty
+ * programmes typically budget. Every price in data/rewards.js derives from it.
+ */
+export const COINS_PER_HKD = 100
+
+export const BLINDBOX_COST = 800
 export const MILESTONE_DAYS = 30
-export const DAILY_PLAYS_PER_GAME = 3
+/** Game entry is ticketed: 3 a day, spend them on whichever games you like. */
+export const DAILY_TICKETS = 3
+export const TICKET_CAP = 5
+/** Every Nth consecutive check-in grants a bonus ticket. */
+export const TICKET_STREAK_BONUS = 7
 
 /**
  * Feeding earns blindbox tickets rather than coins. Paying coins for a treat
@@ -103,7 +116,10 @@ function initialState() {
     stamps: [],
     flights: [],
     vouchers: [],
-    plays: { day: null, counts: {} },
+    playTickets: DAILY_TICKETS,
+    /** Which day the ticket balance belongs to; a new day refreshes it. */
+    ticketDay: null,
+    lastPlayed: null,
     seenIntro: false,
     // Presenter's in-flight switch. Never restored from a save — see hydrate().
     demoOffline: false,
@@ -117,6 +133,14 @@ function initialState() {
 export const isOffline = (state) => state.demoOffline || !state.networkOnline
 
 /**
+ * Tickets refresh on the virtual clock day. Reads go through here so a new day
+ * shows a full balance without needing a write first, and writes normalise
+ * before changing anything.
+ */
+export const ticketsOn = (state, today) =>
+  state.ticketDay === today ? state.playTickets : DAILY_TICKETS
+
+/**
  * Actions that move value. Offline these are refused outright: with nothing
  * earned or spent in the air there is no queue to reconcile and nothing to
  * exploit by pulling the network. Play and cosmetics are deliberately absent
@@ -125,7 +149,9 @@ export const isOffline = (state) => state.demoOffline || !state.networkOnline
 const ECONOMY_ACTIONS = new Set([
   'CHECK_IN',
   'EARN_COINS',
-  'RECORD_PLAY',
+  'SPEND_TICKET',
+  // Nothing is spent in the air, so there is nothing to hand back either.
+  'REFUND_TICKET',
   'OPEN_BLINDBOX',
   'REDEEM_REWARD',
   'FEED_BERRY',
@@ -243,6 +269,14 @@ function reducer(state, action) {
         bonus = { type: 'item', id: reward.treat }
       }
 
+      // Every 7th day in a row buys another go at the games, so the streak is
+      // worth keeping for more than just the blindbox.
+      const ticketBonus = streak > 0 && streak % TICKET_STREAK_BONUS === 0
+      if (ticketBonus) {
+        next.playTickets = Math.min(TICKET_CAP, ticketsOn(state, today) + 1)
+        next.ticketDay = today
+      }
+
       // 30 consecutive days unlocks the exclusive look.
       const milestone = streak >= MILESTONE_DAYS && !state.ownedItems.includes(MILESTONE_ITEM_ID)
       if (milestone) next.ownedItems = [...state.ownedItems, MILESTONE_ITEM_ID]
@@ -254,6 +288,7 @@ function reducer(state, action) {
         coins: reward.coins,
         peak: !!reward.peak,
         bonus,
+        ticket: ticketBonus,
         milestone: milestone ? MILESTONE_ITEM_ID : null
       }
 
@@ -285,11 +320,27 @@ function reducer(state, action) {
       return { ...state, guest: { ...state.guest, name } }
     }
 
-    case 'RECORD_PLAY': {
+    case 'SPEND_TICKET': {
       const today = dayKey(state.dayOffset)
-      const counts = state.plays.day === today ? { ...state.plays.counts } : {}
-      counts[action.gameId] = (counts[action.gameId] || 0) + 1
-      return { ...state, plays: { day: today, counts } }
+      const available = ticketsOn(state, today)
+      if (available < 1) return state
+      // lastPlayed is tracked separately from the balance, since a bonus ticket
+      // can leave the count at its daily value even after a round was played.
+      return { ...state, playTickets: available - 1, ticketDay: today, lastPlayed: today }
+    }
+
+    /**
+     * Walking away without collecting hands the ticket back — you only pay for a
+     * round you actually take the coins from.
+     *
+     * Only refunds against a ticket spent today: if `ticketDay` isn't today the
+     * balance is the untouched daily allowance, so there is nothing to give back
+     * and a stray dispatch can't mint one.
+     */
+    case 'REFUND_TICKET': {
+      const today = dayKey(state.dayOffset)
+      if (state.ticketDay !== today) return state
+      return { ...state, playTickets: Math.min(TICKET_CAP, state.playTickets + 1) }
     }
 
     case 'OPEN_BLINDBOX': {
@@ -511,10 +562,7 @@ export function StoreProvider({ children }) {
       hungry:
         treatsHeld > 0 &&
         (!state.lastFed || daysBetween(state.lastFed, today) >= HUNGRY_AFTER_DAYS),
-      playsLeft: (gameId) => {
-        const used = state.plays.day === today ? state.plays.counts[gameId] || 0 : 0
-        return Math.max(0, DAILY_PLAYS_PER_GAME - used)
-      },
+      ticketsLeft: ticketsOn(state, today),
       medals: TIERED_MEDALS.map((medal) => ({
         ...medal,
         ...tierFor(medal.value(state), medal.thresholds)

@@ -1,4 +1,12 @@
-import { BLINDBOX_COST, FEEDS_PER_TICKET, MILESTONE_DAYS, RARITY_ODDS } from '../state/store.jsx'
+import {
+  BLINDBOX_COST,
+  DAILY_TICKETS,
+  FEEDS_PER_TICKET,
+  MILESTONE_DAYS,
+  RARITY_ODDS,
+  TICKET_CAP,
+  TICKET_STREAK_BONUS
+} from '../state/store.jsx'
 import { CHECK_IN_CALENDAR, WEEKLY_COINS } from '../data/checkin.js'
 import {
   BASIC_ITEMS_BY_ID,
@@ -97,6 +105,30 @@ export default function OddsSheet({ open, onClose }) {
         </div>
         <p className="tiny">
           Guaranteed at {MILESTONE_DAYS} consecutive check-ins. Miss a day and the streak restarts.
+        </p>
+      </div>
+
+      <h4 className="section-title">
+        Play tickets <small>{DAILY_TICKETS} a day</small>
+      </h4>
+      <div className="odds-row">
+        <div className="odds-row__head">
+          <span>🎟️ Daily tickets</span>
+          <b>{DAILY_TICKETS}</b>
+        </div>
+        <p className="tiny">
+          One ticket opens any minigame, and coins are paid on how well you play. Leaving without
+          collecting hands the ticket back. Tickets refresh each day; unused ones don’t carry over.
+        </p>
+      </div>
+      <div className="odds-row">
+        <div className="odds-row__head">
+          <span>🔥 Streak bonus</span>
+          <b>+1 every {TICKET_STREAK_BONUS}</b>
+        </div>
+        <p className="tiny">
+          Every {TICKET_STREAK_BONUS} check-ins in a row earns a bonus ticket. You can hold up to{' '}
+          {TICKET_CAP} at once.
         </p>
       </div>
 

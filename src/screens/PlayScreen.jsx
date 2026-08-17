@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useStore, DAILY_PLAYS_PER_GAME } from '../state/store.jsx'
+import { useStore, DAILY_TICKETS, TICKET_STREAK_BONUS } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import { Coin } from '../components/ui.jsx'
 import Leaderboard from '../components/Leaderboard.jsx'
@@ -40,7 +40,7 @@ const TABS = [
 ]
 
 export default function PlayScreen() {
-  const { state, dispatch, playsLeft, checkedInToday, today, offline } = useStore()
+  const { state, dispatch, ticketsLeft, checkedInToday, today, offline } = useStore()
   const toast = useToast()
   const [active, setActive] = useState(null)
   const [tab, setTab] = useState('games')
@@ -49,17 +49,37 @@ export default function PlayScreen() {
 
   const finish = (amount, score = 0) => {
     if (offline) {
-      // Play stays free in the air — no coins, no allowance burnt, and no rank
-      // posted, since spending a rewarded play for nothing would be worse than
+      // Play stays free in the air — no coins, no ticket spent, and no rank
+      // posted, since burning a ticket for nothing would be worse than
       // blocking it outright.
-      toast('No coins or ranking in flight — your plays are saved for landing', '✈️')
+      toast('No coins or ranking in flight — your tickets are saved for landing', '✈️')
       setActive(null)
       return
     }
     dispatch({ type: 'EARN_COINS', amount })
-    dispatch({ type: 'RECORD_PLAY', gameId: active })
     dispatch({ type: 'SUBMIT_SCORE', gameId: active, score })
     toast(`+${amount} berry coins earned`, '🪙')
+    setActive(null)
+  }
+
+  const openGame = (id) => {
+    if (!offline) {
+      if (ticketsLeft < 1) return
+      dispatch({ type: 'SPEND_TICKET' })
+    }
+    setActive(id)
+  }
+
+  /**
+   * The ticket is taken on entry so the balance reads honestly while you play,
+   * but leaving without collecting hands it straight back — you only pay for a
+   * round you take the coins from. Offline none was spent, so nothing returns.
+   */
+  const quit = () => {
+    if (!offline) {
+      dispatch({ type: 'REFUND_TICKET' })
+      toast('Ticket refunded — nothing collected', '🎟️')
+    }
     setActive(null)
   }
 
@@ -71,7 +91,7 @@ export default function PlayScreen() {
         offline={offline}
         gameId={game.id}
         bestScore={state.bestScores[game.id] ?? 0}
-        onExit={() => setActive(null)}
+        onExit={quit}
         onFinish={finish}
       />
     )
@@ -79,13 +99,7 @@ export default function PlayScreen() {
 
   const quests = [
     { id: 'checkin', label: 'Daily check-in', done: checkedInToday, reward: 10 },
-    {
-      id: 'game',
-      label: 'Play one minigame',
-      done:
-        state.plays.day === today && Object.values(state.plays.counts).some((n) => n > 0),
-      reward: 10
-    },
+    { id: 'game', label: 'Play one minigame', done: state.lastPlayed === today, reward: 10 },
     { id: 'box', label: 'Open a blindbox', done: state.ownedItems.length > 1, reward: '👕' }
   ]
 
@@ -94,8 +108,30 @@ export default function PlayScreen() {
       <div className="screen-head">
         <h2>Play &amp; earn</h2>
         <p className="muted" style={{ marginTop: 4 }}>
-          Every round pays berry coins. {DAILY_PLAYS_PER_GAME} rewarded plays per game, per day.
+          {DAILY_TICKETS} play tickets a day — spend them on whichever games you like.
         </p>
+      </div>
+
+      <div className="tickets">
+        <div className="tickets__pips" aria-hidden="true">
+          {Array.from({ length: Math.max(DAILY_TICKETS, ticketsLeft) }, (_, i) => (
+            <span key={i} className={`tickets__pip ${i < ticketsLeft ? 'tickets__pip--on' : ''}`}>
+              🎟️
+            </span>
+          ))}
+        </div>
+        <div>
+          <div className="tickets__count">
+            {offline ? 'Free play in flight' : `${ticketsLeft} ticket${ticketsLeft === 1 ? '' : 's'} left`}
+          </div>
+          <p className="tiny">
+            {offline
+              ? '✈️ Play as much as you like — no tickets spent, no coins paid'
+              : ticketsLeft > 0
+                ? `1 ticket per round, refunded if you leave without collecting · every ${TICKET_STREAK_BONUS}-day streak earns a bonus ticket`
+                : `Back tomorrow — or keep a ${TICKET_STREAK_BONUS}-day streak for a bonus ticket`}
+          </p>
+        </div>
       </div>
 
       <div className="tabs" style={{ marginTop: 12 }}>
@@ -112,14 +148,13 @@ export default function PlayScreen() {
         <>
       <div style={{ marginTop: 16 }}>
         {GAMES.map((g) => {
-          const left = playsLeft(g.id)
-          // Offline the games stay open — they just don't pay.
-          const locked = left === 0 && !offline
+          // Offline the games stay open and cost nothing — they just don't pay.
+          const locked = ticketsLeft < 1 && !offline
           return (
             <button
               key={g.id}
               className="game-card"
-              onClick={() => setActive(g.id)}
+              onClick={() => openGame(g.id)}
               disabled={locked}
               style={locked ? { opacity: 0.55 } : undefined}
             >
@@ -131,12 +166,12 @@ export default function PlayScreen() {
                 <p className="muted" style={{ marginTop: 2 }}>
                   {g.blurb}
                 </p>
-                <span className={`chip ${left === 0 || offline ? 'chip--out' : 'chip--gold'}`}>
+                <span className={`chip ${locked || offline ? 'chip--out' : 'chip--gold'}`}>
                   {offline
                     ? '✈️ Free to play · no coins'
-                    : left === 0
-                      ? 'Back tomorrow'
-                      : `${left} rewarded play${left > 1 ? 's' : ''} left`}
+                    : locked
+                      ? 'No tickets left'
+                      : '🎟️ 1 ticket'}
                 </span>
               </div>
             </button>

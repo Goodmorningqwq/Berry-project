@@ -97,9 +97,9 @@ export default function DemoPanel() {
               ✈️ In-flight mode: {offline ? 'ON' : 'off'}
               <small>Play keeps working, earning stops</small>
             </button>
-            <button className="demo-btn" onClick={() => grant(2000)}>
-              🪙 Grant 2,000 coins
-              <small>Reaches the top redemption tier</small>
+            <button className="demo-btn" onClick={() => grant(15000)}>
+              🪙 Grant 15,000 coins
+              <small>HK$150 — reaches the top redemption tier</small>
             </button>
             <button
               className="demo-btn"

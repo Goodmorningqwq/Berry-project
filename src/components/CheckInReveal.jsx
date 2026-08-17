@@ -109,6 +109,14 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
       bonuses.push({ key: 'item', emoji: item.emoji, title: item.name, detail: 'A treat for Berry' })
     }
   }
+  if (result.ticket) {
+    bonuses.push({
+      key: 'ticket',
+      emoji: '🎟️',
+      title: 'Bonus play ticket',
+      detail: 'For a full week in a row'
+    })
+  }
   if (result.milestone) {
     const item = ITEMS_BY_ID[result.milestone]
     bonuses.push({
@@ -168,8 +176,8 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
 
                 {bonuses.length > 0 && (
                   <div className="checkin-reveal__bonuses">
-                    {bonuses.map((b, i) => (
-                      <BonusRow key={b.key} {...b} delay={0.45 + i * 0.16} />
+                    {bonuses.map(({ key, ...b }, i) => (
+                      <BonusRow key={key} {...b} delay={0.45 + i * 0.16} />
                     ))}
                   </div>
                 )}

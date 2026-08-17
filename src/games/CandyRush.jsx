@@ -225,7 +225,9 @@ export default function CandyRush({ offline, gameId, bestScore = 0, onExit, onFi
     setPhase('playing')
   }
 
-  const reward = Math.min(40, 10 + Math.floor(score / 120))
+  // A floor of 1 rather than 0: doing nothing pays a token amount, so idling
+  // through a round is never worth a ticket. 35 cap reached at ~2,400 points.
+  const reward = Math.min(35, 1 + Math.floor(score / 70))
 
   return (
     <div className="game-shell">
@@ -314,8 +316,8 @@ export default function CandyRush({ offline, gameId, bestScore = 0, onExit, onFi
               </p>
               {offline ? (
                 <p className="tiny" style={{ marginTop: 14 }}>
-                  ✈️ No coins or ranking in flight — your rewarded plays are waiting for you when you
-                  land.
+                  ✈️ No coins or ranking in flight — and no ticket spent, so they’re all waiting for
+                  you when you land.
                 </p>
               ) : (
                 <>
@@ -330,11 +332,13 @@ export default function CandyRush({ offline, gameId, bestScore = 0, onExit, onFi
                 style={{ marginTop: 16 }}
                 onClick={() => onFinish(reward, score)}
               >
-                {offline ? 'Done' : 'Collect'}
+                {offline ? 'Done' : `Collect ${reward} coin${reward === 1 ? '' : 's'}`}
               </button>
-              <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
-                Leave without collecting
-              </button>
+              {!offline && (
+                <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
+                  Leave without collecting <small>— ticket refunded</small>
+                </button>
+              )}
             </div>
           </div>
         )}

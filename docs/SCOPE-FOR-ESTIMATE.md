@@ -124,7 +124,10 @@ A **fixed 7-day reward calendar**, publicly previewed so users always know what 
 
 ## 2.5 Minigames
 
-Three games, each with **3 rewarded plays per day**, paying 10–40 coins by performance:
+Entry is **ticket-gated**: 3 play tickets a day, spendable on any mix of games, 1 per round. The
+ticket is taken on entry and **refunded if the player leaves without collecting**. Every 7th
+consecutive check-in grants a bonus ticket, capped at 5 held. Rounds pay **1–35 coins** by
+performance — a token floor that makes idling worthless, and a cap all three games can reach.
 
 1. **Cloud Dash** — tap-to-fly obstacle avoidance, 40-second rounds, `requestAnimationFrame` physics
    loop, touch and mouse
@@ -151,14 +154,16 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
 
 ## 2.8 Blindbox and redemption
 
-- **Blindbox** at 150 coins or a free ticket. **Published odds — Common 60% / Rare 30% / Epic 10%** —
+- **Blindbox** at 800 coins or a free ticket. **Published odds — Common 60% / Rare 30% / Epic 10%** —
   with duplicate protection (unowned items preferred within a tier) and a 20-coin refund on an
   unavoidable duplicate. Rarity-tiered reveal animation
 - **Odds disclosure screen** listing every rarity percentage, the items in each tier, the full
   check-in calendar and the feeding conversion. This mirrors real gacha disclosure obligations
-- **Redemption catalogue:** 8 rewards across inflight meals, merchandise and travel extras, priced
-  200–2,000 coins. Redeeming issues a **voucher with a unique code**, redeemable from ticket purchase
-  until online check-in
+- **Redemption catalogue:** 11 rewards across quick wins, inflight meals, merchandise and travel
+  extras, priced 300–15,000 coins. Pricing is derived from a single valuation constant — **100 coins
+  = HK$1**, every price being face value × 100 — so the whole economy re-tunes from one number.
+  Redeeming issues a **voucher with a unique code**, redeemable from ticket purchase until online
+  check-in
 
 ## 2.9 In-flight (offline) mode
 
@@ -167,7 +172,8 @@ Models the aircraft cabin, and is the core anti-abuse design:
 - **Blocked offline:** daily check-in, blindboxes, coupon redemption, feeding, flight completion
 - **Still available:** all three minigames (unlimited), the wardrobe, the room, the passport, and
   any vouchers already issued
-- Minigames pay **nothing** offline and deliberately do **not** consume a rewarded play
+- Minigames pay **nothing** offline, post no leaderboard score, and deliberately do **not** consume a
+  play ticket
 - Because nothing accrues offline there is no queue to reconcile, no cap to tune, and no way to farm
   rewards by disabling the network
 - Enforcement is a single gate covering all value-moving operations, not per-screen checks

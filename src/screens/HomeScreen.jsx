@@ -117,8 +117,8 @@ export default function HomeScreen() {
           })}
         </div>
         <p className="tiny" style={{ marginTop: 8, textAlign: 'center' }}>
-          Day 5 is the big coin day · day 7 pays a free blindbox · day {MILESTONE_DAYS} unlocks{' '}
-          <b>{ITEMS_BY_ID.pilot?.name ?? 'the exclusive look'}</b>
+          Day 5 is the big coin day · day 7 pays a free blindbox <b>and a bonus 🎟️ play ticket</b> ·
+          day {MILESTONE_DAYS} unlocks <b>{ITEMS_BY_ID.pilot?.name ?? 'the exclusive look'}</b>
         </p>
         <p className="tiny" style={{ marginTop: 4, textAlign: 'center', opacity: 0.7 }}>
           {prettyDate(today)}

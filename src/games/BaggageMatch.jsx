@@ -92,7 +92,9 @@ export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, o
     setPhase('running')
   }
 
-  const reward = solved ? Math.min(40, 10 + Math.floor(left / 3)) : 0
+  // 35 cap reached at 50s to spare. Failing pays a floor of 1 — enough that a
+  // spent ticket isn't wholly wasted, too little to make idling worth doing.
+  const reward = solved ? Math.min(35, 1 + Math.floor(left * 0.68)) : 1
   const matchedPairs = cards.filter((c) => c.matched).length / 2
 
   return (
@@ -156,8 +158,8 @@ export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, o
                 <>
                   {offline ? (
                     <p className="tiny" style={{ marginTop: 14 }}>
-                      ✈️ No coins or ranking in flight — your rewarded plays are waiting for you when
-                      you land.
+                      ✈️ No coins or ranking in flight — and no ticket spent, so they’re all waiting
+                      for you when you land.
                     </p>
                   ) : (
                     <>
@@ -173,17 +175,36 @@ export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, o
                     style={{ marginTop: 16 }}
                     onClick={() => onFinish(reward, left)}
                   >
-                    {offline ? 'Done' : 'Collect'}
+                    {offline ? 'Done' : `Collect ${reward} coin${reward === 1 ? '' : 's'}`}
                   </button>
                 </>
               ) : (
-                <button className="btn btn--primary btn--block" style={{ marginTop: 16 }} onClick={start}>
-                  Try again
+                <>
+                  {/* A ticket was spent, so even a failed round pays the floor. */}
+                  {!offline && (
+                    <div style={{ marginTop: 14, fontSize: 22, fontWeight: 800 }}>
+                      <Coin /> +{reward}
+                    </div>
+                  )}
+                  <button
+                    className="btn btn--gold btn--block"
+                    style={{ marginTop: 16 }}
+                    onClick={() => onFinish(reward, 0)}
+                  >
+                    {offline ? 'Done' : `Collect ${reward} coin${reward === 1 ? '' : 's'}`}
+                  </button>
+                </>
+              )}
+              {!offline && (
+                <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
+                  Leave without collecting <small>— ticket refunded</small>
                 </button>
               )}
-              <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
-                Back to games
-              </button>
+              {offline && (
+                <button className="btn btn--ghost btn--block" style={{ marginTop: 8 }} onClick={onExit}>
+                  Back to games
+                </button>
+              )}
             </div>
           </div>
         )}

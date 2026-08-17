@@ -1523,6 +1523,47 @@ p {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* ---------------- play tickets ---------------- */
+
+.tickets {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--purple-700), var(--purple-500));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(111, 43, 144, 0.28);
+}
+
+.tickets__pips {
+  display: flex;
+  gap: 2px;
+  flex: none;
+}
+
+.tickets__pip {
+  font-size: 21px;
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+.tickets__pip--on {
+  opacity: 1;
+  filter: none;
+}
+
+.tickets__count {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.tickets .tiny {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 /* ---------------- leaderboard ---------------- */
 
 .lb {

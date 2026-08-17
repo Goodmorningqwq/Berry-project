@@ -19,7 +19,7 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 | --- | --- |
 | **Daily check-in** | A fixed 7-day calendar (see below), a celebration reveal, and the Pilot Berry look at 30 consecutive days. The reveal then previews what tomorrow pays |
 | **Feed Berry** | Treats from check-ins are fed to Berry; every 5 fed earns a free blindbox |
-| **Minigames** | Cloud Dash, Baggage Match and Candy Rush, 3 rewarded plays each per day |
+| **Minigames** | Cloud Dash, Baggage Match and Candy Rush, entered with one of 3 daily play tickets |
 | **Leaderboards** | A ranking per game, shown right after each round and on a Play tab |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
 | **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
@@ -125,7 +125,7 @@ The rule is that **offline freezes the economy, not the app**:
 | Feeding Berry | Vouchers you already hold stay readable |
 | Completing a flight | Everything else |
 
-Minigames stay playable but pay nothing **and don't consume a rewarded play** — burning the daily
+Minigames stay playable but pay nothing **and don't consume a play ticket** — burning the daily
 allowance for zero reward would be worse than blocking them outright.
 
 Because nothing at all accrues offline, there is no queue to reconcile, no cap to tune and nothing
@@ -147,11 +147,26 @@ the published numbers can't drift from the code:
 
 ### Economy
 
-Earning is unchanged (~130 coins on an active day). Redemption is deliberately expensive so the
-daily habit matters: blindbox 150, hot drink 200, HK$20 meal discount 350, luggage tag 450, HK$50
-meal combo 800, tote 900, 3kg baggage 1,200, front-row seat 1,400, Berry plush 2,000. A meal
-discount is roughly three active days away; the plush is about two weeks. All of it lives in
-`src/data/rewards.js` and `BLINDBOX_COST` in `src/state/store.jsx`.
+**Play tickets.** Games are entered with a ticket, not opened freely: **3 a day**, spent on whichever
+games you like, plus a bonus ticket on every 7th consecutive check-in and a cap of 5 held at once.
+The ticket is taken on entry so the balance reads honestly while you play, but leaving without
+collecting hands it back — you only pay for a round you take the coins from. This bounds the day at
+three collected rounds however the player mixes them, which is what makes the coin worth pricing.
+
+**Coins are worth real money: 100 coins = HK$1** (`COINS_PER_HKD`). Every catalogue price is face
+value × 100, so the economy re-tunes from one constant rather than eleven numbers. The rate is set
+by treating coins as retention marketing spend rather than a rebate — miles are earned by *spending*
+and so are priced as a discount on booked revenue, while Berry coins are earned by *playing*. It
+holds up because rewards are ancillaries whose marginal cost is ~40% of face, and because a typical
+daily player earns ~1,990 coins/month — HK$19.87 of face value, ~HK$7.95 of real cost — which sits
+inside the 1–3%-of-customer-revenue benchmark for loyalty programmes.
+
+Rounds pay **1 to 35 coins**. The floor is deliberately a token amount: idling through three rounds
+pays 3 coins, so AFK farming earns nothing worth having, while a cap of 35 is reachable in all three
+games by playing well. The ladder runs from a 300-coin sticker pack (~5 days, free for UO to give)
+up to a 15,000-coin plush, with the blindbox at 800. Full derivation, per-game curves and the 30-day
+simulation are in [docs/REWARD-TABLE.md](docs/REWARD-TABLE.md); prices live in `src/data/rewards.js`
+and `BLINDBOX_COST` in `src/state/store.jsx`.
 
 Everything is stored locally in `localStorage`. There is no backend and no network calls, so the
 demo works offline.
@@ -173,11 +188,11 @@ Then open http://localhost:5173. Build for production with `npm run build`.
 The ⚙ button in the bottom-right corner opens demo-only shortcuts. None of this ships in the real
 product — it exists so a 30-day habit loop can be shown in five minutes:
 
-- **Next day** — advances the virtual clock, re-arming check-in and game plays
+- **Next day** — advances the virtual clock, re-arming check-in and refreshing play tickets
 - **Skip a week** — breaks the streak, to show the reset
 - **Day 29 streak** — parks the streak one day short so a live check-in lands the 30-day exclusive
 - **Simulate flight** — grants a stamp and that destination's exclusive prop
-- **Grant 2,000 coins** — reaches the top redemption tier
+- **Grant 15,000 coins** — HK$150, reaches the top redemption tier
 - **Give treats** — stocks the stash so Feed Berry can be shown on cue
 - **Reset demo** — back to a clean first run
 
