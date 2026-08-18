@@ -132,8 +132,8 @@ attached to a sale UO would often not otherwise have made.
 
 Free items were built and then removed. They cost **twice as much per coin** as a discount, because
 nothing is bought alongside them to offset the cost, and dropping them cut the programme's cost by
-17%. A discount also reads as a better deal than it costs: HK$5 off a HK$20 snack is a quarter off
-to the customer and about HK$2 to UO.
+17%. A discount also reads as a better deal than it costs: 10% off a HK$30 cup noodle sounds like a
+real offer and costs UO about HK$1.20, because the customer still pays the other HK$27.
 
 ### Two rules protect onboard margin
 
@@ -170,14 +170,13 @@ ladder** — with identical value per coin there is no reason to ever pick the b
 decision collapses to "what can I afford today" and everyone parks on the cheapest one forever. The
 tiers become decoration.
 
-The rate now falls as the discount grows (`VOLUME_MARKUP`), exactly like a bulk price:
+The rate now falls as the **percentage** grows (`VOLUME_MARKUP`), exactly like a bulk price:
 
-| Discount | Coins per HK$1 | Price | Saving vs flat |
-| --- | --- | --- | --- |
-| HK$3 | 160 | 480 | — |
-| HK$5 | 150 | 750 | 6% |
-| HK$8 | 140 | 1,120 | 13% |
-| HK$10 | 130 | 1,300 | 19% |
+| Discount | Coins per HK$1 | Saving vs flat |
+| --- | --- | --- |
+| 5% | 160 | — |
+| 7.5% | 150 | 6% |
+| 10% | 140 | 13% |
 
 This is the honest version of the **decoy effect** (Huber, Payne & Puto, 1982 — popularised by Dan
 Ariely's Economist subscription example, where a deliberately pointless middle option lifted uptake
@@ -185,8 +184,8 @@ of the top tier from 32% to 84%). Rather than pricing a middle rung badly so the
 the top rung genuinely *is* better, so the shop survives a customer running the numbers. The top rung
 of each tab is flagged **Best value** so the ladder is legible without doing the division.
 
-It costs UO more per coin at the top — HK$3.08 per 1,000 coins on a HK$10 coupon against HK$2.50 on a
-HK$3 one, about 6% on the blended figure. **That increase is the incentive**: a bigger coupon has to
+It costs UO more per coin at the top — HK$2.86 per 1,000 coins on a 10% coupon against HK$2.50 on a
+5% one. **That increase is the incentive**: a bigger coupon has to
 be worth saving for, or the ladder does nothing. In exchange it buys larger attached baskets and
 fewer, later redemptions.
 
@@ -231,47 +230,52 @@ the same reward, so nobody banks ten drink coupons and uses them all on one flig
 voucher marks it used and frees the slot. That works in flight (onboard is where a coupon is spent);
 only *issuing* new vouchers is frozen offline.
 
-### The catalogue — 22 rewards, six tabs
+### The catalogue — 21 rewards, six tabs
 
-| Reward | Tier | Face | Price | Days |
-| --- | --- | --- | --- | --- |
-| **Drinks** | | | | |
-| HK$3 off any drink | coupon | HK$3 | **480** | ~10 |
-| HK$5 off any drink | coupon | HK$5 | **750** | ~16 |
-| HK$10 off any Signature Drink ⭐ | coupon | HK$10 | **1,300** | ~27 |
-| **Snacks** | | | | |
-| HK$3 off any snack | coupon | HK$3 | **480** | ~10 |
-| HK$5 off any snack | coupon | HK$5 | **750** | ~16 |
-| HK$8 off any cup noodles ⭐ | coupon | HK$8 | **1,120** | ~24 |
-| **Meals** | | | | |
-| HK$3 off any light bite | coupon | HK$3 | **480** | ~10 |
-| HK$5 off any light bite | coupon | HK$5 | **750** | ~16 |
-| HK$8 off any hot meal | coupon | HK$8 | **1,120** | ~24 |
-| HK$10 off any Hearty Bites main ⭐ | coupon | HK$10 | **1,300** | ~27 |
-| **Sweets** | | | | |
-| HK$3 off any dessert | coupon | HK$3 | **480** | ~10 |
-| HK$5 off any dessert | coupon | HK$5 | **750** | ~16 |
-| HK$8 off an ice cream cup ⭐ | coupon | HK$8 | **1,120** | ~24 |
-| **Berry** | | | | |
-| Berry wallpaper pack | free | HK$2 | 200 | ~4 |
-| Berry sticker pack | free | HK$3 | 300 | ~6 |
-| Berry enamel pin badge | merch | HK$12 | 2,400 | ~51 |
-| Berry luggage tag | merch | HK$40 | 8,000 | ~5.6 months |
-| Berry tote bag | merch | HK$55 | 11,000 | ~7.7 months |
-| Berry plush | merch | HK$75 | 15,000 | ~10.5 months |
-| **Travel** | | | | |
-| Standard seat selection | free | HK$5 | 500 | ~11 |
-| Front-row seat selection | coupon | HK$50 | 8,000 | ~5.6 months |
-| 3kg extra baggage | coupon | HK$75 | 12,000 | ~8.4 months |
+**Onboard coupons are percentages.** `pct` is the headline the customer sees; `hkd` is what it works
+out to against that reward's real menu price, and is the number the costing model uses. Cards spell
+the money out too, because a percentage on a HK$20 item is vaguer than a cash amount.
+
+| Reward | % | Of | Worth | Price | Days |
+| --- | --- | --- | --- | --- | --- |
+| **Drinks** | | | | | |
+| 5% off any drink | 5% | HK$20 carton | HK$1.00 | **160** | ~3 |
+| 7.5% off any drink | 7.5% | HK$20 carton | HK$1.50 | **225** | ~5 |
+| 10% off any Signature Drink ⭐ | 10% | HK$40 latte | HK$4.00 | **560** | ~12 |
+| **Snacks** | | | | | |
+| 5% off any snack | 5% | HK$20 packet | HK$1.00 | **160** | ~3 |
+| 7.5% off any snack | 7.5% | HK$20 packet | HK$1.50 | **225** | ~5 |
+| 10% off any cup noodles ⭐ | 10% | HK$30 cup | HK$3.00 | **420** | ~9 |
+| **Meals** | | | | | |
+| 5% off any light bite | 5% | HK$35 bun | HK$1.75 | **280** | ~6 |
+| 7.5% off any hot meal | 7.5% | HK$65 combo | HK$4.88 | **730** | ~15 |
+| 10% off any Hearty Bites main ⭐ | 10% | HK$75 main | HK$7.50 | **1,050** | ~22 |
+| **Sweets** | | | | | |
+| 5% off any dessert | 5% | HK$35 waffle | HK$1.75 | **280** | ~6 |
+| 7.5% off any dessert | 7.5% | HK$35 waffle | HK$2.63 | **395** | ~8 |
+| 10% off an ice cream cup ⭐ | 10% | HK$40 tub | HK$4.00 | **560** | ~12 |
+| **Berry** | | | | | |
+| Berry wallpaper pack | — | — | HK$2 | 200 | ~4 |
+| Berry sticker pack | — | — | HK$3 | 300 | ~6 |
+| Berry enamel pin badge | — | — | HK$12 | 2,400 | ~51 |
+| Berry luggage tag | — | — | HK$40 | 8,000 | ~5.6 months |
+| Berry tote bag | — | — | HK$55 | 11,000 | ~7.7 months |
+| Berry plush | — | — | HK$75 | 15,000 | ~10.5 months |
+| **Travel** | | | | | |
+| Standard seat selection | — | — | HK$5 | 500 | ~11 |
+| Front-row seat selection | — | — | HK$50 | 8,000 | ~5.6 months |
+| 3kg extra baggage | — | — | HK$75 | 12,000 | ~8.4 months |
+
+⭐ marks the rung flagged **Best value** in the app. Travel extras stay cash-priced because they are
+the ancillary itself rather than a discount on one — "10% off a front-row seat" would be nonsense.
+
+Percentages sit far inside both margin rules: the largest coupon is worth HK$7.50, a tenth of the
+main it discounts, against a HK$10 ceiling and a one-third-of-retail ceiling.
+
+**Every tab opens on something reachable inside two weeks** — 3, 3, 6, 6, 4 and 11 days at the
+measured earn rate of 47 coins a day.
 
 Plus the blindbox at **800**.
-
-⭐ marks the rung flagged **Best value** in the app.
-
-**Every tab opens on something reachable inside two weeks** — 10, 10, 10, 10, 4 and 11 days, at the
-measured earn rate of 47 coins a day. That is the
-property this catalogue exists to hold, and it is asserted in `scratchpad/economy.mjs` rather than
-eyeballed: an earlier revision failed it on two tabs.
 
 ---
 
@@ -307,23 +311,23 @@ Assuming **25% breakage** (coins earned but never redeemed; loyalty programmes t
 | | |
 | --- | --- |
 | Coins redeemed/day | ~117,200 |
-| **True cost per day** | **~HK$284** |
-| — from check-in | ~HK$77 |
-| — from games | ~HK$207 |
-| Per month | ~HK$8,500 |
-| Per year | ~HK$103,600 |
-| Per registered user per year | **HK$10.36** |
+| **True cost per day** | **~HK$279** |
+| — from check-in | ~HK$75 |
+| — from games | ~HK$204 |
+| Per month | ~HK$8,400 |
+| Per year | ~HK$102,000 |
+| Per registered user per year | **HK$10.20** |
 
 **Down 34% on the ~HK$429/day the free-item catalogue cost.** Three things moved it: dropping free
 items (−17%), the volume curve spending some of that back to buy the incentive to climb the ladder
 (+6%), and the games rebalance correcting a 46% overstatement in the assumed earn rate (−25%). The
 last of those is not a saving so much as an error being removed.
 
-Against a customer worth ~HK$3,000/year, HK$10.36 is **0.35% of revenue**, comfortably inside the 1–3%
+Against a customer worth ~HK$3,000/year, HK$10.20 is **0.34% of revenue**, comfortably inside the 1–3%
 loyalty benchmark, and before counting any incremental ancillary sales the coupons trigger.
 
 **Worst case**, if all 10,000 were daily actives — which no programme achieves, but it bounds the
-risk: **~HK$873/day, ~HK$319,000/year**.
+risk: **~HK$859/day, ~HK$314,000/year**.
 
 Two caveats worth carrying into the pitch, because they are what a finance reviewer will push on: the
 25% breakage and the 15/35/50 engagement split are assumptions rather than measurements; and the
@@ -345,6 +349,7 @@ people actually redeem moves the total more than any single price does.
 | Volume curve on the ladders | `src/data/rewards.js` — `VOLUME_MARKUP`, plus `bestValue` on the top rung |
 | Real menu prices | `src/data/rewards.js` — each reward's `retail`; refresh when UO reissues the menu |
 | Onboard discount cap | `src/data/rewards.js` — `MAX_DISCOUNT_HKD` |
+| Coupon percentages | `src/data/rewards.js` — each reward's `pct`, with `hkd` the cash it works out to |
 | Expiry windows | `src/state/store.jsx` — `COIN_EXPIRY_DAYS`, `VOUCHER_EXPIRY_DAYS`, `EXPIRY_WARN_DAYS` |
 | Check-in calendar | `src/data/checkin.js` |
 | Redemption prices | `src/data/rewards.js` — `priceOf()` |

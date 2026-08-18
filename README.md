@@ -216,13 +216,14 @@ Match, a higher divisor and a big-match bonus for Candy Rush — bringing the bl
 round** and narrowing the spread between best and worst game from 8× to 2.5×. That matters because
 tickets let a player *choose* their game, so the best-paying one sets the whole economy.
 
-The floor keeps AFK pointless: three idled rounds pay 3 coins. The shop runs 22 rewards across six
-tabs — Drinks, Snacks, Meals, Sweets, Berry and Travel — and **every tab opens on something reachable
-in about 10 days**, because a tab whose cheapest item is months away just reads as a wall.
+The floor keeps AFK pointless: three idled rounds pay 3 coins. Onboard coupons are **percentages** — 5% / 7.5% / 10% off, with the cash equivalent spelled out on
+each card because a percentage on a HK$20 item is vaguer than an amount. The shop runs 21 rewards
+across six tabs — Drinks, Snacks, Meals, Sweets, Berry and Travel — and **every tab opens on something reachable
+in 3–11 days**, because a tab whose cheapest item is months away just reads as a wall.
 
 At 10,000 registered players the programme issues ~156,000 coins a day (73% of it from games, which
-is why the ticket cap is the control that matters) and costs roughly **HK$284/day — ~HK$104,000/year,
-or HK$10.36 per registered user** after breakage. Full derivation, per-game curves, the markup schedule and the costing model are in
+is why the ticket cap is the control that matters) and costs roughly **HK$279/day — ~HK$102,000/year,
+or HK$10.20 per registered user** after breakage. Full derivation, per-game curves, the markup schedule and the costing model are in
 [docs/REWARD-TABLE.md](docs/REWARD-TABLE.md).
 
 Everything is stored locally in `localStorage`. There is no backend and no network calls, so the

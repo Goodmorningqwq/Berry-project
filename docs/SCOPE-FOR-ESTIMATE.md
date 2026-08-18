@@ -168,11 +168,11 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
   unavoidable duplicate. Rarity-tiered reveal animation
 - **Odds disclosure screen** listing every rarity percentage, the items in each tier, the full
   check-in calendar and the feeding conversion. This mirrors real gacha disclosure obligations
-- **Redemption catalogue:** 22 rewards across six tabs (Drinks, Snacks, Meals, Sweets, Berry,
+- **Redemption catalogue:** 21 rewards across six tabs (Drinks, Snacks, Meals, Sweets, Berry,
   Travel), priced against the **real HK Express inflight menu**. Pricing separates the coin's **book
   value** (1 coin = HK$0.01, the accounting liability) from its **shelf price**, which applies a
   markup rising with what a reward costs to fulfil — 100 coins/HK$ for zero-cost perks, 160 for
-  discount coupons, 200 for real merchandise. **Every onboard reward is a discount, never a free
+  discount coupons, 200 for real merchandise. **Every onboard reward is a percentage discount (5% / 7.5% / 10%), never a free
   item**, so the customer always pays the balance. Two rules protect margin: no discount exceeds
   **HK$10**, and none exceeds **a third of the retail price** of what it applies to. Every tab
   carries an entry reachable in 3–12 days of typical play. Redeeming issues a **voucher with a
