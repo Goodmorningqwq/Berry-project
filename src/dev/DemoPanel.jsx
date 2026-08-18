@@ -99,7 +99,7 @@ export default function DemoPanel() {
             </button>
             <button className="demo-btn" onClick={() => grant(15000)}>
               🪙 Grant 15,000 coins
-              <small>HK$150 — reaches the top redemption tier</small>
+              <small>Reaches the Berry plush, the top redemption tier</small>
             </button>
             <button
               className="demo-btn"

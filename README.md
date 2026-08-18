@@ -153,20 +153,27 @@ The ticket is taken on entry so the balance reads honestly while you play, but l
 collecting hands it back — you only pay for a round you take the coins from. This bounds the day at
 three collected rounds however the player mixes them, which is what makes the coin worth pricing.
 
-**Coins are worth real money: 100 coins = HK$1** (`COINS_PER_HKD`). Every catalogue price is face
-value × 100, so the economy re-tunes from one constant rather than eleven numbers. The rate is set
-by treating coins as retention marketing spend rather than a rebate — miles are earned by *spending*
-and so are priced as a discount on booked revenue, while Berry coins are earned by *playing*. It
-holds up because rewards are ancillaries whose marginal cost is ~40% of face, and because a typical
-daily player earns ~1,990 coins/month — HK$19.87 of face value, ~HK$7.95 of real cost — which sits
-inside the 1–3%-of-customer-revenue benchmark for loyalty programmes.
+**Coins carry two different numbers, and conflating them is the mistake to avoid.** The **book
+value** is 1 coin = HK$0.01 (`COINS_PER_HKD`) — what UO carries the outstanding liability at. The
+**shelf price** is set above it, by a markup that rises with what a reward actually costs to fulfil:
+100 coins/HK$ for zero-cost perks, 160 for margin-positive discount coupons, 200 for real
+merchandise (`MARKUP` in `src/data/rewards.js`). That markup is UO's margin and the only real lever
+on what the programme gives away — it cuts exposure by 37% versus pricing everything at book value.
+No coupon exceeds a third of the retail price of what it discounts, so every coupon redemption
+leaves the customer spending the balance and stays margin-positive.
 
 Rounds pay **1 to 35 coins**. The floor is deliberately a token amount: idling through three rounds
 pays 3 coins, so AFK farming earns nothing worth having, while a cap of 35 is reachable in all three
-games by playing well. The ladder runs from a 300-coin sticker pack (~5 days, free for UO to give)
-up to a 15,000-coin plush, with the blindbox at 800. Full derivation, per-game curves and the 30-day
-simulation are in [docs/REWARD-TABLE.md](docs/REWARD-TABLE.md); prices live in `src/data/rewards.js`
-and `BLINDBOX_COST` in `src/state/store.jsx`.
+games by playing well. The ladder runs from a 200-coin wallpaper pack (~3 days, free for UO to give)
+up to a 15,000-coin plush, with the blindbox at 800 — and **every tab has an entry reachable in
+3–36 days**, because a tab whose cheapest item is months away just reads as a wall.
+
+At 10,000 registered players the programme issues ~209,000 coins a day (80% of it from games, which
+is why the ticket cap is the control that matters) and costs roughly **HK$395/day — ~HK$144,000/year,
+or HK$14.43 per registered user** after breakage and ancillary margins. Full derivation, per-game
+curves, the markup schedule and the 30-day simulation are in
+[docs/REWARD-TABLE.md](docs/REWARD-TABLE.md); prices live in `src/data/rewards.js` and
+`BLINDBOX_COST` in `src/state/store.jsx`.
 
 Everything is stored locally in `localStorage`. There is no backend and no network calls, so the
 demo works offline.

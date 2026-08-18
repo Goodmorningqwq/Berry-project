@@ -74,11 +74,15 @@ Tickets are what bound the day, not the games:
 Measured over 30 days (`scratchpad/economy.mjs`, using the real check-in calendar and the weekly
 bonus ticket):
 
-| | Coins/month | Face value | True cost to UO (~40%) |
+| | Coins/month | Book value | Face value at shelf prices |
 | --- | --- | --- | --- |
-| Idling every round | 389 | HK$3.89 | ~HK$1.56 |
-| Typical daily player | **1,987** | HK$19.87 | **~HK$7.95** |
-| Skilled daily player | **3,585** | HK$35.85 | **~HK$14.34** |
+| Idling every round | 389 | HK$3.89 | ~HK$2.46 |
+| Typical daily player | **1,987** | HK$19.87 | **~HK$12.55** |
+| Skilled daily player | **3,585** | HK$35.85 | **~HK$22.65** |
+
+Book value is what UO accrues as liability; face value at shelf prices is what those coins actually
+buy once the store markup is applied. See [What the programme costs UO](#what-the-programme-costs-uo)
+for the difference and why it matters.
 
 **The floor is what makes AFK pointless.** Three idled rounds pay 3 coins — 100 days for the cheapest
 reward — so a bot or an idle tab earns essentially nothing while a player who actually engages earns
@@ -90,42 +94,119 @@ free blindbox instead.
 
 ---
 
-## What coins are worth: **100 coins = HK$1**
+## What coins are worth: book value vs shelf price
 
-One coin is one HK cent. Every catalogue price is **face value × 100**, so the whole economy is
-re-tuned by changing `COINS_PER_HKD`, not eleven separate numbers.
+**Two different numbers, and conflating them is the mistake to avoid.**
+
+- **Book value — 1 coin = HK$0.01** (`COINS_PER_HKD`). What UO carries the outstanding coin liability
+  at. This is the accounting number and the one the costing model below uses.
+- **Shelf price — set by UO, above book value.** The markup is UO's margin and the only real lever on
+  what the programme gives away. The app has never advertised an exchange rate and still doesn't; it
+  just shows prices.
 
 **Berry coins are not a rebate.** Airline miles are worth 1.2–1.6 US cents because they're earned by
 *spending* — they discount revenue already booked. Berry coins are earned by *playing*, so they're
-retention marketing spend, and two things make the rate affordable:
+retention marketing spend, which is why they're priced as marketing rather than as yield.
 
-1. **Rewards are ancillaries, where marginal cost sits far below face value.** Seat selection costs
-   UO nothing. A HK$20 discount on a ~60%-margin meal — partly driving purchases that wouldn't
-   otherwise happen — costs perhaps HK$6 in real terms. Call it ~40% blended.
-2. **The industry benchmark is 1–3% of customer revenue** on loyalty rewards. Against a customer
-   worth ~HK$3,000/year, even a *daily* player at ~HK$7.95/month lands at ~3% — and only a small
-   minority play daily, so the blended cost across all users sits comfortably inside the benchmark.
+### The markup schedule
 
-| Reward | Face | Price | Days of typical play |
-| --- | --- | --- | --- |
-| Berry sticker pack | HK$3 | **300** | ~5 |
-| Standard seat selection | HK$5 | **500** | ~8 |
-| HK$5 off an inflight snack | HK$5 | **500** | ~8 |
-| Blindbox | ~HK$8 | 800 | ~12 |
-| HK$20 off an inflight meal | HK$20 | 2,000 | ~30 |
-| Free inflight hot drink | HK$30 | 3,000 | ~45 |
-| HK$50 meal combo | HK$50 | 5,000 | ~75 |
-| Berry luggage tag | HK$60 | 6,000 | ~91 |
-| Front-row seat selection | HK$80 | 8,000 | ~121 |
-| Berry tote bag | HK$100 | 10,000 | ~151 |
-| 3kg extra baggage | HK$120 | 12,000 | ~181 |
-| Berry plush | HK$150 | 15,000 | ~226 |
+Markup rises with what a reward actually costs UO to fulfil (`MARKUP` in `src/data/rewards.js`):
 
-**The three cheap rungs are the point.** Without something reachable inside a week a new player sees
-nothing attainable and leaves. A digital sticker pack costs UO literally nothing and seat selection
-costs close to it, so the bottom of the ladder is nearly free to give away while doing the most work
-for retention. The long tail at the top is what a genuinely committed player aims at over a
-half-year — that's the habit the brief asks for.
+| Tier | Markup | Why |
+| --- | --- | --- |
+| **`free`** — zero-cost perks | **100 coins/HK$** | Nothing to fulfil, so priced at book value. These are the hook and are meant to be redeemed often. |
+| **`coupon`** — margin-positive discounts | **160 coins/HK$** | The customer still pays the balance on a ~60%-margin item, so UO nets money on a sale that often wouldn't have happened. |
+| **`merch`** — real merchandise | **200 coins/HK$** | Genuine COGS with no offsetting sale. Priced as the aspiration, not the expectation. |
+
+Each reward carries its own `tier`, deliberately separate from `kind` (the tab it appears under).
+Standard seat selection is a travel extra to the customer but costs UO nothing to give, so it sits in
+the Travel extras tab at the `free` rate. Collapsing the two would misprice it.
+
+**Discount cap:** no coupon exceeds roughly a third of the retail price of what it discounts, so
+every coupon redemption stays margin-positive. HK$5 off a HK$30 snack still has the customer spending
+HK$25.
+
+### The catalogue
+
+| Reward | Tier | Face | Price | Days of typical play |
+| --- | --- | --- | --- | --- |
+| Berry wallpaper pack | free | HK$2 | **200** | ~3 |
+| Berry sticker pack | free | HK$3 | **300** | ~5 |
+| Standard seat selection | free | HK$5 | **500** | ~8 |
+| Blindbox | — | ~HK$8 | 800 | ~12 |
+| HK$5 off an inflight snack | coupon | HK$5 | **800** | ~12 |
+| HK$10 off an inflight meal | coupon | HK$10 | **1,600** | ~24 |
+| Berry enamel pin badge | merch | HK$12 | **2,400** | ~36 |
+| HK$20 off a meal + drink combo | coupon | HK$20 | **3,200** | ~48 |
+| Berry luggage tag | merch | HK$40 | **8,000** | ~4 months |
+| Front-row seat selection | coupon | HK$50 | **8,000** | ~4 months |
+| Berry tote bag | merch | HK$55 | **11,000** | ~5.5 months |
+| 3kg extra baggage | coupon | HK$75 | **12,000** | ~6 months |
+| Berry plush | merch | HK$75 | **15,000** | ~7.5 months |
+
+**Every tab has a reachable entry** — 3, 12, 36 and 8 days respectively. That is the point of the
+shape: a tab whose cheapest item is months away reads as a wall, and a new player who sees nothing
+attainable leaves. The long tail at the top is what a genuinely committed player aims at over a
+half-year, which is the habit the brief asks for.
+
+---
+
+## What the programme costs UO
+
+Per daily player, over 30 days:
+
+| | Face value/month | True cost (~40%) |
+| --- | --- | --- |
+| At flat book value | HK$19.87 | HK$7.95 |
+| **At store markup** (~158 blended) | **HK$12.55** | **HK$5.02** |
+
+The markup cuts exposure by **37%**. Note that shrinking individual coupons would *not* have done
+this: while every price was face value × 100, exposure was fixed at earn rate ÷ 100 no matter what
+the catalogue contained. Only the markup moves it.
+
+### At 10,000 registered players
+
+Engagement figures are assumptions and are stated so they can be challenged. Coin rates are computed
+from the live constants by `scratchpad/economy.mjs`.
+
+| Segment | Share | Users | Active days/wk | Rounds/active day | Coins/day each |
+| --- | --- | --- | --- | --- | --- |
+| Daily | 15% | 1,500 | 7 | 3 | 65.5 |
+| Regular | 35% | 3,500 | 4 | 2 | 25.9 |
+| Lapsed | 50% | 5,000 | 1 | 1 | 4.0 |
+
+**Coins issued per day: ~208,700** — check-in ~42,100 (20%), games ~166,600 (80%). Games issue four
+times what check-in does, which is why the **ticket cap**, not the payout curve, is the control that
+actually bounds the programme.
+
+Assuming **25% breakage** (coins earned but never redeemed; loyalty programmes typically see 20–30%)
+and **true cost ≈ 40% of face**:
+
+| | Flat book value | With store markup |
+| --- | --- | --- |
+| Face issued/day | HK$2,087 | HK$1,318 |
+| — from check-in | HK$421 | HK$266 |
+| — from games | HK$1,666 | HK$1,052 |
+| After 25% breakage | HK$1,565 | HK$989 |
+| **True cost per day** | **~HK$626** | **~HK$395** |
+| Per month | ~HK$18,800 | ~HK$11,900 |
+| Per year | ~HK$228,500 | ~HK$144,300 |
+| Per registered user per year | HK$22.85 | **HK$14.43** |
+
+**The markup saves ~HK$231/day — about HK$84,000 a year at this size.**
+
+Against a customer worth ~HK$3,000/year, HK$14.43 is **0.5% of revenue**, comfortably inside the
+1–3% loyalty benchmark, and before counting any incremental ancillary sales the coupons trigger.
+
+**Worst case**, if all 10,000 were daily actives — which no programme achieves, but it bounds the
+risk: 655,000 coins/day, ~HK$1,242/day, **~HK$453,000/year**. Even fully saturated the programme
+costs under HK$0.5M a year.
+
+Three caveats worth carrying into the pitch, because they are what a finance reviewer will push on:
+the 25% breakage and the 15/35/50 engagement split are assumptions rather than measurements; and the
+40% true-cost figure is blended — merchandise runs 60–70% COGS while the wallpaper and sticker packs
+cost nothing, so the *mix* of what people actually redeem moves the total more than any single price
+does.
 
 ---
 
@@ -137,9 +218,10 @@ half-year — that's the habit the brief asks for.
 | Baggage Match payout | `src/games/BaggageMatch.jsx` — `const reward` |
 | Candy Rush payout | `src/games/CandyRush.jsx` — `const reward` |
 | Tickets per day / cap / streak bonus | `src/state/store.jsx` — `DAILY_TICKETS`, `TICKET_CAP`, `TICKET_STREAK_BONUS` |
-| Coin valuation | `src/state/store.jsx` — `COINS_PER_HKD` |
+| Coin book value | `src/state/store.jsx` — `COINS_PER_HKD` |
+| Store markup schedule | `src/data/rewards.js` — `MARKUP`, and each reward's `tier` |
 | Check-in calendar | `src/data/checkin.js` |
-| Redemption prices | `src/data/rewards.js` — each entry's `hkd`, with `cost = hkd × 100` |
+| Redemption prices | `src/data/rewards.js` — each entry's `hkd` × `MARKUP[tier]` |
 
 **In-flight:** all three games stay playable and unlimited, but pay **0 coins**, post no leaderboard
 score, and **consume no ticket** (so there is nothing to refund either) — everything waits until

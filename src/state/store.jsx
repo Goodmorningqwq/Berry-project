@@ -13,14 +13,17 @@ import { REGION_BADGES, TIERED_MEDALS, tierFor } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 6
+const SCHEMA_VERSION = 7
 
 /**
- * The coin's valuation. Berry coins are earned by playing, not spending, so
- * they're marketing spend rather than a rebate — priced at 1 coin = 1 HK cent,
- * which puts a daily player at roughly HK$21/month of face value and, after
- * ancillary margins, well inside the 1–3% of customer revenue that loyalty
- * programmes typically budget. Every price in data/rewards.js derives from it.
+ * The coin's **book value** — what UO carries the outstanding coin liability
+ * at, not a shelf price. Berry coins are earned by playing rather than
+ * spending, so they're marketing spend rather than a rebate, and 1 coin = 1 HK
+ * cent is the number the costing model uses.
+ *
+ * Store prices are set *above* this: see `MARKUP` in data/rewards.js, where the
+ * markup rises with what a reward actually costs UO to fulfil. Do not use this
+ * constant to predict a price — it no longer derives them.
  */
 export const COINS_PER_HKD = 100
 

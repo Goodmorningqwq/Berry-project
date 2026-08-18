@@ -159,11 +159,13 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
   unavoidable duplicate. Rarity-tiered reveal animation
 - **Odds disclosure screen** listing every rarity percentage, the items in each tier, the full
   check-in calendar and the feeding conversion. This mirrors real gacha disclosure obligations
-- **Redemption catalogue:** 11 rewards across quick wins, inflight meals, merchandise and travel
-  extras, priced 300–15,000 coins. Pricing is derived from a single valuation constant — **100 coins
-  = HK$1**, every price being face value × 100 — so the whole economy re-tunes from one number.
-  Redeeming issues a **voucher with a unique code**, redeemable from ticket purchase until online
-  check-in
+- **Redemption catalogue:** 12 rewards across quick wins, inflight meals, merchandise and travel
+  extras, priced 200–15,000 coins. Pricing separates the coin's **book value** (1 coin = HK$0.01,
+  the accounting liability) from its **shelf price**, which applies a markup rising with what a
+  reward actually costs to fulfil — 100 coins/HK$ for zero-cost perks, 160 for margin-positive
+  discount coupons, 200 for real merchandise. Every tab carries an entry reachable in 3–36 days of
+  typical play. Redeeming issues a **voucher with a unique code**, redeemable from ticket purchase
+  until online check-in
 
 ## 2.9 In-flight (offline) mode
 
