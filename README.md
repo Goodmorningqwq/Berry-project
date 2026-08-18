@@ -166,7 +166,8 @@ Rounds pay **1 to 35 coins**. The floor is deliberately a token amount: idling t
 pays 3 coins, so AFK farming earns nothing worth having, while a cap of 35 is reachable in all three
 games by playing well. The ladder runs from a 200-coin wallpaper pack (~3 days, free for UO to give)
 up to a 15,000-coin plush, with the blindbox at 800 — and **every tab has an entry reachable in
-3–36 days**, because a tab whose cheapest item is months away just reads as a wall.
+3–36 days**, six of them inside a fortnight, because a tab whose cheapest item is months away just
+reads as a wall.
 
 At 10,000 registered players the programme issues ~209,000 coins a day (80% of it from games, which
 is why the ticket cap is the control that matters) and costs roughly **HK$395/day — ~HK$144,000/year,

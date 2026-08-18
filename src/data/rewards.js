@@ -84,6 +84,16 @@ export const REWARDS = [
 
   /* ---- inflight meals: margin-positive discounts ---- */
   {
+    id: 'drink-3',
+    tier: 'coupon',
+    kind: 'meal',
+    name: 'HK$3 off an inflight drink',
+    detail: 'Coffee, tea, soft drinks — anything from the trolley',
+    hkd: 3,
+    cost: 480,
+    emoji: '☕'
+  },
+  {
     id: 'snack-5',
     tier: 'coupon',
     kind: 'meal',
@@ -94,24 +104,14 @@ export const REWARDS = [
     emoji: '🍪'
   },
   {
-    id: 'meal-10',
+    id: 'meal-5',
     tier: 'coupon',
     kind: 'meal',
-    name: 'HK$10 off an inflight meal',
+    name: 'HK$5 off an inflight meal',
     detail: 'Applies to any hot meal on your next UO flight',
-    hkd: 10,
-    cost: 1600,
+    hkd: 5,
+    cost: 800,
     emoji: '🍱'
-  },
-  {
-    id: 'combo-20',
-    tier: 'coupon',
-    kind: 'meal',
-    name: 'HK$20 off a meal + drink combo',
-    detail: 'Hot meal and a drink on your next UO flight',
-    hkd: 20,
-    cost: 3200,
-    emoji: '🍛'
   },
 
   /* ---- merchandise: real COGS, so this is the aspiration ---- */

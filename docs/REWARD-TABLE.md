@@ -132,20 +132,20 @@ HK$25.
 | --- | --- | --- | --- | --- |
 | Berry wallpaper pack | free | HK$2 | **200** | ~3 |
 | Berry sticker pack | free | HK$3 | **300** | ~5 |
+| HK$3 off an inflight drink | coupon | HK$3 | **480** | ~7 |
 | Standard seat selection | free | HK$5 | **500** | ~8 |
-| Blindbox | — | ~HK$8 | 800 | ~12 |
 | HK$5 off an inflight snack | coupon | HK$5 | **800** | ~12 |
-| HK$10 off an inflight meal | coupon | HK$10 | **1,600** | ~24 |
+| HK$5 off an inflight meal | coupon | HK$5 | **800** | ~12 |
+| Blindbox | — | ~HK$8 | 800 | ~12 |
 | Berry enamel pin badge | merch | HK$12 | **2,400** | ~36 |
-| HK$20 off a meal + drink combo | coupon | HK$20 | **3,200** | ~48 |
 | Berry luggage tag | merch | HK$40 | **8,000** | ~4 months |
 | Front-row seat selection | coupon | HK$50 | **8,000** | ~4 months |
 | Berry tote bag | merch | HK$55 | **11,000** | ~5.5 months |
 | 3kg extra baggage | coupon | HK$75 | **12,000** | ~6 months |
 | Berry plush | merch | HK$75 | **15,000** | ~7.5 months |
 
-**Every tab has a reachable entry** — 3, 12, 36 and 8 days respectively. That is the point of the
-shape: a tab whose cheapest item is months away reads as a wall, and a new player who sees nothing
+**Every tab has a reachable entry** — 3, 7, 36 and 8 days respectively, and six rewards sit inside a
+fortnight. That is the point of the shape: a tab whose cheapest item is months away reads as a wall, and a new player who sees nothing
 attainable leaves. The long tail at the top is what a genuinely committed player aims at over a
 half-year, which is the habit the brief asks for.
 
