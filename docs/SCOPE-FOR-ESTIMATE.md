@@ -131,9 +131,16 @@ ticket is taken on entry and **refunded if the player leaves without collecting*
 consecutive check-in grants a bonus ticket, capped at 5 held. Rounds pay **1–35 coins** by
 performance — a token floor that makes idling worthless, and a cap all three games can reach.
 
+Payout curves are **tuned against simulation, not intuition**: a harness replays each game's real
+logic for 20,000 rounds per game per skill level and reports the actual distribution. It found a
+flagship game paying 2.5 coins a round, a cap that was arithmetically unreachable, and an earn rate
+overstated by 46% — none of which was visible from reading the code.
+
 1. **Cloud Dash** — tap-to-fly obstacle avoidance, 40-second rounds, `requestAnimationFrame` physics
    loop, touch and mouse
-2. **Baggage Match** — 16-card memory match against a 60-second clock, payout scales with time left
+2. **Baggage Match** — 16-card memory match against a 45-second clock. Cards sit face-down as closed
+   suitcases and flip to reveal what is packed inside; payout scales with time left **and** moves
+   used, so memory counts rather than tapping speed
 3. **Candy Rush** — 7×7 match-3 with cascade resolution, a 20-move budget, combo multipliers,
    illegal-swap rejection and dead-board reshuffling
 
@@ -161,7 +168,7 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
   unavoidable duplicate. Rarity-tiered reveal animation
 - **Odds disclosure screen** listing every rarity percentage, the items in each tier, the full
   check-in calendar and the feeding conversion. This mirrors real gacha disclosure obligations
-- **Redemption catalogue:** 21 rewards across six tabs (Drinks, Snacks, Meals, Sweets, Berry,
+- **Redemption catalogue:** 22 rewards across six tabs (Drinks, Snacks, Meals, Sweets, Berry,
   Travel), priced against the **real HK Express inflight menu**. Pricing separates the coin's **book
   value** (1 coin = HK$0.01, the accounting liability) from its **shelf price**, which applies a
   markup rising with what a reward costs to fulfil — 100 coins/HK$ for zero-cost perks, 160 for

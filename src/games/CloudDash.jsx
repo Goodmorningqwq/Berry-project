@@ -16,7 +16,7 @@ const FLAP = -8.2
 const BERRY_SIZE = 46
 const BERRY_X = 62
 const OBSTACLE_W = 56
-const GAP = 168
+const GAP = 210
 const SPAWN_EVERY = 1500 // ms
 const BASE_SPEED = 2.9
 const ROUND_MS = 40000
@@ -165,8 +165,12 @@ export default function CloudDash({ equipped, offline, gameId, bestScore = 0, on
   }, [phase, size])
 
   // A floor of 1 rather than 0: doing nothing pays a token amount, so idling
-  // through a round is never worth a ticket. 35 cap still reached at 20 coins.
-  const reward = Math.min(35, 1 + Math.floor(frame.score * 1.7))
+  // through a round is never worth a ticket. Cap reached at 16 coins caught.
+  //
+  // Both this and GAP were retuned after simulating 20,000 rounds: at a 168px
+  // gap an average player earned 2.5 coins and hit the floor 37% of the time,
+  // which made the flagship game worthless. 210px and x2.2 puts it at ~10.
+  const reward = Math.min(35, 1 + Math.floor(frame.score * 2.2))
 
   return (
     <div className="game-shell">

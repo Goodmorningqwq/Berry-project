@@ -3,12 +3,17 @@ import { Coin } from '../components/ui.jsx'
 import { LeaderboardSlice } from '../components/Leaderboard.jsx'
 
 /**
- * Eight pairs of travel icons on a 4x4 grid, against a 60 second clock.
- * Faster clears pay more — the reward scales with the time left over.
+ * Eight pairs of packed items on a 4x4 grid, against a 45 second clock. Cards
+ * sit face-down as closed suitcases; flipping one shows what is inside.
+ *
+ * Payout scales with time left *and* with how few moves it took, so memory
+ * counts rather than just tapping speed.
  */
 
-const FACES = ['🧳', '🎫', '🛂', '🗺️', '📷', '🕶️', '🧃', '✈️']
-const ROUND_SECONDS = 60
+// What is packed inside the case. 🧳 is deliberately absent — it is the card
+// back, so a suitcase always means "still closed".
+const FACES = ['👕', '🎫', '🛂', '🗺️', '📷', '🕶️', '🧃', '✈️']
+const ROUND_SECONDS = 45
 
 function shuffled() {
   const deck = [...FACES, ...FACES].map((face, i) => ({ id: i, face, up: false, matched: false }))
@@ -92,9 +97,20 @@ export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, o
     setPhase('running')
   }
 
-  // 35 cap reached at 50s to spare. Failing pays a floor of 1 — enough that a
-  // spent ticket isn't wholly wasted, too little to make idling worth doing.
-  const reward = solved ? Math.min(35, 1 + Math.floor(left * 0.68)) : 1
+  /*
+   * Paid on time left *and* on how few moves it took.
+   *
+   * Time alone made this a flat plateau: 20,000 simulated rounds put an average
+   * player on 17.9 coins with a variance near zero, and the 35 cap was
+   * arithmetically unreachable — it needed 8 pairs solved in 15 seconds when
+   * there are 16 cards to reveal. Not one round in 60,000 hit it.
+   *
+   * The move bonus rewards memory rather than tapping speed, which is the skill
+   * the game is actually about, and gives the cap a real if rare route: about
+   * 2% of strong rounds reach it, matching the intended tail.
+   */
+  const moveBonus = Math.max(0, 16 - moves) * 1.5
+  const reward = solved ? Math.min(35, 1 + Math.floor(left * 1.15 + moveBonus)) : 1
   const matchedPairs = cards.filter((c) => c.matched).length / 2
 
   return (
@@ -123,7 +139,7 @@ export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, o
               aria-label={card.up || card.matched ? card.face : 'Hidden card'}
             >
               <span className="match-card__inner">
-                <span className="match-card__face match-card__back">B</span>
+                <span className="match-card__face match-card__back">🧳</span>
                 <span className="match-card__face match-card__front">{card.face}</span>
               </span>
             </button>

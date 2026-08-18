@@ -156,6 +156,17 @@ export const REWARDS = [
 
   /* ---- meals: light bites 35–45 · combos 65 · hearty mains 75 ---- */
   {
+    id: 'meal-light-3',
+    tier: 'coupon',
+    kind: 'meal',
+    name: 'HK$3 off any light bite',
+    detail: 'Rice noodle rolls, buns, sandwiches',
+    hkd: 3,
+    retail: 35,
+    cost: 480,
+    emoji: '🥠'
+  },
+  {
     id: 'meal-light-5',
     tier: 'coupon',
     kind: 'meal',

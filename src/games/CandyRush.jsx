@@ -17,6 +17,13 @@ const SIZE = 7
 const TILES = ['✈️', '🧳', '🎫', '☕', '🍪', '🧋']
 const MOVES = 20
 const BASE_POINTS = 10
+/**
+ * Runs of 4+ score extra. Simulation showed random play scoring within 9% of
+ * optimal play — the game was a slot machine wearing a puzzle's clothes,
+ * because any legal swap triggers cascades. Rewarding the bigger match roughly
+ * doubles what skill is worth.
+ */
+const BIG_MATCH_BONUS = 1.6
 
 const idx = (r, c) => r * SIZE + c
 const rowOf = (i) => Math.floor(i / SIZE)
@@ -158,8 +165,9 @@ export default function CandyRush({ offline, gameId, bestScore = 0, onExit, onFi
       }
 
       const multiplier = chain + 1
+      const bigBonus = matches.size >= 4 ? BIG_MATCH_BONUS : 1
       setCombo(multiplier)
-      setScore((s) => s + matches.size * BASE_POINTS * multiplier)
+      setScore((s) => s + Math.round(matches.size * BASE_POINTS * multiplier * bigBonus))
       setClearing(matches)
 
       later(() => {
@@ -226,8 +234,13 @@ export default function CandyRush({ offline, gameId, bestScore = 0, onExit, onFi
   }
 
   // A floor of 1 rather than 0: doing nothing pays a token amount, so idling
-  // through a round is never worth a ticket. 35 cap reached at ~2,400 points.
-  const reward = Math.min(35, 1 + Math.floor(score / 70))
+  // through a round is never worth a ticket. Cap reached at ~4,400 points.
+  //
+  // The divisor went 70 -> 130 after simulation showed this game paying ~20
+  // coins a round against Cloud Dash's 2.5. Since tickets let a player choose
+  // their game, the best-paying one sets the whole economy, so the three have
+  // to land near each other or one of them is simply the correct answer.
+  const reward = Math.min(35, 1 + Math.floor(score / 130))
 
   return (
     <div className="game-shell">

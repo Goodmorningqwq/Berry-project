@@ -19,11 +19,11 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 | --- | --- |
 | **Daily check-in** | A fixed 7-day calendar (see below), a celebration reveal, and the Pilot Berry look at 30 consecutive days. The reveal then previews what tomorrow pays |
 | **Feed Berry** | Treats from check-ins are fed to Berry; every 5 fed earns a free blindbox |
-| **Minigames** | Cloud Dash, Baggage Match and Candy Rush, entered with one of 3 daily play tickets |
+| **Minigames** | Cloud Dash, Baggage Match and Candy Rush, entered with one of 3 daily play tickets. Payouts tuned against 20,000 simulated rounds per game |
 | **Leaderboards** | A ranking per game, shown right after each round and on a Play tab |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
 | **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
-| **Redemption** | 21 rewards across six tabs, priced against the real UO inflight menu — onboard discounts, Berry merchandise and travel extras. Redeemable from ticket purchase until online check-in, capped at one outstanding voucher each |
+| **Redemption** | 22 rewards across six tabs, priced against the real UO inflight menu — onboard discounts, Berry merchandise and travel extras. Redeemable from ticket purchase until online check-in, capped at one outstanding voucher each |
 
 ### Berry's wardrobe
 
@@ -189,16 +189,27 @@ coupons can't be banked and dumped on a single flight — the reward card reads 
 the voucher to mark it used. Marking a voucher used deliberately works **in flight**, since onboard
 is exactly where a coupon gets spent; only issuing new ones is frozen.
 
-Rounds pay **1 to 35 coins**. The floor is deliberately a token amount: idling through three rounds
-pays 3 coins, so AFK farming earns nothing worth having, while a cap of 35 is reachable in all three
-games by playing well. The shop runs 21 rewards across six tabs — Drinks, Snacks, Meals, Sweets,
-Berry and Travel — and **every tab opens on something reachable in 3–12 days**, because a tab whose
-cheapest item is months away just reads as a wall.
+Rounds pay **1 to 35 coins**, and what they *actually* pay is measured rather than assumed.
+`scratchpad/payout-dist.mjs` replays each game's real logic — Cloud Dash's physics loop, Baggage
+Match's deck and clock, Candy Rush's board and cascades — for **20,000 rounds per game per skill
+level**. That found three defects reading the code never would: Cloud Dash paid an average player
+**2.5 coins** and hit the floor 37% of rounds, Baggage Match's 35 cap was **mathematically
+unreachable** (it needed 8 pairs in 15 seconds), and Candy Rush was a slot machine where random play
+scored within 8% of optimal. The economy had been assuming 17.7 coins a round against a measured
+10.4.
 
-At 10,000 registered players the programme issues ~209,000 coins a day (80% of it from games, which
-is why the ticket cap is the control that matters) and costs roughly **HK$379/day — ~HK$138,000/year,
-or HK$13.85 per registered user** after breakage — 12% below what the same catalogue cost with free
-items in it. Full derivation, per-game curves, the markup schedule and the costing model are in
+All three were retuned — a wider gap for Cloud Dash, a tighter clock plus a move bonus for Baggage
+Match, a higher divisor and a big-match bonus for Candy Rush — bringing the blend to **12.1 coins a
+round** and narrowing the spread between best and worst game from 8× to 2.5×. That matters because
+tickets let a player *choose* their game, so the best-paying one sets the whole economy.
+
+The floor keeps AFK pointless: three idled rounds pay 3 coins. The shop runs 22 rewards across six
+tabs — Drinks, Snacks, Meals, Sweets, Berry and Travel — and **every tab opens on something reachable
+in about 10 days**, because a tab whose cheapest item is months away just reads as a wall.
+
+At 10,000 registered players the programme issues ~156,000 coins a day (73% of it from games, which
+is why the ticket cap is the control that matters) and costs roughly **HK$284/day — ~HK$104,000/year,
+or HK$10.36 per registered user** after breakage. Full derivation, per-game curves, the markup schedule and the costing model are in
 [docs/REWARD-TABLE.md](docs/REWARD-TABLE.md).
 
 Everything is stored locally in `localStorage`. There is no backend and no network calls, so the

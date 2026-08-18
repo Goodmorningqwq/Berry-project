@@ -1,6 +1,7 @@
 # Minigame Reward Table
 
-Berry coin payouts for all three minigames, taken from the live formulas.
+Berry coin payouts for all three minigames, taken from the live formulas and **measured by
+simulation**, not assumed.
 
 **Entry is by ticket.** Everyone gets **3 play tickets a day** (`DAILY_TICKETS` in
 `src/state/store.jsx`), spendable on whichever games they like — three rounds of one game, or one of
@@ -10,87 +11,79 @@ without collecting hands it straight back**: you only pay for a round you take t
 
 Every game pays a **floor of 1 coin** and caps at **35**. The floor is deliberately a token amount —
 enough that a round is never literally worthless, small enough that **idling through a round is never
-worth a ticket**. All three caps are genuinely reachable.
+worth a ticket**.
 
-| Game | Score metric | Formula | Cap reached at | Round length |
+| Game | Score metric | Formula | Cap reached at | Round |
 | --- | --- | --- | --- | --- |
-| Cloud Dash | coins caught in the air | `min(35, 1 + ⌊coins × 1.7⌋)` | 20 coins | 40 seconds |
-| Baggage Match | seconds left on the clock | `solved ? min(35, 1 + ⌊left × 0.68⌋) : 1` | 50s to spare | 60 seconds |
-| Candy Rush | points scored | `min(35, 1 + ⌊points ÷ 70⌋)` | ~2,400 points | 20 moves |
+| Cloud Dash | coins caught in the air | `min(35, 1 + ⌊coins × 2.2⌋)` | 16 coins | 40 seconds |
+| Baggage Match | seconds left **and** moves used | `solved ? min(35, 1 + ⌊left × 1.15 + (16−moves) × 1.5⌋) : 1` | ~26s left in 11 moves | 45 seconds |
+| Candy Rush | points scored | `min(35, 1 + ⌊points ÷ 130⌋)` | ~4,420 points | 20 moves |
 
 ---
 
-## Cloud Dash
+## How these were set: simulation, not guesswork
 
-Tap to fly, dodge clouds, collect coins. Each coin caught is worth 1.7 berry coins.
+`scratchpad/payout-dist.mjs` replays each game's real logic — Cloud Dash's physics loop, Baggage
+Match's deck and clock, Candy Rush's board, cascades and refills — **20,000 rounds per game per skill
+level**, driven by three player models. Only the player model is invented; every constant and formula
+is copied from the game files.
 
-| Coins caught | 0 | 2 | 4 | 6 | 8 | 12 | 16 | **20+** |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Payout** | **1** | 4 | 7 | 11 | 14 | 21 | 28 | **35** |
+That measurement found three defects that no amount of reading the code had surfaced:
 
-Highest variance of the three — one bad cloud ends the round near the floor.
+| Defect | Evidence |
+| --- | --- |
+| **Cloud Dash barely paid** | An average player earned **2.5 coins** and hit the 1-coin floor **37%** of rounds. The flagship game was nearly worthless. |
+| **Baggage Match's cap was unreachable** | 35 needed 8 pairs solved in 15 seconds with 16 cards to reveal. **0 hits in 60,000 rounds**; the true ceiling was ~26. The docs claimed all three caps were reachable — they were wrong. |
+| **Candy Rush was a slot machine** | Random play scored **19.5** against optimal play's **21.0**. Skill was worth 8%, and it was the biggest earner, so the game where play barely mattered set the shape of the whole economy. |
 
-## Baggage Match
+And the economy had been assuming **17.7 coins per round** when the measured population figure was
+**10.4** — a 70% overstatement flowing into every reward price and cost projection.
 
-Match 8 pairs against a 60-second clock. Paid on the time you have left, so a faster clear pays more.
+### What changed
 
-| Seconds left | unsolved | 0 | 10 | 20 | 30 | 40 | **50+** |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| **Payout** | **1** | 1 | 7 | 14 | 21 | 28 | **35** |
+- **Cloud Dash** — obstacle gap widened **168 → 210px** and the multiplier raised **1.7 → 2.2**. The
+  gap was the real fix; the multiplier alone would have paid more for a game you still could not
+  play.
+- **Baggage Match** — clock tightened **60 → 45s**, and payout now counts **moves as well as time**.
+  Time alone made it a flat plateau with near-zero variance; the move bonus rewards memory, which is
+  the skill the game is actually about, and gives the cap a real if rare route.
+- **Candy Rush** — divisor **70 → 130**, plus a **×1.6 bonus on runs of 4+**. Since tickets let a
+  player choose their game, the best-paying game sets the whole economy, so the three have to land
+  near each other or one of them is simply the correct answer.
 
-Failing pays the floor of 1 rather than nothing, and the "out of time" card carries a Collect button
-so it is claimable — but at 1 coin it is a consolation, not an income.
+### What they pay now
 
-This is the steadiest earner, because solving the board is the most reliable outcome of the three.
+Average player, 20,000 rounds each:
 
-## Candy Rush
+| Game | Before | After | Floor rate | Notes |
+| --- | --- | --- | --- | --- |
+| Cloud Dash | 2.5 | **6.5** | 37% → **21%** | High variance by design — weak rounds end early, strong rounds cap |
+| Baggage Match | 17.9 | **16.1** | 0% → 0.1% | Now has real spread instead of a plateau |
+| Candy Rush | 20.3 | **13.4** | 0% | Skill now worth ~16% instead of 8% |
 
-7×7 match-3 with a 20-move budget. Cascades multiply, so chains are where the points are.
-
-| Points | 0 | 400 | 800 | 1,200 | 1,600 | 2,000 | **2,380+** |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| **Payout** | **1** | 6 | 12 | 18 | 23 | 29 | **35** |
-
-Typical rounds in testing scored 600–1,300, paying 9–19.
+**Population blend (30% weak / 50% average / 20% strong): 12.1 coins per round.** The spread between
+the best and worst game for an average player fell from **8×** to **2.5×**.
 
 ---
 
 ## What a day is worth
 
-| | Cloud Dash | Baggage Match | Candy Rush |
-| --- | --- | --- | --- |
-| Floor (idled) | 1 | 1 | 1 |
-| Typical round | ~14 (8 coins) | ~24 (35s left) | ~15 (1,000 pts) |
-| Best possible | 35 | 35 | 35 |
-
-Tickets are what bound the day, not the games:
-
 | | Per round | × 3 tickets | + check-in | **Day total** |
 | --- | --- | --- | --- | --- |
 | Idled | 1 | 3 | ~10 | **~13** |
-| Typical | ~18 | 54 | ~10 | **~64** |
+| Measured blend | ~12 | 36 | ~10 | **~47** |
 | Skilled | 35 | 105 | ~10 | **~115** |
 
-Measured over 30 days (`scratchpad/economy.mjs`, using the real check-in calendar and the weekly
-bonus ticket):
+Over 30 days that is **~1,420 coins**, or **47/day** — the figure every price in the catalogue is
+now checked against.
 
-| | Coins/month | Book value | Face value at shelf prices |
-| --- | --- | --- | --- |
-| Idling every round | 389 | HK$3.89 | ~HK$2.46 |
-| Typical daily player | **1,987** | HK$19.87 | **~HK$12.55** |
-| Skilled daily player | **3,585** | HK$35.85 | **~HK$22.65** |
+**The floor is what makes AFK pointless.** Three idled rounds pay 3 coins — around 160 days for the
+cheapest reward — so a bot or an idle tab earns essentially nothing while a player who engages earns
+in days.
 
-Book value is what UO accrues as liability; face value at shelf prices is what those coins actually
-buy once the store markup is applied. See [What the programme costs UO](#what-the-programme-costs-uo)
-for the difference and why it matters.
-
-**The floor is what makes AFK pointless.** Three idled rounds pay 3 coins — 100 days for the cheapest
-reward — so a bot or an idle tab earns essentially nothing while a player who actually engages earns
-in days. The gap between idling and playing is the whole point of the curve.
-
-The daily check-in alone pays 70 coins a week (`WEEKLY_COINS`), or ~300/month. Completing a flight
-pays a separate **50 coins**, and feeding Berry pays no coins at all — every 5 treats fed earns a
-free blindbox instead.
+The daily check-in alone pays 70 coins a week (`WEEKLY_COINS`), or ~300/month, and is now **27%** of
+all coins issued rather than 20%. Completing a flight pays a separate **50 coins**, and feeding Berry
+pays no coins at all — every 5 treats fed earns a free blindbox instead.
 
 ---
 
@@ -205,43 +198,45 @@ the same reward, so nobody banks ten drink coupons and uses them all on one flig
 voucher marks it used and frees the slot. That works in flight (onboard is where a coupon is spent);
 only *issuing* new vouchers is frozen offline.
 
-### The catalogue — 21 rewards, six tabs
+### The catalogue — 22 rewards, six tabs
 
 | Reward | Tier | Face | Price | Days |
 | --- | --- | --- | --- | --- |
 | **Drinks** | | | | |
-| HK$3 off any drink | coupon | HK$3 | **480** | ~7 |
-| HK$5 off any drink | coupon | HK$5 | **750** | ~11 |
-| HK$10 off any Signature Drink ⭐ | coupon | HK$10 | **1,300** | ~20 |
+| HK$3 off any drink | coupon | HK$3 | **480** | ~10 |
+| HK$5 off any drink | coupon | HK$5 | **750** | ~16 |
+| HK$10 off any Signature Drink ⭐ | coupon | HK$10 | **1,300** | ~27 |
 | **Snacks** | | | | |
-| HK$3 off any snack | coupon | HK$3 | **480** | ~7 |
-| HK$5 off any snack | coupon | HK$5 | **750** | ~11 |
-| HK$8 off any cup noodles ⭐ | coupon | HK$8 | **1,120** | ~17 |
+| HK$3 off any snack | coupon | HK$3 | **480** | ~10 |
+| HK$5 off any snack | coupon | HK$5 | **750** | ~16 |
+| HK$8 off any cup noodles ⭐ | coupon | HK$8 | **1,120** | ~24 |
 | **Meals** | | | | |
-| HK$5 off any light bite | coupon | HK$5 | **750** | ~11 |
-| HK$8 off any hot meal | coupon | HK$8 | **1,120** | ~17 |
-| HK$10 off any Hearty Bites main ⭐ | coupon | HK$10 | **1,300** | ~20 |
+| HK$3 off any light bite | coupon | HK$3 | **480** | ~10 |
+| HK$5 off any light bite | coupon | HK$5 | **750** | ~16 |
+| HK$8 off any hot meal | coupon | HK$8 | **1,120** | ~24 |
+| HK$10 off any Hearty Bites main ⭐ | coupon | HK$10 | **1,300** | ~27 |
 | **Sweets** | | | | |
-| HK$3 off any dessert | coupon | HK$3 | **480** | ~7 |
-| HK$5 off any dessert | coupon | HK$5 | **750** | ~11 |
-| HK$8 off an ice cream cup ⭐ | coupon | HK$8 | **1,120** | ~17 |
+| HK$3 off any dessert | coupon | HK$3 | **480** | ~10 |
+| HK$5 off any dessert | coupon | HK$5 | **750** | ~16 |
+| HK$8 off an ice cream cup ⭐ | coupon | HK$8 | **1,120** | ~24 |
 | **Berry** | | | | |
-| Berry wallpaper pack | free | HK$2 | 200 | ~3 |
-| Berry sticker pack | free | HK$3 | 300 | ~5 |
-| Berry enamel pin badge | merch | HK$12 | 2,400 | ~36 |
-| Berry luggage tag | merch | HK$40 | 8,000 | ~4 months |
-| Berry tote bag | merch | HK$55 | 11,000 | ~5.5 months |
-| Berry plush | merch | HK$75 | 15,000 | ~7.5 months |
+| Berry wallpaper pack | free | HK$2 | 200 | ~4 |
+| Berry sticker pack | free | HK$3 | 300 | ~6 |
+| Berry enamel pin badge | merch | HK$12 | 2,400 | ~51 |
+| Berry luggage tag | merch | HK$40 | 8,000 | ~5.6 months |
+| Berry tote bag | merch | HK$55 | 11,000 | ~7.7 months |
+| Berry plush | merch | HK$75 | 15,000 | ~10.5 months |
 | **Travel** | | | | |
-| Standard seat selection | free | HK$5 | 500 | ~8 |
-| Front-row seat selection | coupon | HK$50 | 8,000 | ~4 months |
-| 3kg extra baggage | coupon | HK$75 | 12,000 | ~6 months |
+| Standard seat selection | free | HK$5 | 500 | ~11 |
+| Front-row seat selection | coupon | HK$50 | 8,000 | ~5.6 months |
+| 3kg extra baggage | coupon | HK$75 | 12,000 | ~8.4 months |
 
 Plus the blindbox at **800**.
 
 ⭐ marks the rung flagged **Best value** in the app.
 
-**Every tab opens on something reachable inside two weeks** — 7, 7, 11, 7, 3 and 8 days. That is the
+**Every tab opens on something reachable inside two weeks** — 10, 10, 10, 10, 4 and 11 days, at the
+measured earn rate of 47 coins a day. That is the
 property this catalogue exists to hold, and it is asserted in `scratchpad/economy.mjs` rather than
 eyeballed: an earlier revision failed it on two tabs.
 
@@ -270,31 +265,32 @@ from the live constants by `scratchpad/economy.mjs`.
 | Regular | 35% | 3,500 | 4 | 2 |
 | Lapsed | 50% | 5,000 | 1 | 1 |
 
-**Coins issued per day: ~208,700** — check-in ~42,100 (20%), games ~166,600 (80%). Games issue four
-times what check-in does, which is why the **ticket cap**, not the payout curve, is the control that
-actually bounds the programme.
+**Coins issued per day: ~156,200** — check-in ~42,100 (27%), games ~114,100 (73%). Games still issue
+nearly three times what check-in does, which is why the **ticket cap**, not the payout curve, is the
+control that actually bounds the programme.
 
 Assuming **25% breakage** (coins earned but never redeemed; loyalty programmes typically see 20–30%):
 
 | | |
 | --- | --- |
-| Coins redeemed/day | ~156,500 |
-| **True cost per day** | **~HK$379** |
+| Coins redeemed/day | ~117,200 |
+| **True cost per day** | **~HK$284** |
 | — from check-in | ~HK$77 |
-| — from games | ~HK$303 |
-| Per month | ~HK$11,400 |
-| Per year | ~HK$138,500 |
-| Per registered user per year | **HK$13.85** |
+| — from games | ~HK$207 |
+| Per month | ~HK$8,500 |
+| Per year | ~HK$103,600 |
+| Per registered user per year | **HK$10.36** |
 
-**Down 12% on the free-item catalogue's ~HK$429/day.** Dropping free items saved about HK$26,000 a
-year; the volume curve then spends about HK$8,000 of that back to buy the incentive to climb the
-ladder, which is a trade worth making.
+**Down 34% on the ~HK$429/day the free-item catalogue cost.** Three things moved it: dropping free
+items (−17%), the volume curve spending some of that back to buy the incentive to climb the ladder
+(+6%), and the games rebalance correcting a 46% overstatement in the assumed earn rate (−25%). The
+last of those is not a saving so much as an error being removed.
 
-Against a customer worth ~HK$3,000/year, HK$13.85 is **0.5% of revenue**, comfortably inside the 1–3%
+Against a customer worth ~HK$3,000/year, HK$10.36 is **0.35% of revenue**, comfortably inside the 1–3%
 loyalty benchmark, and before counting any incremental ancillary sales the coupons trigger.
 
 **Worst case**, if all 10,000 were daily actives — which no programme achieves, but it bounds the
-risk: **~HK$1,191/day, ~HK$435,000/year**.
+risk: **~HK$873/day, ~HK$319,000/year**.
 
 Two caveats worth carrying into the pitch, because they are what a finance reviewer will push on: the
 25% breakage and the 15/35/50 engagement split are assumptions rather than measurements; and the
@@ -317,7 +313,8 @@ people actually redeem moves the total more than any single price does.
 | Real menu prices | `src/data/rewards.js` — each reward's `retail`; refresh when UO reissues the menu |
 | Onboard discount cap | `src/data/rewards.js` — `MAX_DISCOUNT_HKD` |
 | Check-in calendar | `src/data/checkin.js` |
-| Redemption prices | `src/data/rewards.js` — `priceOf()`: `hkd` × `MARKUP[tier]` |
+| Redemption prices | `src/data/rewards.js` — `priceOf()` |
+| Measured payout distribution | `scratchpad/payout-dist.mjs` — 20,000 rounds per game per skill level |
 
 **In-flight:** all three games stay playable and unlimited, but pay **0 coins**, post no leaderboard
 score, and **consume no ticket** (so there is nothing to refund either) — everything waits until
