@@ -193,6 +193,34 @@ fewer, later redemptions.
 `scratchpad/economy.mjs` asserts the curve is genuinely monotonic per tab and that exactly one rung
 per tab carries the badge, so a future edit can't flatten it back by accident.
 
+### Expiry — six months, both
+
+| | Window | Counted from |
+| --- | --- | --- |
+| **Berry coins** | 180 days | The last time you earned or spent any. Activity pushes it back a full six months. |
+| **Vouchers** | 180 days | The day it was issued, shown on the voucher itself. |
+
+Coins expire on **inactivity**, not per batch: the whole balance carries one date, which is how
+airline miles work and keeps the balance a single number instead of a ledger of dated lots. Simply
+opening the app is not enough — you have to earn or spend something, which is the standard
+definition and the one that makes the rule defensible.
+
+`lifetimeCoins` is untouched when a balance lapses, so the Coin Earner medal is never retroactively
+taken away.
+
+**An expired voucher frees its slot.** Without that, the one-outstanding cap below would turn into a
+trap: letting a coupon lapse would lock that reward out permanently. Expiry has to release it, and
+`holdsVoucher()` ignores expired vouchers for exactly this reason.
+
+**Why it exists.** At six months of inactivity this rarely fires for anyone who opens the app, so it
+is not really a retention lever — the honest argument is liability hygiene. An unbounded coin balance
+is an unbounded liability UO could never write off, and a coupon with no end date can be redeemed
+against a menu and a cost base that have both moved on. That is why real programmes have the rule.
+
+Expiry is applied by a lazy sweep on load and whenever the clock moves, since time passes while the
+app is closed. It is deliberately **not** gated by in-flight mode — expiry is the passage of time,
+not an economic action, and it only ever removes value.
+
 **Holding cap — one outstanding voucher per reward.** An unused voucher blocks redeeming another of
 the same reward, so nobody banks ten drink coupons and uses them all on one flight. Tapping a
 voucher marks it used and frees the slot. That works in flight (onboard is where a coupon is spent);
@@ -312,6 +340,7 @@ people actually redeem moves the total more than any single price does.
 | Volume curve on the ladders | `src/data/rewards.js` — `VOLUME_MARKUP`, plus `bestValue` on the top rung |
 | Real menu prices | `src/data/rewards.js` — each reward's `retail`; refresh when UO reissues the menu |
 | Onboard discount cap | `src/data/rewards.js` — `MAX_DISCOUNT_HKD` |
+| Expiry windows | `src/state/store.jsx` — `COIN_EXPIRY_DAYS`, `VOUCHER_EXPIRY_DAYS`, `EXPIRY_WARN_DAYS` |
 | Check-in calendar | `src/data/checkin.js` |
 | Redemption prices | `src/data/rewards.js` — `priceOf()` |
 | Measured payout distribution | `scratchpad/payout-dist.mjs` — 20,000 rounds per game per skill level |

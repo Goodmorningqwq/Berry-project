@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useStore, BLINDBOX_COST, holdsVoucher } from '../state/store.jsx'
+import { useStore, BLINDBOX_COST, holdsVoucher, coinsExpiring, voucherLive } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
 import Celebration from '../components/Celebration.jsx'
@@ -45,7 +45,7 @@ function Reveal({ pull, onClose }) {
 }
 
 export default function ShopScreen() {
-  const { state, dispatch, offline } = useStore()
+  const { state, dispatch, offline, today } = useStore()
   const toast = useToast()
   const [shaking, setShaking] = useState(false)
   const [kind, setKind] = useState(REWARD_KINDS[0].id)
@@ -53,6 +53,7 @@ export default function ShopScreen() {
 
   const free = state.blindboxTickets > 0
   const canOpen = (free || state.coins >= BLINDBOX_COST) && !offline
+  const expiry = coinsExpiring(state)
 
   const openBox = () => {
     if (!canOpen || shaking) return
@@ -142,6 +143,15 @@ export default function ShopScreen() {
       <OddsSheet open={oddsOpen} onClose={() => setOddsOpen(false)} />
 
       <h3 className="section-title">Redeem your coins</h3>
+      {expiry && (
+        <p className={`expiry-note ${expiry.soon ? 'expiry-note--soon' : ''}`}>
+          {expiry.soon ? '⌛' : '🗓'} {state.coins.toLocaleString()} coins expire{' '}
+          {prettyDate(expiry.on)}
+          {expiry.soon && ` — ${expiry.days} day${expiry.days === 1 ? '' : 's'} left`}
+          {'. '}
+          Earning or spending any coins pushes this back six months.
+        </p>
+      )}
       <p className="tiny" style={{ marginTop: -4 }}>
         {offline
           ? '✈️ Vouchers are issued by UO, so redeeming needs a connection. Codes you already hold still work onboard.'
@@ -201,12 +211,16 @@ export default function ShopScreen() {
         <div>
           {state.vouchers.map((v) => {
             const reward = REWARDS_BY_ID[v.rewardId]
+            // Expired and used both mean "spent" to the UI, but they say so
+            // differently — one is your doing, the other is the clock's.
+            const live = voucherLive(v, today)
+            const expired = !live && !v.used
             return (
               <button
-                className={`voucher ${v.used ? 'voucher--used' : ''}`}
+                className={`voucher ${v.used ? 'voucher--used' : ''} ${expired ? 'voucher--expired' : ''}`}
                 key={v.id}
                 onClick={() => useVoucher(v, reward)}
-                disabled={v.used}
+                disabled={!live}
               >
                 <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 600 }}>
                   {reward.emoji} {reward.name}
@@ -215,9 +229,14 @@ export default function ShopScreen() {
                 <div style={{ fontSize: 10.5, opacity: 0.75, marginTop: 4 }}>
                   {v.used
                     ? `Used ${prettyDate(v.usedAt ?? v.issuedAt)}`
-                    : `Issued ${prettyDate(v.issuedAt)} · tap when you use it onboard`}
+                    : expired
+                      ? `Expired ${v.expiresAt ? prettyDate(v.expiresAt) : ""}`
+                      : v.expiresAt
+                        ? `Valid until ${prettyDate(v.expiresAt)} · tap when you use it onboard`
+                        : `Issued ${prettyDate(v.issuedAt)} · tap when you use it onboard`}
                 </div>
                 {v.used && <span className="voucher__stamp">Used</span>}
+                {expired && <span className="voucher__stamp">Expired</span>}
               </button>
             )
           })}

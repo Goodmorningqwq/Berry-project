@@ -78,6 +78,14 @@ export default function DemoPanel() {
               ⏩ Skip a week
               <small>Breaks the streak — shows the reset</small>
             </button>
+            <button className="demo-btn" onClick={() => advance(152)}>
+              🗓 Skip 5 months
+              <small>Coins about to expire — shows the warning</small>
+            </button>
+            <button className="demo-btn" onClick={() => advance(183)}>
+              ⌛ Skip 6 months
+              <small>Coins and vouchers expire live</small>
+            </button>
             <button className="demo-btn" onClick={primeMilestone}>
               🔥 Day {MILESTONE_DAYS - 1} streak
               <small>Check in to land the 30-day reward</small>

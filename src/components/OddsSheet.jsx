@@ -1,6 +1,8 @@
 import {
   BLINDBOX_COST,
   DAILY_TICKETS,
+  COIN_EXPIRY_DAYS,
+  VOUCHER_EXPIRY_DAYS,
   FEEDS_PER_TICKET,
   MILESTONE_DAYS,
   RARITY_ODDS,
@@ -129,6 +131,30 @@ export default function OddsSheet({ open, onClose }) {
         <p className="tiny">
           Every {TICKET_STREAK_BONUS} check-ins in a row earns a bonus ticket. You can hold up to{' '}
           {TICKET_CAP} at once.
+        </p>
+      </div>
+
+      <h4 className="section-title">
+        Expiry <small>six months</small>
+      </h4>
+      <div className="odds-row">
+        <div className="odds-row__head">
+          <span>🪙 Berry coins</span>
+          <b>{COIN_EXPIRY_DAYS} days</b>
+        </div>
+        <p className="tiny">
+          Your balance lapses after {COIN_EXPIRY_DAYS} days with no earning or spending. Any coins in
+          or out pushes the date back a full six months, so an active account never loses anything.
+        </p>
+      </div>
+      <div className="odds-row">
+        <div className="odds-row__head">
+          <span>🎟️ Vouchers</span>
+          <b>{VOUCHER_EXPIRY_DAYS} days</b>
+        </div>
+        <p className="tiny">
+          Counted from the day it's issued, and shown on the voucher. An expired voucher frees its
+          slot, so you can always redeem that reward again.
         </p>
       </div>
 

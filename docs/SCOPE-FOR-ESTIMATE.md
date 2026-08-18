@@ -180,7 +180,22 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
   voucher per reward** — an unused voucher blocks a second of the same kind until it is marked used,
   so coupons cannot be stockpiled
 
-## 2.9 In-flight (offline) mode
+## 2.9 Expiry
+
+- **Berry coins** lapse after **180 days without earning or spending**. The balance carries a single
+  rolling date rather than per-batch lots, so any activity pushes it back a full six months. Lifetime
+  earnings are unaffected, so medals are never retroactively demoted
+- **Vouchers** expire **180 days from issue**, with the date shown on the voucher
+- An expired voucher **releases the one-outstanding slot**, so expiry can never permanently lock a
+  reward out
+- Applied as a lazy sweep on load and whenever the clock moves, since time passes while the app is
+  closed. Deliberately not gated by offline mode — expiry is the passage of time, not an economic
+  action, and only ever removes value
+- Both windows are disclosed in the in-app odds sheet alongside the drop rates and ticket rules
+- **Why:** unbounded balances are an unbounded liability that can never be written off, and undated
+  coupons get redeemed against a menu and cost base that have moved on
+
+## 2.10 In-flight (offline) mode
 
 Models the aircraft cabin, and is the core anti-abuse design:
 
@@ -193,7 +208,7 @@ Models the aircraft cabin, and is the core anti-abuse design:
   rewards by disabling the network
 - Enforcement is a single gate covering all value-moving operations, not per-screen checks
 
-## 2.10 Demonstration tooling (PoC only)
+## 2.11 Demonstration tooling (PoC only)
 
 A presenter panel with a virtual clock (advance a day, skip a week, jump to a 29-day streak),
 simulate a flight to any destination, grant currency or treats, toggle in-flight mode, and reset.

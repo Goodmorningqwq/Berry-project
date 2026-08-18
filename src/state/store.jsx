@@ -13,7 +13,7 @@ import { REGION_BADGES, TIERED_MEDALS, tierFor } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 10
+const SCHEMA_VERSION = 11
 
 /**
  * The coin's **book value** — what UO carries the outstanding coin liability
@@ -41,6 +41,23 @@ export const TICKET_STREAK_BONUS = 7
  * converting an item back into money.
  */
 export const FEEDS_PER_TICKET = 5
+
+/**
+ * Expiry, six months for both.
+ *
+ * Coins expire on **inactivity** rather than per-batch: the whole balance
+ * carries one date, and any earning or spending pushes it out again. That is
+ * how airline miles actually work, and it keeps the balance a single number
+ * instead of a ledger of dated lots.
+ *
+ * The real argument for it is not retention — at six months of inactivity it
+ * rarely fires for anyone who opens the app — it is that an unbounded coin
+ * balance is an unbounded liability UO could never write off.
+ */
+export const COIN_EXPIRY_DAYS = 180
+export const VOUCHER_EXPIRY_DAYS = 180
+/** How close to the end before the app starts warning about it. */
+export const EXPIRY_WARN_DAYS = 30
 
 /** Days without feeding before Berry looks glum. Nothing is ever deducted. */
 export const HUNGRY_AFTER_DAYS = 2
@@ -105,6 +122,10 @@ function initialState() {
     bestScores: {},
     coins: 0,
     lifetimeCoins: 0,
+    /** When the whole balance lapses. Null while there is nothing to lose. */
+    coinsExpireOn: null,
+    /** Set by SWEEP_EXPIRY so App can announce it, then cleared. */
+    lastExpiry: null,
     streak: 0,
     bestStreak: 0,
     lastCheckIn: null,
@@ -135,13 +156,38 @@ function initialState() {
 /** In-flight if the presenter says so, or if the device genuinely has no network. */
 export const isOffline = (state) => state.demoOffline || !state.networkOnline
 
+/** A voucher still worth something: neither used nor past its date. */
+export const voucherLive = (v, today) => !v.used && !(v.expiresAt && today > v.expiresAt)
+
 /**
- * Whether an unused voucher for this reward is already in hand. Redemption is
+ * Whether a *live* voucher for this reward is already in hand. Redemption is
  * capped at one outstanding voucher each, so a player can't bank ten drink
  * coupons and use them all on one flight.
+ *
+ * Expired vouchers deliberately don't count. If they did, letting one lapse
+ * would lock that reward out forever — the cap would become a trap rather than
+ * an anti-stockpiling rule.
  */
 export const holdsVoucher = (state, rewardId) =>
-  state.vouchers.some((v) => v.rewardId === rewardId && !v.used)
+  state.vouchers.some((v) => v.rewardId === rewardId && voucherLive(v, dayKey(state.dayOffset)))
+
+/**
+ * How the balance is doing against its expiry date: null when there is nothing
+ * to lose, otherwise the date, days remaining, and whether that is close enough
+ * to say so out loud.
+ */
+export const coinsExpiring = (state) => {
+  if (!state.coins || !state.coinsExpireOn) return null
+  const days = daysBetween(dayKey(state.dayOffset), state.coinsExpireOn)
+  return { on: state.coinsExpireOn, days, soon: days <= EXPIRY_WARN_DAYS }
+}
+
+/**
+ * Any earning or spending pushes the expiry out. Simply opening the app is not
+ * enough — this is activity-based expiry, which is the standard definition and
+ * the one that makes the rule defensible.
+ */
+const touchCoins = (state) => dayKey(state.dayOffset + COIN_EXPIRY_DAYS)
 
 /**
  * Tickets refresh on the virtual clock day. Reads go through here so a new day
@@ -265,7 +311,8 @@ function reducer(state, action) {
         streak,
         bestStreak: Math.max(state.bestStreak, streak),
         coins: state.coins + reward.coins,
-        lifetimeCoins: state.lifetimeCoins + reward.coins
+        lifetimeCoins: state.lifetimeCoins + reward.coins,
+        coinsExpireOn: touchCoins(state)
       }
 
       let bonus = null
@@ -315,7 +362,8 @@ function reducer(state, action) {
       return {
         ...state,
         coins: state.coins + action.amount,
-        lifetimeCoins: state.lifetimeCoins + action.amount
+        lifetimeCoins: state.lifetimeCoins + action.amount,
+        coinsExpireOn: touchCoins(state)
       }
 
     case 'SUBMIT_SCORE': {
@@ -368,6 +416,7 @@ function reducer(state, action) {
         ...state,
         coins: state.coins - spent + refund,
         lifetimeCoins: state.lifetimeCoins + refund,
+        coinsExpireOn: touchCoins(state),
         blindboxTickets: useTicket ? state.blindboxTickets - 1 : state.blindboxTickets,
         ownedItems: duplicate ? state.ownedItems : [...state.ownedItems, item.id],
         lastPull: { itemId: item.id, duplicate, refund }
@@ -449,7 +498,8 @@ function reducer(state, action) {
         flights: [...state.flights, flight],
         ownedItems: unlocks ? [...state.ownedItems, countryReward] : state.ownedItems,
         coins: state.coins + reward,
-        lifetimeCoins: state.lifetimeCoins + reward
+        lifetimeCoins: state.lifetimeCoins + reward,
+        coinsExpireOn: touchCoins(state)
       }
     }
 
@@ -463,12 +513,15 @@ function reducer(state, action) {
       return {
         ...state,
         coins: state.coins - reward.cost,
+        // Spending is activity too, so it pushes the balance's own clock out.
+        coinsExpireOn: touchCoins(state),
         vouchers: [
           {
             id: `${reward.id}-${Date.now()}`,
             rewardId: reward.id,
             code: voucherCode(),
             issuedAt: dayKey(state.dayOffset),
+            expiresAt: dayKey(state.dayOffset + VOUCHER_EXPIRY_DAYS),
             used: false
           },
           ...state.vouchers
@@ -484,13 +537,53 @@ function reducer(state, action) {
      * already spent when the voucher was issued.
      */
     case 'USE_VOUCHER': {
+      const today = dayKey(state.dayOffset)
       let changed = false
       const vouchers = state.vouchers.map((v) => {
-        if (v.id !== action.voucherId || v.used) return v
+        // An expired card can't be spent, so it can't be marked used either.
+        if (v.id !== action.voucherId || !voucherLive(v, today)) return v
         changed = true
         return { ...v, used: true, usedAt: dayKey(state.dayOffset) }
       })
       return changed ? { ...state, vouchers } : state
+    }
+
+    /**
+     * Expiry is the passage of time, not an economic action, so it is
+     * deliberately absent from ECONOMY_ACTIONS — it has to apply in flight too.
+     * It only ever removes value, so there is nothing to gain by pulling the
+     * network.
+     *
+     * It runs as a lazy sweep rather than a timer because time passes while the
+     * app is closed. App dispatches it on mount and whenever the virtual clock
+     * moves.
+     */
+    case 'SWEEP_EXPIRY': {
+      const today = dayKey(state.dayOffset)
+      const lapsed = state.coinsExpireOn && today > state.coinsExpireOn
+      const expiringCoins = lapsed ? state.coins : 0
+
+      // Vouchers carry their own date, so nothing has to be rewritten for them
+      // to lapse — but the balance is a single number and must be zeroed.
+      const anyVoucherLapsed = state.vouchers.some(
+        (v) => !v.used && v.expiresAt && today > v.expiresAt
+      )
+      if (!lapsed && !anyVoucherLapsed) return state
+
+      return {
+        ...state,
+        coins: lapsed ? 0 : state.coins,
+        // lifetimeCoins is untouched: the Coin Earner medal reflects what you
+        // once earned, and expiry shouldn't retroactively demote you.
+        coinsExpireOn: lapsed ? null : state.coinsExpireOn,
+        lastExpiry: expiringCoins > 0 ? { coins: expiringCoins, on: today } : state.lastExpiry
+      }
+    }
+
+    case 'CLEAR_EXPIRY': {
+      if (!state.lastExpiry) return state
+      const { lastExpiry, ...rest } = state
+      return rest
     }
 
     /* ---- presenter controls ---- */

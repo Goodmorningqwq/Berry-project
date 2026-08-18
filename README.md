@@ -23,7 +23,7 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 | **Leaderboards** | A ranking per game, shown right after each round and on a Play tab |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
 | **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
-| **Redemption** | 22 rewards across six tabs, priced against the real UO inflight menu — onboard discounts, Berry merchandise and travel extras. Redeemable from ticket purchase until online check-in, capped at one outstanding voucher each |
+| **Redemption** | 22 rewards across six tabs, coins and vouchers expiring after six months, priced against the real UO inflight menu — onboard discounts, Berry merchandise and travel extras. Redeemable from ticket purchase until online check-in, capped at one outstanding voucher each |
 
 ### Berry's wardrobe
 
@@ -183,6 +183,18 @@ and removed: they cost twice as much per coin, because nothing is bought alongsi
 the cost. Two rules protect margin — **no discount exceeds HK$10**, and none exceeds **a third of
 what it applies to**. Both are asserted against the real menu prices; the largest in the catalogue is
 27%.
+
+**Coins and vouchers both expire after six months.** Coins expire on *inactivity* — the whole
+balance carries one date, and any earning or spending pushes it back a full six months, which is how
+airline miles work and keeps the balance a single number rather than a ledger of dated lots. Vouchers
+count from the day they're issued. `lifetimeCoins` survives a lapse, so the Coin Earner medal is
+never retroactively taken away, and an expired voucher **frees its slot** — otherwise the
+one-outstanding cap below would become a trap that locks a reward out forever.
+
+The honest argument for expiry isn't retention: at six months of inactivity it rarely fires for
+anyone who opens the app. It's liability hygiene. An unbounded coin balance is an unbounded
+liability UO could never write off, and a coupon with no end date gets redeemed against a menu and a
+cost base that have both moved on.
 
 **One outstanding voucher per reward.** Holding an unused coupon blocks redeeming a second one, so
 coupons can't be banked and dumped on a single flight — the reward card reads *Held* until you tap

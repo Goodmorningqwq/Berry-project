@@ -93,6 +93,19 @@ export default function App() {
     wasOffline.current = offline
   }, [offline, toast])
 
+  // Expiry has to be swept lazily: time passes while the app is closed, so
+  // nothing fires on its own. Re-runs whenever the virtual clock moves, which
+  // is what the presenter's time jumps do.
+  useEffect(() => {
+    dispatch({ type: 'SWEEP_EXPIRY' })
+  }, [dispatch, state.dayOffset])
+
+  useEffect(() => {
+    if (!state.lastExpiry) return
+    toast(`${state.lastExpiry.coins.toLocaleString()} berry coins expired`, '⌛')
+    dispatch({ type: 'CLEAR_EXPIRY' })
+  }, [state.lastExpiry, dispatch, toast])
+
   const openBerry = () => {
     setPushPhase('in')
     dispatch({ type: 'SEEN_INTRO' })
