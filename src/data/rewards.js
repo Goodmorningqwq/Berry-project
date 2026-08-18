@@ -46,7 +46,40 @@ export const MARKUP = {
 /** The most any single onboard discount may be worth, to protect margin. */
 export const MAX_DISCOUNT_HKD = 10
 
-export const priceOf = (r) => r.hkd * MARKUP[r.tier]
+/**
+ * **Onboard coupons are priced on a volume curve, not proportionally.**
+ *
+ * Flat pricing was the previous mistake: every coupon cost 160 coins per HK$1,
+ * so the bigger rungs were identical value and there was no reason to ever pick
+ * one. The choice collapsed to 'what can I afford today', which parks everyone
+ * on the cheapest rung forever.
+ *
+ * Now the coins-per-dollar rate falls as the discount grows, exactly like a
+ * bulk price. Saving up is genuinely rewarded, and the top rung of each tab is
+ * flagged 'Best value' so the ladder is legible without doing the division.
+ *
+ * This is the honest version of the decoy effect (Huber, Payne & Puto, 1982):
+ * a real quantity discount rather than a deliberately bad middle option, so it
+ * survives a customer actually running the numbers.
+ *
+ * It does cost UO more per coin at the top — HK$3.08 per 1,000 coins on a HK$10
+ * coupon against HK$2.50 on a HK$3 one. That is the price of the incentive, and
+ * it buys larger attached baskets and fewer, later redemptions.
+ */
+export const VOLUME_MARKUP = {
+  3: 160,
+  5: 150,
+  8: 140,
+  10: 130
+}
+
+/** Which tabs use the volume curve — the onboard ladders where sizes compete. */
+export const ONBOARD_KINDS = ['drink', 'snack', 'meal', 'sweet']
+
+export const priceOf = (r) =>
+  ONBOARD_KINDS.includes(r.kind) && r.tier === 'coupon'
+    ? r.hkd * VOLUME_MARKUP[r.hkd]
+    : r.hkd * MARKUP[r.tier]
 
 export const REWARDS = [
   /* ---- drinks: cartons/cans 20–25 · signature 40/45 ---- */
@@ -69,7 +102,7 @@ export const REWARDS = [
     detail: 'Soft drinks, juices and teas from the trolley',
     hkd: 5,
     retail: 20,
-    cost: 800,
+    cost: 750,
     emoji: '🧃'
   },
   {
@@ -80,7 +113,8 @@ export const REWARDS = [
     detail: 'Milk tea, latte or the barista-made specials',
     hkd: 10,
     retail: 40,
-    cost: 1600,
+    cost: 1300,
+    bestValue: true,
     emoji: '☕'
   },
 
@@ -104,7 +138,7 @@ export const REWARDS = [
     detail: 'Crisps, gummies, biscuits — anything from the snack page',
     hkd: 5,
     retail: 20,
-    cost: 800,
+    cost: 750,
     emoji: '🥨'
   },
   {
@@ -115,7 +149,8 @@ export const REWARDS = [
     detail: 'Any cup noodle on board',
     hkd: 8,
     retail: 30,
-    cost: 1280,
+    cost: 1120,
+    bestValue: true,
     emoji: '🍜'
   },
 
@@ -128,7 +163,7 @@ export const REWARDS = [
     detail: 'Rice noodle rolls, buns, sandwiches',
     hkd: 5,
     retail: 35,
-    cost: 800,
+    cost: 750,
     emoji: '🥟'
   },
   {
@@ -139,7 +174,7 @@ export const REWARDS = [
     detail: 'Any hot dish on your next UO flight',
     hkd: 8,
     retail: 65,
-    cost: 1280,
+    cost: 1120,
     emoji: '🍱'
   },
   {
@@ -150,7 +185,8 @@ export const REWARDS = [
     detail: 'The signature rice and pasta mains',
     hkd: 10,
     retail: 75,
-    cost: 1600,
+    cost: 1300,
+    bestValue: true,
     emoji: '🍛'
   },
 
@@ -174,7 +210,7 @@ export const REWARDS = [
     detail: 'Egg waffles, red bean soup, ice cream',
     hkd: 5,
     retail: 35,
-    cost: 800,
+    cost: 750,
     emoji: '🍮'
   },
   {
@@ -185,7 +221,8 @@ export const REWARDS = [
     detail: 'Häagen-Dazs 100mL, vanilla or cookies & cream',
     hkd: 8,
     retail: 40,
-    cost: 1280,
+    cost: 1120,
+    bestValue: true,
     emoji: '🍨'
   },
 
@@ -288,9 +325,6 @@ export const REWARDS = [
     emoji: '🧳'
   }
 ]
-
-/** The four onboard food tabs, where the HK$10 discount cap applies. */
-export const ONBOARD_KINDS = ['drink', 'snack', 'meal', 'sweet']
 
 export const REWARD_KINDS = [
   { id: 'drink', label: 'Drinks' },

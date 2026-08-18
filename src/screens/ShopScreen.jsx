@@ -171,7 +171,10 @@ export default function ShopScreen() {
             >
               <div className="reward-row__emoji">{r.emoji}</div>
               <div className="reward-row__body">
-                <div className="reward-row__name">{r.name}</div>
+                <div className="reward-row__name">
+                  {r.name}
+                  {r.bestValue && !held && <span className="reward-row__best">Best value</span>}
+                </div>
                 <p className="tiny">{held ? 'In your vouchers — use it to redeem again' : r.detail}</p>
               </div>
               <span className={`chip ${held ? 'chip--out' : 'chip--gold'}`}>

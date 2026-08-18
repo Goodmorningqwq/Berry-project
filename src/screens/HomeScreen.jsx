@@ -4,6 +4,7 @@ import { CHECK_IN_CALENDAR, cyclePosition, rewardForStreak } from '../data/check
 import { useToast } from '../components/Toast.jsx'
 import BerryRoom from '../components/BerryRoom.jsx'
 import CheckInReveal from '../components/CheckInReveal.jsx'
+import MonthCalendar from '../components/MonthCalendar.jsx'
 import { Coin, Empty, Modal, ProgressBar } from '../components/ui.jsx'
 import { BASIC_ITEMS, BASIC_ITEMS_BY_ID, ITEMS_BY_ID } from '../data/items.js'
 import { nextTrip } from '../data/destinations.js'
@@ -21,6 +22,7 @@ export default function HomeScreen() {
   const { state, dispatch, checkedInToday, today, hungry, offline } = useStore()
   const toast = useToast()
   const [caring, setCaring] = useState(false)
+  const [monthOpen, setMonthOpen] = useState(false)
   const [effect, setEffect] = useState(null)
   const effectTimer = useRef(null)
 
@@ -93,9 +95,15 @@ export default function HomeScreen() {
           {offline ? '✈️ Available when you land' : checkedInToday ? 'Come back tomorrow' : 'Check in'}
         </button>
 
-        {/* The calendar is fixed, so this can promise exactly what each day
-            pays rather than quoting a probability. */}
-        <div className="streak-days">
+        {/* The calendar is fixed, so this promises exactly what each day pays
+            rather than quoting a probability. Tapping the week opens the full run — the strip answers what
+            — the strip answers what tomorrow pays, the calendar answers whether
+            the exclusive is worth chasing. */}
+        <button
+          className="streak-days"
+          onClick={() => setMonthOpen(true)}
+          aria-label="See the full 30-day check-in calendar"
+        >
           {CHECK_IN_CALENDAR.map((entry) => {
             const done = entry.day <= cyclePos
             const isNext = entry.day === cyclePos + 1
@@ -115,7 +123,7 @@ export default function HomeScreen() {
               </div>
             )
           })}
-        </div>
+        </button>
         <p className="tiny" style={{ marginTop: 8, textAlign: 'center' }}>
           Day 5 is the big coin day · day 7 pays a free blindbox <b>and a bonus 🎟️ play ticket</b> ·
           day {MILESTONE_DAYS} unlocks <b>{ITEMS_BY_ID.pilot?.name ?? 'the exclusive look'}</b>
@@ -174,6 +182,8 @@ export default function HomeScreen() {
           onCollect={() => dispatch({ type: 'CLEAR_CHECK_IN' })}
         />
       )}
+
+      <MonthCalendar open={monthOpen} streak={state.streak} onClose={() => setMonthOpen(false)} />
 
       <Modal open={caring} onClose={() => setCaring(false)} label="Care for Berry">
         <h3 style={{ fontSize: 17 }}>Care for Berry</h3>

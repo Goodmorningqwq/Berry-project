@@ -83,6 +83,12 @@ Home strip can promise it in advance:
 
 70 coins a week, the same as the flat 10/day it replaced. Treats are what feed Berry.
 
+**Tapping the week strip opens the full 30-day run** — all 30 cells with what each pays, the four
+blindbox days, the four bonus tickets and the day-30 exclusive, plus the totals. The strip answers
+"what do I get tomorrow"; the calendar answers "is the exclusive worth chasing", which is the
+question that actually sustains a 30-day streak. Both derive from `rewardForStreak`, so they cannot
+disagree.
+
 ### Berry's room
 
 Home opens on Berry's room rather than a plain stage. Two shelves hold nine trophy slots — the five
@@ -159,6 +165,13 @@ value** is 1 coin = HK$0.01 (`COINS_PER_HKD`) — what UO carries the outstandin
 (`MARKUP` in `src/data/rewards.js`): 100 coins/HK$ for zero-cost perks, 160 for discount coupons,
 200 for real merchandise.
 
+**The onboard ladders are priced on a volume curve, not proportionally.** They were briefly flat at
+160 coins per HK$1, which is the worst shape a ladder can have — identical value per coin means no
+reason to ever pick the bigger rung, so everyone parks on the cheapest. The rate now falls as the
+discount grows (160 → 150 → 140 → 130 coins per HK$1), so saving up is genuinely rewarded, and the
+top rung of each tab is flagged **Best value**. It is the honest version of the decoy effect: rather
+than pricing a middle rung badly so the top looks better, the top rung actually is better.
+
 **The menu prices are real.** Every `retail` figure comes from the HK Express *Inflight Gourmet Meals
 and Deals* menu — cartons HK$20, cans HK$25, signature drinks HK$40/45, packet snacks HK$20, cup
 noodles HK$30, light bites HK$35–45, hearty mains HK$75, desserts HK$35–40. Reward wording stays
@@ -183,9 +196,9 @@ Berry and Travel — and **every tab opens on something reachable in 3–12 days
 cheapest item is months away just reads as a wall.
 
 At 10,000 registered players the programme issues ~209,000 coins a day (80% of it from games, which
-is why the ticket cap is the control that matters) and costs roughly **HK$358/day — ~HK$131,000/year,
-or HK$13.06 per registered user** after breakage. That is 17% below what the same catalogue cost with
-free items in it. Full derivation, per-game curves, the markup schedule and the costing model are in
+is why the ticket cap is the control that matters) and costs roughly **HK$379/day — ~HK$138,000/year,
+or HK$13.85 per registered user** after breakage — 12% below what the same catalogue cost with free
+items in it. Full derivation, per-game curves, the markup schedule and the costing model are in
 [docs/REWARD-TABLE.md](docs/REWARD-TABLE.md).
 
 Everything is stored locally in `localStorage`. There is no backend and no network calls, so the

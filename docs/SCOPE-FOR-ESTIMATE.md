@@ -121,6 +121,8 @@ A **fixed 7-day reward calendar**, publicly previewed so users always know what 
   confetti, a counting coin total and a squash-and-stretch landing. Three intensity tiers so bigger
   rewards feel bigger. Tapping skips to the payoff
 - A **second step** then previews tomorrow's reward and the progress toward the 30-day milestone
+- **Full 30-day calendar**, opened by tapping the week strip: every day's payout, the weekly blindbox
+  and bonus-ticket days, the day-30 exclusive, and the run totals
 
 ## 2.5 Minigames
 
