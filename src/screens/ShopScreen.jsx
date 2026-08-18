@@ -48,7 +48,7 @@ export default function ShopScreen() {
   const { state, dispatch, offline } = useStore()
   const toast = useToast()
   const [shaking, setShaking] = useState(false)
-  const [kind, setKind] = useState('meal')
+  const [kind, setKind] = useState(REWARD_KINDS[0].id)
   const [oddsOpen, setOddsOpen] = useState(false)
 
   const free = state.blindboxTickets > 0
@@ -148,7 +148,7 @@ export default function ShopScreen() {
           : `${REDEMPTION_WINDOW}.`}
       </p>
 
-      <div className="tabs" style={{ marginTop: 10 }}>
+      <div className="tabs tabs--scroll" style={{ marginTop: 10 }}>
         {REWARD_KINDS.map((k) => (
           <button key={k.id} aria-selected={kind === k.id} onClick={() => setKind(k.id)}>
             {k.label}

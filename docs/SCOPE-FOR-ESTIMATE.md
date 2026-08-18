@@ -159,13 +159,15 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
   unavoidable duplicate. Rarity-tiered reveal animation
 - **Odds disclosure screen** listing every rarity percentage, the items in each tier, the full
   check-in calendar and the feeding conversion. This mirrors real gacha disclosure obligations
-- **Redemption catalogue:** 12 rewards across quick wins, inflight meals, merchandise and travel
-  extras, priced 200–15,000 coins. Pricing separates the coin's **book value** (1 coin = HK$0.01,
-  the accounting liability) from its **shelf price**, which applies a markup rising with what a
-  reward actually costs to fulfil — 100 coins/HK$ for zero-cost perks, 160 for margin-positive
-  discount coupons, 200 for real merchandise. Every tab carries an entry reachable in 3–36 days of
+- **Redemption catalogue:** 23 rewards across six tabs (Drinks, Snacks, Meals, Sweets, Berry,
+  Travel), priced against the **real HK Express inflight menu**. Pricing separates the coin's **book
+  value** (1 coin = HK$0.01, the accounting liability) from its **shelf price**, which applies a
+  markup rising with what a reward actually costs to fulfil — 100 coins/HK$ for zero-cost perks, 160
+  for margin-positive discount coupons, 200 for real merchandise, and 200 applied to UO's **unit
+  cost** for a whole free item. No coupon exceeds a third of the retail price of what it discounts,
+  so every redemption stays margin-positive. Every tab carries an entry reachable in 3–12 days of
   typical play. Redeeming issues a **voucher with a unique code**, redeemable from ticket purchase
-  until online check-in. **Capped at one outstanding voucher per reward** — an unused voucher blocks
+  until online check-in, **capped at one outstanding voucher per reward** — an unused voucher blocks
   a second of the same kind until it is marked used, so coupons cannot be stockpiled
 
 ## 2.9 In-flight (offline) mode

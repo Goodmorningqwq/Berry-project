@@ -23,7 +23,7 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 | **Leaderboards** | A ranking per game, shown right after each round and on a Play tab |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
 | **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
-| **Redemption** | Coins convert into inflight meal discounts, merchandise vouchers and travel extras — redeemable from ticket purchase until online check-in, capped at one outstanding voucher each |
+| **Redemption** | 23 rewards across six tabs, priced against the real UO inflight menu — discounts, whole free items, Berry merchandise and travel extras. Redeemable from ticket purchase until online check-in, capped at one outstanding voucher each |
 
 ### Berry's wardrobe
 
@@ -155,31 +155,37 @@ three collected rounds however the player mixes them, which is what makes the co
 
 **Coins carry two different numbers, and conflating them is the mistake to avoid.** The **book
 value** is 1 coin = HK$0.01 (`COINS_PER_HKD`) — what UO carries the outstanding liability at. The
-**shelf price** is set above it, by a markup that rises with what a reward actually costs to fulfil:
-100 coins/HK$ for zero-cost perks, 160 for margin-positive discount coupons, 200 for real
-merchandise (`MARKUP` in `src/data/rewards.js`). That markup is UO's margin and the only real lever
-on what the programme gives away — it cuts exposure by 37% versus pricing everything at book value.
-No coupon exceeds a third of the retail price of what it discounts, so every coupon redemption
-leaves the customer spending the balance and stays margin-positive.
+**shelf price** is set above it, by a markup that rises with what a reward actually costs to fulfil
+(`MARKUP` in `src/data/rewards.js`): 100 coins/HK$ for zero-cost perks, 160 for margin-positive
+discount coupons, 200 for real merchandise, and 200 applied to **UO's unit cost** for a whole free
+item, since nothing is bought alongside it. Priced off retail instead, a free bottle of water would
+cost more than HK$20 off a main.
 
-**One outstanding voucher per reward.** Holding an unused HK$3 drink coupon blocks redeeming a
-second one, so coupons can't be banked and dumped on a single flight — the reward card reads *Held*
-until you tap the voucher to mark it used. Marking a voucher used deliberately works **in flight**,
-since onboard is exactly where a coupon gets spent; only issuing new ones is frozen.
+**The menu prices are real.** Every `retail` figure comes from the HK Express *Inflight Gourmet Meals
+and Deals* menu — water HK$10, cartons HK$20, cans HK$25, signature drinks HK$40/45, packet snacks
+HK$20, cup noodles HK$30, light bites HK$35–45, hearty mains HK$75, desserts HK$35–40. "Free drink
+with any meal" is worth exactly HK$15 because that is the menu's own drink add-on price. Reward
+wording stays generic so a seasonal menu change doesn't invalidate the catalogue. No coupon exceeds a
+third of what it discounts, so the customer always pays the balance and every redemption stays
+margin-positive.
+
+**One outstanding voucher per reward.** Holding an unused coupon blocks redeeming a second one, so
+coupons can't be banked and dumped on a single flight — the reward card reads *Held* until you tap
+the voucher to mark it used. Marking a voucher used deliberately works **in flight**, since onboard
+is exactly where a coupon gets spent; only issuing new ones is frozen.
 
 Rounds pay **1 to 35 coins**. The floor is deliberately a token amount: idling through three rounds
 pays 3 coins, so AFK farming earns nothing worth having, while a cap of 35 is reachable in all three
-games by playing well. The ladder runs from a 200-coin wallpaper pack (~3 days, free for UO to give)
-up to a 15,000-coin plush, with the blindbox at 800 — and **every tab has an entry reachable in
-3–36 days**, six of them inside a fortnight, because a tab whose cheapest item is months away just
-reads as a wall.
+games by playing well. The shop runs 23 rewards across six tabs — Drinks, Snacks, Meals, Sweets,
+Berry and Travel — and **every tab opens on something reachable in 3–12 days**, because a tab whose
+cheapest item is months away just reads as a wall.
 
 At 10,000 registered players the programme issues ~209,000 coins a day (80% of it from games, which
-is why the ticket cap is the control that matters) and costs roughly **HK$395/day — ~HK$144,000/year,
-or HK$14.43 per registered user** after breakage and ancillary margins. Full derivation, per-game
-curves, the markup schedule and the 30-day simulation are in
-[docs/REWARD-TABLE.md](docs/REWARD-TABLE.md); prices live in `src/data/rewards.js` and
-`BLINDBOX_COST` in `src/state/store.jsx`.
+is why the ticket cap is the control that matters) and costs roughly **HK$429/day — ~HK$156,000/year,
+or HK$15.65 per registered user** after breakage. That is 9% up on the previous catalogue, entirely
+from the free-item tier: freebies cost exactly 2× what coupons do per coin, because a coupon is
+partly paid for by the sale it triggers and a freebie isn't. Full derivation, per-game curves, the
+markup schedule and the costing model are in [docs/REWARD-TABLE.md](docs/REWARD-TABLE.md).
 
 Everything is stored locally in `localStorage`. There is no backend and no network calls, so the
 demo works offline.

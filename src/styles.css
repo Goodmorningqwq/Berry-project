@@ -1703,6 +1703,25 @@ p {
   box-shadow: var(--shadow);
 }
 
+/* Six shop tabs won't survive `flex: 1` on a 390px phone — the labels crush.
+   Scroll them instead, so the strip stays legible however many tabs exist.
+   Scoped to a modifier so the two-tab strips elsewhere keep filling the width. */
+.tabs--scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabs--scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs--scroll button {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  white-space: nowrap;
+}
+
 .stamp-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
