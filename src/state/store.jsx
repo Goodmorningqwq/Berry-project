@@ -183,11 +183,25 @@ export const coinsExpiring = (state) => {
 }
 
 /**
- * Any earning or spending pushes the expiry out. Simply opening the app is not
- * enough — this is activity-based expiry, which is the standard definition and
- * the one that makes the rule defensible.
+ * The balance carries **one clock, set once and never extended**.
+ *
+ * It starts the moment coins go from zero to something, and it is not pushed
+ * out by earning more — spend it or lose it. An earlier version reset the clock
+ * on every coin movement, which meant an active player's coins could never
+ * actually expire; that is a dormancy rule, not an expiry, and it was not what
+ * was wanted here.
+ *
+ * The known edge: coins earned late in a window inherit whatever time is left,
+ * so a payout on day 179 lives one day. The UI says so plainly rather than
+ * letting it surprise anyone.
+ *
+ * Spending the balance to zero clears the clock, so the next coin earned starts
+ * a fresh six months.
  */
-const touchCoins = (state) => dayKey(state.dayOffset + COIN_EXPIRY_DAYS)
+const nextExpiry = (state, coinsAfter) => {
+  if (coinsAfter <= 0) return null
+  return state.coinsExpireOn ?? dayKey(state.dayOffset + COIN_EXPIRY_DAYS)
+}
 
 /**
  * Tickets refresh on the virtual clock day. Reads go through here so a new day
@@ -312,7 +326,7 @@ function reducer(state, action) {
         bestStreak: Math.max(state.bestStreak, streak),
         coins: state.coins + reward.coins,
         lifetimeCoins: state.lifetimeCoins + reward.coins,
-        coinsExpireOn: touchCoins(state)
+        coinsExpireOn: nextExpiry(state, state.coins + reward.coins)
       }
 
       let bonus = null
@@ -363,7 +377,7 @@ function reducer(state, action) {
         ...state,
         coins: state.coins + action.amount,
         lifetimeCoins: state.lifetimeCoins + action.amount,
-        coinsExpireOn: touchCoins(state)
+        coinsExpireOn: nextExpiry(state, state.coins + action.amount)
       }
 
     case 'SUBMIT_SCORE': {
@@ -416,7 +430,7 @@ function reducer(state, action) {
         ...state,
         coins: state.coins - spent + refund,
         lifetimeCoins: state.lifetimeCoins + refund,
-        coinsExpireOn: touchCoins(state),
+        coinsExpireOn: nextExpiry(state, state.coins - spent + refund),
         blindboxTickets: useTicket ? state.blindboxTickets - 1 : state.blindboxTickets,
         ownedItems: duplicate ? state.ownedItems : [...state.ownedItems, item.id],
         lastPull: { itemId: item.id, duplicate, refund }
@@ -499,7 +513,7 @@ function reducer(state, action) {
         ownedItems: unlocks ? [...state.ownedItems, countryReward] : state.ownedItems,
         coins: state.coins + reward,
         lifetimeCoins: state.lifetimeCoins + reward,
-        coinsExpireOn: touchCoins(state)
+        coinsExpireOn: nextExpiry(state, state.coins + reward)
       }
     }
 
@@ -513,8 +527,8 @@ function reducer(state, action) {
       return {
         ...state,
         coins: state.coins - reward.cost,
-        // Spending is activity too, so it pushes the balance's own clock out.
-        coinsExpireOn: touchCoins(state),
+        // Spending never buys time, but clearing the balance ends the window.
+        coinsExpireOn: nextExpiry(state, state.coins - reward.cost),
         vouchers: [
           {
             id: `${reward.id}-${Date.now()}`,
@@ -616,7 +630,8 @@ function reducer(state, action) {
       return {
         ...state,
         coins: state.coins + action.amount,
-        lifetimeCoins: state.lifetimeCoins + action.amount
+        lifetimeCoins: state.lifetimeCoins + action.amount,
+        coinsExpireOn: nextExpiry(state, state.coins + action.amount)
       }
 
     case 'RESET':

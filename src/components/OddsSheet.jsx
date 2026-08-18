@@ -143,8 +143,10 @@ export default function OddsSheet({ open, onClose }) {
           <b>{COIN_EXPIRY_DAYS} days</b>
         </div>
         <p className="tiny">
-          Your balance lapses after {COIN_EXPIRY_DAYS} days with no earning or spending. Any coins in
-          or out pushes the date back a full six months, so an active account never loses anything.
+          The clock starts the first time you earn coins into an empty balance and runs for{' '}
+          {COIN_EXPIRY_DAYS} days. Earning more does <b>not</b> extend it — spend them before the
+          date. Once you've spent the balance down to zero, the next coin you earn starts a fresh six
+          months.
         </p>
       </div>
       <div className="odds-row">

@@ -3,6 +3,7 @@ import { useStore } from './state/store.jsx'
 import { Icons } from './components/ui.jsx'
 import HostScreen from './components/HostScreen.jsx'
 import OfflineBanner from './components/OfflineBanner.jsx'
+import CoinSheet from './components/CoinSheet.jsx'
 import { useToast } from './components/Toast.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import PlayScreen from './screens/PlayScreen.jsx'
@@ -22,6 +23,7 @@ const TABS = [
 function TopBar({ onBack }) {
   const { state, checkedInToday } = useStore()
   const [bump, setBump] = useState(false)
+  const [coinsOpen, setCoinsOpen] = useState(false)
   const prevCoins = useRef(state.coins)
 
   useEffect(() => {
@@ -46,12 +48,20 @@ function TopBar({ onBack }) {
           <span className={`pill pill--flame ${checkedInToday ? '' : 'pill--dim'}`}>
             🔥 {state.streak}
           </span>
-          <span className={`pill pill--coin ${bump ? 'coin-bump' : ''}`}>
+          {/* Tappable: the balance is where people look when they wonder about
+              their coins, so the expiry date belongs here and not only a tab
+              away on Rewards. */}
+          <button
+            className={`pill pill--coin pill--tap ${bump ? 'coin-bump' : ''}`}
+            onClick={() => setCoinsOpen(true)}
+            aria-label="Your berry coins and when they expire"
+          >
             <span className="coin-icon">B</span>
             {state.coins.toLocaleString()}
-          </span>
+          </button>
         </div>
       </div>
+      <CoinSheet open={coinsOpen} onClose={() => setCoinsOpen(false)} />
     </header>
   )
 }

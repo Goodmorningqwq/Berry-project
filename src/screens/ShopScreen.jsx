@@ -149,7 +149,7 @@ export default function ShopScreen() {
           {prettyDate(expiry.on)}
           {expiry.soon && ` — ${expiry.days} day${expiry.days === 1 ? '' : 's'} left`}
           {'. '}
-          Earning or spending any coins pushes this back six months.
+          Spend them before then — earning more doesn't extend the date.
         </p>
       )}
       <p className="tiny" style={{ marginTop: -4 }}>

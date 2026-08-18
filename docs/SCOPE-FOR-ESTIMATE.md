@@ -182,9 +182,11 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
 
 ## 2.9 Expiry
 
-- **Berry coins** lapse after **180 days without earning or spending**. The balance carries a single
-  rolling date rather than per-batch lots, so any activity pushes it back a full six months. Lifetime
-  earnings are unaffected, so medals are never retroactively demoted
+- **Berry coins** lapse **180 days after the balance starts from zero**. One clock per balance, set
+  once and never extended by earning more — spend it or lose it. Spending down to zero clears it, so
+  the next coin earned starts a fresh window. Lifetime earnings are unaffected, so medals are never
+  retroactively demoted
+- The balance, its deadline and the rule are reachable by **tapping the coin count in the header**
 - **Vouchers** expire **180 days from issue**, with the date shown on the voucher
 - An expired voucher **releases the one-outstanding slot**, so expiry can never permanently lock a
   reward out

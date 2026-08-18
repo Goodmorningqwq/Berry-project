@@ -184,15 +184,16 @@ the cost. Two rules protect margin — **no discount exceeds HK$10**, and none e
 what it applies to**. Both are asserted against the real menu prices; the largest in the catalogue is
 27%.
 
-**Coins and vouchers both expire after six months.** Coins expire on *inactivity* — the whole
-balance carries one date, and any earning or spending pushes it back a full six months, which is how
-airline miles work and keeps the balance a single number rather than a ledger of dated lots. Vouchers
-count from the day they're issued. `lifetimeCoins` survives a lapse, so the Coin Earner medal is
+**Coins and vouchers both expire after six months.** The coin balance carries one clock, started the
+first time you earn into an empty balance and **never extended by earning more** — spend it or lose
+it. Spending down to zero clears the clock, so the next coin starts a fresh six months. Vouchers
+count from the day they're issued. Tapping the coin count in the header opens a sheet with the
+balance, the deadline and the rule. `lifetimeCoins` survives a lapse, so the Coin Earner medal is
 never retroactively taken away, and an expired voucher **frees its slot** — otherwise the
 one-outstanding cap below would become a trap that locks a reward out forever.
 
-The honest argument for expiry isn't retention: at six months of inactivity it rarely fires for
-anyone who opens the app. It's liability hygiene. An unbounded coin balance is an unbounded
+Expiry does two jobs: it gives the balance a deadline that actually arrives, which is what makes a
+coin worth spending rather than hoarding, and it's liability hygiene. An unbounded coin balance is an unbounded
 liability UO could never write off, and a coupon with no end date gets redeemed against a menu and a
 cost base that have both moved on.
 

@@ -197,13 +197,17 @@ per tab carries the badge, so a future edit can't flatten it back by accident.
 
 | | Window | Counted from |
 | --- | --- | --- |
-| **Berry coins** | 180 days | The last time you earned or spent any. Activity pushes it back a full six months. |
+| **Berry coins** | 180 days | The first time you earn into an **empty** balance. The date is set once and never extended. |
 | **Vouchers** | 180 days | The day it was issued, shown on the voucher itself. |
 
-Coins expire on **inactivity**, not per batch: the whole balance carries one date, which is how
-airline miles work and keeps the balance a single number instead of a ledger of dated lots. Simply
-opening the app is not enough — you have to earn or spend something, which is the standard
-definition and the one that makes the rule defensible.
+**Spend it or lose it.** The balance carries one clock, started the moment coins go from zero to
+something and **never pushed out by earning more**. An earlier version reset the clock on every coin
+movement, which meant an active player's coins could never actually expire — that is a dormancy rule
+rather than an expiry, and it isn't what this is for.
+
+The known edge: coins earned late in a window inherit whatever time is left, so a payout on day 179
+lives one day. The app says so plainly on the coin sheet rather than letting it surprise anyone.
+Spending the balance to zero clears the clock, so the next coin earned starts a fresh six months.
 
 `lifetimeCoins` is untouched when a balance lapses, so the Coin Earner medal is never retroactively
 taken away.
@@ -212,8 +216,9 @@ taken away.
 trap: letting a coupon lapse would lock that reward out permanently. Expiry has to release it, and
 `holdsVoucher()` ignores expired vouchers for exactly this reason.
 
-**Why it exists.** At six months of inactivity this rarely fires for anyone who opens the app, so it
-is not really a retention lever — the honest argument is liability hygiene. An unbounded coin balance
+**Why it exists.** Two reasons, and the second is the honest one: it gives the balance a deadline
+that actually arrives, which is what makes a coin worth spending rather than hoarding; and it is
+liability hygiene. An unbounded coin balance
 is an unbounded liability UO could never write off, and a coupon with no end date can be redeemed
 against a menu and a cost base that have both moved on. That is why real programmes have the rule.
 
