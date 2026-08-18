@@ -2191,6 +2191,53 @@ p {
   padding: 14px;
   position: relative;
   overflow: hidden;
+  /* It became a button when vouchers grew a tap-to-use action. */
+  display: block;
+  width: 100%;
+  border: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.16s ease;
+}
+
+.voucher:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* A spent voucher stays in the list as history, visibly cancelled. */
+.voucher--used {
+  background: linear-gradient(135deg, #6b6b73, #8a8a93);
+  cursor: default;
+}
+
+.voucher--used .voucher__code {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.voucher__stamp {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-14deg);
+  border: 2.5px solid rgba(255, 255, 255, 0.75);
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voucher {
+    transition: none;
+  }
+  .voucher:active:not(:disabled) {
+    transform: none;
+  }
 }
 
 .voucher + .voucher {

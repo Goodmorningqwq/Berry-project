@@ -165,7 +165,8 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
   reward actually costs to fulfil — 100 coins/HK$ for zero-cost perks, 160 for margin-positive
   discount coupons, 200 for real merchandise. Every tab carries an entry reachable in 3–36 days of
   typical play. Redeeming issues a **voucher with a unique code**, redeemable from ticket purchase
-  until online check-in
+  until online check-in. **Capped at one outstanding voucher per reward** — an unused voucher blocks
+  a second of the same kind until it is marked used, so coupons cannot be stockpiled
 
 ## 2.9 In-flight (offline) mode
 

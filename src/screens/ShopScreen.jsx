@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useStore, BLINDBOX_COST } from '../state/store.jsx'
+import { useStore, BLINDBOX_COST, holdsVoucher } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
 import Celebration from '../components/Celebration.jsx'
@@ -73,8 +73,19 @@ export default function ShopScreen() {
       toast('Not enough berry coins yet', '🪙')
       return
     }
+    if (holdsVoucher(state, reward.id)) {
+      toast('You already hold this voucher — use it first', '🎟️')
+      return
+    }
     dispatch({ type: 'REDEEM_REWARD', rewardId: reward.id })
     toast(`${reward.name} — voucher issued`, reward.emoji)
+  }
+
+  /** Using a voucher is what frees its slot, so it works in flight too. */
+  const useVoucher = (v, reward) => {
+    if (v.used) return
+    dispatch({ type: 'USE_VOUCHER', voucherId: v.id })
+    toast(`${reward.name} marked as used`, '✅')
   }
 
   return (
@@ -147,7 +158,10 @@ export default function ShopScreen() {
 
       <div style={{ marginTop: 12 }}>
         {REWARDS.filter((r) => r.kind === kind).map((r) => {
-          const affordable = state.coins >= r.cost && !offline
+          // Capped at one outstanding voucher each, so holding one blocks the
+          // next until it's used.
+          const held = holdsVoucher(state, r.id)
+          const affordable = state.coins >= r.cost && !offline && !held
           return (
             <button
               key={r.id}
@@ -158,10 +172,16 @@ export default function ShopScreen() {
               <div className="reward-row__emoji">{r.emoji}</div>
               <div className="reward-row__body">
                 <div className="reward-row__name">{r.name}</div>
-                <p className="tiny">{r.detail}</p>
+                <p className="tiny">{held ? 'In your vouchers — use it to redeem again' : r.detail}</p>
               </div>
-              <span className="chip chip--gold">
-                <Coin small /> {r.cost}
+              <span className={`chip ${held ? 'chip--out' : 'chip--gold'}`}>
+                {held ? (
+                  'Held'
+                ) : (
+                  <>
+                    <Coin small /> {r.cost}
+                  </>
+                )}
               </span>
             </button>
           )
@@ -169,7 +189,7 @@ export default function ShopScreen() {
       </div>
 
       <h3 className="section-title">
-        My vouchers <small>{state.vouchers.length}</small>
+        My vouchers <small>{state.vouchers.filter((v) => !v.used).length} to use</small>
       </h3>
 
       {state.vouchers.length === 0 ? (
@@ -179,15 +199,23 @@ export default function ShopScreen() {
           {state.vouchers.map((v) => {
             const reward = REWARDS_BY_ID[v.rewardId]
             return (
-              <div className="voucher" key={v.id}>
+              <button
+                className={`voucher ${v.used ? 'voucher--used' : ''}`}
+                key={v.id}
+                onClick={() => useVoucher(v, reward)}
+                disabled={v.used}
+              >
                 <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 600 }}>
                   {reward.emoji} {reward.name}
                 </div>
                 <div className="voucher__code">{v.code}</div>
                 <div style={{ fontSize: 10.5, opacity: 0.75, marginTop: 4 }}>
-                  Issued {prettyDate(v.issuedAt)} · show at check-in or onboard
+                  {v.used
+                    ? `Used ${prettyDate(v.usedAt ?? v.issuedAt)}`
+                    : `Issued ${prettyDate(v.issuedAt)} · tap when you use it onboard`}
                 </div>
-              </div>
+                {v.used && <span className="voucher__stamp">Used</span>}
+              </button>
             )
           })}
         </div>

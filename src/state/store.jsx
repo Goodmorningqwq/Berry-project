@@ -136,6 +136,14 @@ function initialState() {
 export const isOffline = (state) => state.demoOffline || !state.networkOnline
 
 /**
+ * Whether an unused voucher for this reward is already in hand. Redemption is
+ * capped at one outstanding voucher each, so a player can't bank ten drink
+ * coupons and use them all on one flight.
+ */
+export const holdsVoucher = (state, rewardId) =>
+  state.vouchers.some((v) => v.rewardId === rewardId && !v.used)
+
+/**
  * Tickets refresh on the virtual clock day. Reads go through here so a new day
  * shows a full balance without needing a write first, and writes normalise
  * before changing anything.
@@ -448,6 +456,10 @@ function reducer(state, action) {
     case 'REDEEM_REWARD': {
       const reward = REWARDS_BY_ID[action.rewardId]
       if (!reward || state.coins < reward.cost) return state
+      // One outstanding voucher per reward, so coupons can't be stockpiled and
+      // dumped on a single flight. Mark the one you hold as used and the slot
+      // frees up — see USE_VOUCHER.
+      if (holdsVoucher(state, reward.id)) return state
       return {
         ...state,
         coins: state.coins - reward.cost,
@@ -462,6 +474,23 @@ function reducer(state, action) {
           ...state.vouchers
         ]
       }
+    }
+
+    /**
+     * Marking a voucher used is what frees its slot for the next redemption.
+     *
+     * Deliberately absent from ECONOMY_ACTIONS: a coupon is used *onboard*, so
+     * it has to work in flight. It moves no value either way — the coins were
+     * already spent when the voucher was issued.
+     */
+    case 'USE_VOUCHER': {
+      let changed = false
+      const vouchers = state.vouchers.map((v) => {
+        if (v.id !== action.voucherId || v.used) return v
+        changed = true
+        return { ...v, used: true, usedAt: dayKey(state.dayOffset) }
+      })
+      return changed ? { ...state, vouchers } : state
     }
 
     /* ---- presenter controls ---- */

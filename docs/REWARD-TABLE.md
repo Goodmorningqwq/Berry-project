@@ -126,6 +126,11 @@ the Travel extras tab at the `free` rate. Collapsing the two would misprice it.
 every coupon redemption stays margin-positive. HK$5 off a HK$30 snack still has the customer spending
 HK$25.
 
+**Holding cap — one outstanding voucher per reward.** An unused voucher blocks redeeming another of
+the same reward, so nobody banks ten drink coupons and uses them all on one flight. Tapping a
+voucher marks it used and frees the slot. That works in flight (onboard is where a coupon is spent);
+only *issuing* new vouchers is frozen offline.
+
 ### The catalogue
 
 | Reward | Tier | Face | Price | Days of typical play |

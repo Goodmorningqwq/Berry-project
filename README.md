@@ -23,7 +23,7 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 | **Leaderboards** | A ranking per game, shown right after each round and on a Play tab |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
 | **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
-| **Redemption** | Coins convert into inflight meal discounts, merchandise vouchers and travel extras — redeemable from ticket purchase until online check-in |
+| **Redemption** | Coins convert into inflight meal discounts, merchandise vouchers and travel extras — redeemable from ticket purchase until online check-in, capped at one outstanding voucher each |
 
 ### Berry's wardrobe
 
@@ -121,8 +121,8 @@ The rule is that **offline freezes the economy, not the app**:
 | Daily check-in | All three minigames, unlimited |
 | Posting a leaderboard score | Browsing the leaderboards |
 | Opening blindboxes | Dressing Berry, browsing the wardrobe |
-| Redeeming coupons | Passport, medals, the room, flight records |
-| Feeding Berry | Vouchers you already hold stay readable |
+| Redeeming *new* coupons | Using a voucher you already hold — that happens onboard |
+| Feeding Berry | Passport, medals, the room, flight records |
 | Completing a flight | Everything else |
 
 Minigames stay playable but pay nothing **and don't consume a play ticket** — burning the daily
@@ -161,6 +161,11 @@ merchandise (`MARKUP` in `src/data/rewards.js`). That markup is UO's margin and 
 on what the programme gives away — it cuts exposure by 37% versus pricing everything at book value.
 No coupon exceeds a third of the retail price of what it discounts, so every coupon redemption
 leaves the customer spending the balance and stays margin-positive.
+
+**One outstanding voucher per reward.** Holding an unused HK$3 drink coupon blocks redeeming a
+second one, so coupons can't be banked and dumped on a single flight — the reward card reads *Held*
+until you tap the voucher to mark it used. Marking a voucher used deliberately works **in flight**,
+since onboard is exactly where a coupon gets spent; only issuing new ones is frozen.
 
 Rounds pay **1 to 35 coins**. The floor is deliberately a token amount: idling through three rounds
 pays 3 coins, so AFK farming earns nothing worth having, while a cap of 35 is reachable in all three
