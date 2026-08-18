@@ -127,69 +127,73 @@ Deals* menu:
 | Hearty mains (Satay King, Tsui Wah, A-1 carbonara) | HK$75 |
 | Desserts (egg waffle, red bean soup) | HK$35 |
 | Häagen-Dazs 100mL | HK$40 |
-| Drink add-on with any food | **+HK$15** |
-| Signature drink or ice cream add-on | **+HK$30** |
 
-The menu is seasonal, so **these need refreshing when UO changes it**. Reward *wording* is
+The menu is seasonal, so **these need refreshing when UO reissues it**. Reward *wording* is
 deliberately generic ("any hot meal", not a named dish) so a new menu doesn't invalidate the
 catalogue — only the `retail` figures the discount cap is checked against.
 
-The **+HK$15 drink add-on** is why "Free drink with any meal" has a face value of exactly HK$15: it is
-UO's own price for that upgrade, not a guess.
+### Discounts only, never free items
+
+**Every onboard reward is a discount.** The customer always pays the balance, so each redemption is
+attached to a sale UO would often not otherwise have made.
+
+Free items were built and then removed. They cost **twice as much per coin** as a discount, because
+nothing is bought alongside them to offset the cost, and dropping them cut the programme's cost by
+17%. A discount also reads as a better deal than it costs: HK$5 off a HK$20 snack is a quarter off
+to the customer and about HK$2 to UO.
+
+### Two rules protect onboard margin
+
+1. **No discount exceeds HK$10** (`MAX_DISCOUNT_HKD`), so no single coupon can swallow the margin on
+   a HK$20 snack or a HK$40 drink.
+2. **No discount exceeds a third of the `retail`** of the cheapest item it applies to.
+
+Both are asserted in `scratchpad/economy.mjs` against the real menu prices, not eyeballed. The
+largest discount in the catalogue is 27% of what it applies to; most sit between 9% and 25%.
+
+The travel extras (front-row seat, 3kg baggage) sit above the HK$10 cap deliberately: they are
+capacity-limited rather than a cash cost, and they are the aspiration for that tab rather than an
+everyday redemption.
 
 ### The markup schedule
 
 Markup rises with what a reward actually costs UO to fulfil (`MARKUP` in `src/data/rewards.js`):
 
-| Tier | Rate | Applied to | Why |
-| --- | --- | --- | --- |
-| **`free`** | **100 coins/HK$** | face value | Nothing to fulfil — digital goods, seat selection. The hook, meant to be redeemed. |
-| **`coupon`** | **160 coins/HK$** | the discount | Customer pays the balance on a ~60%-margin item, so UO nets money on a sale that often wouldn't have happened. |
-| **`freebie`** | **200 coins/HK$** | **UO's unit cost** | A whole free item with no offsetting sale, so it prices off `unitCost` (~35% of menu price), not retail. |
-| **`merch`** | **200 coins/HK$** | face value | Real COGS, priced as the aspiration. |
-
-**Why freebies price off cost.** A bottle of water retails at HK$10 but costs UO around HK$3. Priced
-off retail it would cost 2,000 coins — more than HK$20 off a main — which is absurd for a bottle of
-water. Priced off the HK$3 it lands at 600 coins, about nine days, which is where an entry reward
-belongs.
+| Tier | Rate | Why |
+| --- | --- | --- |
+| **`free`** | **100 coins/HK$** | Nothing to fulfil — digital goods, seat selection. The hook, meant to be redeemed. |
+| **`coupon`** | **160 coins/HK$** | Customer pays the balance on a ~60%-margin item, so UO nets money on a sale that often wouldn't have happened. |
+| **`merch`** | **200 coins/HK$** | Real COGS, priced as the aspiration. |
 
 Each reward carries its own `tier`, deliberately separate from `kind` (the tab it appears under).
 Standard seat selection is a travel extra to the customer but costs UO nothing to give, so it sits in
 the Travel tab at the `free` rate. Collapsing the two would misprice it.
-
-**Discount cap:** no coupon exceeds a third of the `retail` of the cheapest item it applies to, so the
-customer always pays the balance and every coupon redemption stays margin-positive. Two rewards were
-tuned to satisfy it against the real menu — the Signature Drink discount is HK$12 rather than HK$15
-(HK$15 on a HK$40 drink is 38%), and the free dessert pairs with a Hearty Bites main rather than any
-hot meal (32% instead of 35%).
 
 **Holding cap — one outstanding voucher per reward.** An unused voucher blocks redeeming another of
 the same reward, so nobody banks ten drink coupons and uses them all on one flight. Tapping a
 voucher marks it used and frees the slot. That works in flight (onboard is where a coupon is spent);
 only *issuing* new vouchers is frozen offline.
 
-### The catalogue — 23 rewards, six tabs
+### The catalogue — 21 rewards, six tabs
 
-| Reward | Tier | Priced from | Price | Days |
+| Reward | Tier | Face | Price | Days |
 | --- | --- | --- | --- | --- |
 | **Drinks** | | | | |
-| Free bottled water | freebie | cost HK$3 | **600** | ~9 |
+| HK$3 off any drink | coupon | HK$3 | **480** | ~7 |
 | HK$5 off any drink | coupon | HK$5 | **800** | ~12 |
-| Free juice or tea carton | freebie | cost HK$7 | **1,400** | ~21 |
-| HK$12 off any Signature Drink | coupon | HK$12 | **1,920** | ~29 |
+| HK$10 off any Signature Drink | coupon | HK$10 | **1,600** | ~24 |
 | **Snacks** | | | | |
+| HK$3 off any snack | coupon | HK$3 | **480** | ~7 |
 | HK$5 off any snack | coupon | HK$5 | **800** | ~12 |
-| Free packet snack | freebie | cost HK$7 | **1,400** | ~21 |
-| HK$10 off any cup noodles | coupon | HK$10 | **1,600** | ~24 |
+| HK$8 off any cup noodles | coupon | HK$8 | **1,280** | ~19 |
 | **Meals** | | | | |
 | HK$5 off any light bite | coupon | HK$5 | **800** | ~12 |
-| HK$10 off any hot meal | coupon | HK$10 | **1,600** | ~24 |
-| Free drink with any meal | coupon | HK$15 | **2,400** | ~36 |
-| HK$20 off any Hearty Bites main | coupon | HK$20 | **3,200** | ~48 |
+| HK$8 off any hot meal | coupon | HK$8 | **1,280** | ~19 |
+| HK$10 off any Hearty Bites main | coupon | HK$10 | **1,600** | ~24 |
 | **Sweets** | | | | |
+| HK$3 off any dessert | coupon | HK$3 | **480** | ~7 |
 | HK$5 off any dessert | coupon | HK$5 | **800** | ~12 |
-| Free ice cream cup | freebie | cost HK$14 | **2,800** | ~42 |
-| Free dessert with a Hearty Bites main | coupon | HK$35 | **5,600** | ~85 |
+| HK$8 off an ice cream cup | coupon | HK$8 | **1,280** | ~19 |
 | **Berry** | | | | |
 | Berry wallpaper pack | free | HK$2 | 200 | ~3 |
 | Berry sticker pack | free | HK$3 | 300 | ~5 |
@@ -204,7 +208,7 @@ only *issuing* new vouchers is frozen offline.
 
 Plus the blindbox at **800**.
 
-**Every tab opens on something reachable inside two weeks** — 9, 12, 12, 12, 3 and 8 days. That is the
+**Every tab opens on something reachable inside two weeks** — 7, 7, 12, 7, 3 and 8 days. That is the
 property this catalogue exists to hold, and it is asserted in `scratchpad/economy.mjs` rather than
 eyeballed: an earlier revision failed it on two tabs.
 
@@ -212,20 +216,15 @@ eyeballed: an earlier revision failed it on two tabs.
 
 ## What the programme costs UO
 
-Costed **per tier**, not as one blended percentage, because the tiers differ enormously:
+Costed **per tier**, not as one blended percentage:
 
 | Tier | UO cost per redemption | **Cost per 1,000 coins redeemed** |
 | --- | --- | --- |
 | `free` | nothing | **HK$0** |
 | `coupon` | ~40% of the discount | **HK$2.50** |
 | `merch` | ~65% of face (real COGS) | **HK$3.25** |
-| `freebie` | the unit cost outright | **HK$5.00** |
 
-**Freebies cost exactly 2× what coupons do per coin**, because a coupon is partly paid for by the
-sale it triggers and a freebie is not. That is the deliberate price of offering a whole free item,
-which motivates far better than a few dollars off — but it is a real cost and is stated, not hidden.
-
-Blended evenly across the catalogue, a coin costs UO about **HK$2.74 per 1,000**.
+Blended across the catalogue, a coin costs UO about **HK$2.29 per 1,000**.
 
 ### At 10,000 registered players
 
@@ -247,28 +246,26 @@ Assuming **25% breakage** (coins earned but never redeemed; loyalty programmes t
 | | |
 | --- | --- |
 | Coins redeemed/day | ~156,500 |
-| **True cost per day** | **~HK$429** |
-| — from check-in | ~HK$87 |
-| — from games | ~HK$342 |
-| Per month | ~HK$12,900 |
-| Per year | ~HK$156,500 |
-| Per registered user per year | **HK$15.65** |
+| **True cost per day** | **~HK$358** |
+| — from check-in | ~HK$72 |
+| — from games | ~HK$286 |
+| Per month | ~HK$10,700 |
+| Per year | ~HK$130,600 |
+| Per registered user per year | **HK$13.06** |
 
-**This is up 9% on the previous ~HK$395/day**, and the increase is entirely the freebie tier. Adding
-whole free items to the catalogue costs real money; the model surfaces that rather than burying it in
-an averaged percentage.
+**Down 17% on the free-item catalogue's ~HK$429/day** — about HK$26,000 a year saved by making every
+onboard reward a discount instead.
 
-Against a customer worth ~HK$3,000/year, HK$15.65 is **0.5% of revenue**, comfortably inside the 1–3%
+Against a customer worth ~HK$3,000/year, HK$13.06 is **0.4% of revenue**, comfortably inside the 1–3%
 loyalty benchmark, and before counting any incremental ancillary sales the coupons trigger.
 
 **Worst case**, if all 10,000 were daily actives — which no programme achieves, but it bounds the
-risk: 655,000 coins/day, **~HK$1,346/day, ~HK$491,000/year**.
+risk: **~HK$1,123/day, ~HK$410,000/year**.
 
-Three caveats worth carrying into the pitch, because they are what a finance reviewer will push on:
-the 25% breakage and the 15/35/50 engagement split are assumptions rather than measurements; the ~35%
-unit-cost assumption behind freebies drives the largest single line; and the blend assumes redemptions
-spread evenly across the catalogue, when in practice the *mix* of what people actually redeem moves
-the total more than any single price does.
+Two caveats worth carrying into the pitch, because they are what a finance reviewer will push on: the
+25% breakage and the 15/35/50 engagement split are assumptions rather than measurements; and the
+blend assumes redemptions spread evenly across the catalogue, when in practice the *mix* of what
+people actually redeem moves the total more than any single price does.
 
 ---
 
@@ -283,9 +280,9 @@ the total more than any single price does.
 | Coin book value | `src/state/store.jsx` — `COINS_PER_HKD` |
 | Store markup schedule | `src/data/rewards.js` — `MARKUP`, and each reward's `tier` |
 | Real menu prices | `src/data/rewards.js` — each reward's `retail`; refresh when UO reissues the menu |
-| Free-item unit costs | `src/data/rewards.js` — each freebie's `unitCost` (~35% of menu price) |
+| Onboard discount cap | `src/data/rewards.js` — `MAX_DISCOUNT_HKD` |
 | Check-in calendar | `src/data/checkin.js` |
-| Redemption prices | `src/data/rewards.js` — `priceOf()`: basis × `MARKUP[tier]` |
+| Redemption prices | `src/data/rewards.js` — `priceOf()`: `hkd` × `MARKUP[tier]` |
 
 **In-flight:** all three games stay playable and unlimited, but pay **0 coins**, post no leaderboard
 score, and **consume no ticket** (so there is nothing to refund either) — everything waits until

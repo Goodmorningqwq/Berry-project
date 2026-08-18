@@ -13,7 +13,7 @@ import { REGION_BADGES, TIERED_MEDALS, tierFor } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 9
+const SCHEMA_VERSION = 10
 
 /**
  * The coin's **book value** — what UO carries the outstanding coin liability
