@@ -94,32 +94,30 @@ const StrawHat = () => (
   </g>
 )
 
-const Sakura = () => (
+/* Japan's exclusive: a hachimaki, drawn from the official render. The band
+   follows the top of the head rather than sitting flat, so it reads as tied on
+   rather than stuck on. */
+const Hachimaki = () => (
   <g {...ink}>
-    <g transform="translate(146 46)">
-      {[0, 72, 144, 216, 288].map((a) => (
-        <ellipse key={a} rx="9" ry="13" fill="#FBD3E2" transform={`rotate(${a}) translate(0 -12)`} />
-      ))}
-      <circle r="5" fill="#F5C542" />
-    </g>
-    <g transform="translate(120 26) scale(0.62)">
-      {[0, 72, 144, 216, 288].map((a) => (
-        <ellipse key={a} rx="9" ry="13" fill="#F9BFD5" transform={`rotate(${a}) translate(0 -12)`} />
-      ))}
-      <circle r="5" fill="#F5C542" />
-    </g>
+    <path d="M46 62 Q100 34 154 62 L152 78 Q100 52 48 78 Z" fill="#FBFBFB" />
+    <circle cx="100" cy="60" r="10" fill="#E02B20" />
   </g>
 )
 
-const HanbokBand = () => (
+/* Korea's exclusive: a gat. The brim is drawn wider than the head so the
+   silhouette reads at small sizes, and the crown tapers slightly the way the
+   real hat does.
+
+   The official render hangs a ribbon at chest level. That is left off: the gat
+   is head-anchored, so it scales with each look's head, and a chest-length
+   ribbon would drift on Crew and Pilot Berry whose proportions differ. The
+   short tie under the brim keeps the read without the drift. */
+const Gat = () => (
   <g {...ink}>
-    <path d="M46 44 Q100 20 154 44 L154 56 Q100 32 46 56 Z" fill="#2C3E86" />
-    <path d="M60 50 q40 -18 80 0" fill="none" stroke="#F5C542" strokeWidth="3" />
-    <g transform="translate(100 30)">
-      <path d="M0 6 L-20 -10 L-6 6 L-20 20 Z" fill="#E8548C" />
-      <path d="M0 6 L20 -10 L6 6 L20 20 Z" fill="#E8548C" />
-      <circle cy="6" r="6" fill="#C43C6B" />
-    </g>
+    <path d="M78 46 L84 8 Q100 3 116 8 L122 46 Z" fill="#1B1B1B" />
+    <ellipse cx="100" cy="50" rx="70" ry="13" fill="#242424" />
+    <path d="M76 46 q24 6 48 0" fill="none" stroke="#3A3A3A" strokeWidth="2.5" />
+    <path d="M84 58 l-5 16" fill="none" strokeWidth="4" />
   </g>
 )
 
@@ -161,13 +159,21 @@ const PandaHood = () => (
 /* Face props (head-anchored)                                          */
 /* ------------------------------------------------------------------ */
 
+/* Star lenses, from the official render. Each star is one path rotated into
+   place, so the two lenses stay identical. */
+const STAR = 'M0 -22 L6 -7 L22 -7 L9 3 L14 18 L0 9 L-14 18 L-9 3 L-22 -7 L-6 -7 Z'
+
 const Sunnies = () => (
   <g {...ink}>
-    <rect x="54" y="72" width="38" height="26" rx="12" fill="#2B2F45" />
-    <rect x="108" y="72" width="38" height="26" rx="12" fill="#2B2F45" />
-    <path d="M92 82 h16" strokeWidth="5" />
-    <path d="M60 79 l11 5" stroke="#7C8199" strokeWidth="3.5" />
-    <path d="M114 79 l11 5" stroke="#7C8199" strokeWidth="3.5" />
+    <path d="M92 84 h16" strokeWidth="5" />
+    <g transform="translate(73 85)">
+      <path d={STAR} fill="#2BC4D8" transform="scale(1.18)" />
+      <path d={STAR} fill="#3B2B8F" strokeWidth="2" />
+    </g>
+    <g transform="translate(127 85)">
+      <path d={STAR} fill="#2BC4D8" transform="scale(1.18)" />
+      <path d={STAR} fill="#3B2B8F" strokeWidth="2" />
+    </g>
   </g>
 )
 
@@ -201,17 +207,23 @@ const NeckPillowFront = () => (
   </g>
 )
 
+/* UO purple in the official render, not the pink this used to be. */
 const ScarfBehind = () => (
   <g {...ink}>
-    <path d="M54 126 q46 30 92 0 l0 20 q-46 28 -92 0 z" fill="#C43C6B" />
+    <path d="M54 126 q46 30 92 0 l0 20 q-46 28 -92 0 z" fill="#7B2D9E" />
   </g>
 )
 
 const ScarfFront = () => (
   <g {...ink}>
-    <path d="M112 142 l18 52 l-20 5 l-10 -50 z" fill="#A82F58" />
-    <path d="M110 190 l20 -5 l4 13 l-21 5 z" fill="#8E2549" />
-    <ellipse cx="100" cy="146" rx="16" ry="11" fill="#D9557E" />
+    <path d="M112 142 l18 52 l-20 5 l-10 -50 z" fill="#5F1F7D" />
+    {/* fringe at the tail, as drawn */}
+    <g stroke="#3F1456" strokeWidth="3">
+      {[0, 5, 10, 15].map((d) => (
+        <path key={d} d={`M${111 + d} ${191 + d * 0.3} l2 12`} />
+      ))}
+    </g>
+    <ellipse cx="100" cy="146" rx="16" ry="11" fill="#9040B4" />
   </g>
 )
 
@@ -324,8 +336,8 @@ export const HAT_ART = {
   conical: { anchor: 'head', Front: Conical },
   ramen: { anchor: 'head', Front: Ramen },
   strawHat: { anchor: 'head', Front: StrawHat },
-  sakura: { anchor: 'head', Front: Sakura },
-  hanbokBand: { anchor: 'head', Front: HanbokBand },
+  hachimaki: { anchor: 'head', Front: Hachimaki },
+  gat: { anchor: 'head', Front: Gat },
   bandana: { anchor: 'head', Front: Bandana },
   salakot: { anchor: 'head', Front: Salakot },
   pandaHood: { anchor: 'head', Front: PandaHood }

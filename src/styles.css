@@ -693,13 +693,13 @@ p {
 .room__wall {
   position: absolute;
   inset: 0 0 26% 0;
-  background: linear-gradient(180deg, #e3d4f2 0%, #f1e7f9 100%);
+  background: var(--room-wall);
 }
 
 .room__floor {
   position: absolute;
   inset: 74% 0 0 0;
-  background: linear-gradient(180deg, #f7e6c9 0%, #fdf4e4 100%);
+  background: var(--room-floor);
   border-top: 2px solid rgba(111, 43, 144, 0.12);
 }
 
@@ -710,7 +710,7 @@ p {
   width: 96px;
   height: 62px;
   border-radius: 12px;
-  background: linear-gradient(180deg, #bfe3fa, #e7f4fd);
+  background: var(--room-sky);
   border: 3px solid #fff;
   box-shadow: 0 3px 10px rgba(111, 43, 144, 0.12);
   overflow: hidden;
@@ -719,7 +719,126 @@ p {
 .room__window span {
   position: absolute;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--room-speck);
+}
+
+.patch-note {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--purple-50);
+}
+
+.patch-note__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--purple-800);
+  font-size: 14.5px;
+}
+
+.patch-note__list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.patch-note__list li + li {
+  margin-top: 6px;
+}
+
+/* Wardrobe tile for a room theme: wall over floor, with the window's sky.
+   Inherits the same --room-* variables the real room uses. */
+.room-swatch {
+  position: relative;
+  width: 78px;
+  height: 62px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--room-floor);
+  border: 2px solid rgba(111, 43, 144, 0.15);
+}
+
+.room-swatch::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 30% 0;
+  background: var(--room-wall);
+}
+
+.room-swatch__sky {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--room-sky);
+  border: 2px solid #fff;
+}
+
+.room-swatch--locked {
+  filter: grayscale(0.7);
+  opacity: 0.65;
+}
+
+/* ---- room backgrounds ----
+   Each theme is four custom properties, so a new one is four lines rather than
+   four rulesets. The default values are the original room, so an unequipped
+   room renders exactly as it always did. */
+
+.room {
+  --room-wall: linear-gradient(180deg, #e3d4f2 0%, #f1e7f9 100%);
+  --room-floor: linear-gradient(180deg, #f7e6c9 0%, #fdf4e4 100%);
+  --room-sky: linear-gradient(180deg, #bfe3fa, #e7f4fd);
+  --room-speck: rgba(255, 255, 255, 0.9);
+}
+
+.room--bg-clouds {
+  --room-wall: linear-gradient(180deg, #cfe8fb 0%, #eaf6ff 100%);
+  --room-floor: linear-gradient(180deg, #eef6fd 0%, #ffffff 100%);
+  --room-sky: linear-gradient(180deg, #7fc4f2, #cfe9fb);
+}
+
+.room--bg-sakura {
+  --room-wall: linear-gradient(180deg, #fbdce8 0%, #fdeef4 100%);
+  --room-floor: linear-gradient(180deg, #f6e3d2 0%, #fdf2e8 100%);
+  --room-sky: linear-gradient(180deg, #f9c2d8, #fde4ee);
+  --room-speck: rgba(255, 255, 255, 0.95);
+}
+
+.room--bg-island {
+  --room-wall: linear-gradient(180deg, #b6e7de 0%, #ddf5f0 100%);
+  --room-floor: linear-gradient(180deg, #f3e2b8 0%, #fbf1d8 100%);
+  --room-sky: linear-gradient(180deg, #37b6c9 55%, #f3e2b8 55%);
+}
+
+.room--bg-seoul {
+  --room-wall: linear-gradient(180deg, #1e2350 0%, #33306b 100%);
+  --room-floor: linear-gradient(180deg, #2a2550 0%, #3d3566 100%);
+  --room-sky: linear-gradient(180deg, #10142e, #2b2a5c);
+  --room-speck: rgba(255, 214, 102, 0.95);
+}
+
+.room--bg-cabin {
+  --room-wall: linear-gradient(180deg, #6f2b90 0%, #8c47ab 100%);
+  --room-floor: linear-gradient(180deg, #3f3a46 0%, #5a5462 100%);
+  --room-sky: linear-gradient(180deg, #9ad4f5, #dff0fb);
+}
+
+/* The cabin window is an aircraft porthole rather than a house window. */
+.room--bg-cabin .room__window {
+  border-radius: 999px / 40px;
+  border-width: 5px;
+}
+
+/* Seoul and Cabin run dark walls, so the shelf labels need to lift off them. */
+.room--bg-seoul .room__shelf,
+.room--bg-cabin .room__shelf {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
 }
 
 .room__shelves {

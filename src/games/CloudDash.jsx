@@ -170,7 +170,7 @@ export default function CloudDash({ equipped, offline, gameId, bestScore = 0, on
   // Both this and GAP were retuned after simulating 20,000 rounds: at a 168px
   // gap an average player earned 2.5 coins and hit the floor 37% of the time,
   // which made the flagship game worthless. 210px and x2.2 puts it at ~10.
-  const reward = Math.min(35, 1 + Math.floor(frame.score * 2.2))
+  const reward = Math.min(23, 1 + Math.floor(frame.score * 1.45))
 
   return (
     <div className="game-shell">

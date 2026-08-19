@@ -240,7 +240,7 @@ export default function CandyRush({ offline, gameId, bestScore = 0, onExit, onFi
   // coins a round against Cloud Dash's 2.5. Since tickets let a player choose
   // their game, the best-paying one sets the whole economy, so the three have
   // to land near each other or one of them is simply the correct answer.
-  const reward = Math.min(35, 1 + Math.floor(score / 130))
+  const reward = Math.min(23, 1 + Math.floor(score / 197))
 
   return (
     <div className="game-shell">

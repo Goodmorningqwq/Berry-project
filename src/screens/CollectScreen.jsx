@@ -3,7 +3,7 @@ import { useStore } from '../state/store.jsx'
 import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
 import FlightRecord from '../components/FlightRecord.jsx'
-import { Empty, ProgressBar } from '../components/ui.jsx'
+import { Empty, ProgressBar, RoomSwatch } from '../components/ui.jsx'
 import { BY_COUNTRY, DESTINATIONS } from '../data/destinations.js'
 import { COSMETICS, ITEMS_BY_ID, RARITY_LABEL, SLOTS } from '../data/items.js'
 
@@ -205,7 +205,11 @@ function Wardrobe() {
             >
               <span className={`rarity rarity--${item.rarity}`}>{RARITY_LABEL[item.rarity]}</span>
               <div className="wardrobe-item__preview">
-                <Berry equipped={{ [item.slot]: item.id }} mood="idle" size={78} animate={false} />
+                {item.slot === 'background' ? (
+                  <RoomSwatch id={item.id} />
+                ) : (
+                  <Berry equipped={{ [item.slot]: item.id }} mood="idle" size={78} animate={false} />
+                )}
               </div>
               <div className="wardrobe-item__name">{item.name}</div>
             </button>
@@ -223,7 +227,7 @@ function Wardrobe() {
               <div key={item.id} className="wardrobe-item wardrobe-item--locked">
                 <span className={`rarity rarity--${item.rarity}`}>{RARITY_LABEL[item.rarity]}</span>
                 <div className="wardrobe-item__preview" style={{ fontSize: 30 }}>
-                  🔒
+                  {item.slot === 'background' ? <RoomSwatch id={item.id} locked /> : '🔒'}
                 </div>
                 <div className="wardrobe-item__name">{item.name}</div>
                 <div className="tiny">
@@ -231,7 +235,9 @@ function Wardrobe() {
                     ? 'Fly to that country'
                     : item.source === 'milestone'
                       ? '30-day streak'
-                      : 'Blindbox'}
+                      : item.source === 'shop'
+                        ? 'Buy in Rewards'
+                        : 'Blindbox'}
                 </div>
               </div>
             ))}

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useStore } from './state/store.jsx'
+import { RELEASE_KEY, useStore } from './state/store.jsx'
 import { Icons } from './components/ui.jsx'
 import HostScreen from './components/HostScreen.jsx'
 import OfflineBanner from './components/OfflineBanner.jsx'
 import CoinSheet from './components/CoinSheet.jsx'
+import PatchNotes from './components/PatchNotes.jsx'
+import { LATEST_RELEASE, RELEASES, releasesSince } from './data/releases.js'
 import { useToast } from './components/Toast.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import PlayScreen from './screens/PlayScreen.jsx'
@@ -116,6 +118,57 @@ export default function App() {
     dispatch({ type: 'CLEAR_EXPIRY' })
   }, [state.lastExpiry, dispatch, toast])
 
+  // Which releases to show, decided once on mount. The marker lives in its own
+  // localStorage key rather than in state: SCHEMA_VERSION bumps wipe the save
+  // most rounds, and a wiped marker would show notes to genuinely-new visitors
+  // and make "new user" indistinguishable from "user we just reset".
+  const [newReleases, setNewReleases] = useState([])
+  const [notesOpen, setNotesOpen] = useState(false)
+
+  useEffect(() => {
+    let seen = null
+    try {
+      seen = localStorage.getItem(RELEASE_KEY)
+    } catch {
+      return // private mode: skip the popup rather than nagging every load
+    }
+    if (seen === LATEST_RELEASE) return
+
+    // No marker at all means a first-ever visit — there is nothing to have
+    // been updated *from*, so record the version and stay quiet.
+    const since = releasesSince(seen)
+    if (since.length) {
+      setNewReleases(since)
+      setNotesOpen(true)
+    } else {
+      try {
+        localStorage.setItem(RELEASE_KEY, LATEST_RELEASE)
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [])
+
+  const dismissNotes = () => {
+    setNotesOpen(false)
+    try {
+      localStorage.setItem(RELEASE_KEY, LATEST_RELEASE)
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // The presenter panel asks for the full list on demand, since the marker
+  // deliberately survives "Reset demo".
+  useEffect(() => {
+    const show = () => {
+      setNewReleases(RELEASES)
+      setNotesOpen(true)
+    }
+    window.addEventListener('berry:show-patch-notes', show)
+    return () => window.removeEventListener('berry:show-patch-notes', show)
+  }, [])
+
   const openBerry = () => {
     setPushPhase('in')
     dispatch({ type: 'SEEN_INTRO' })
@@ -145,6 +198,8 @@ export default function App() {
     <div className="app">
       {/* The host screen stays behind for the length of the transition, so the
           extension reads as pushing in over the app rather than replacing it. */}
+      <PatchNotes open={notesOpen} releases={newReleases} onClose={dismissNotes} />
+
       {pushPhase && (
         <div className="app__host-under" aria-hidden="true">
           <HostScreen onOpen={() => {}} />

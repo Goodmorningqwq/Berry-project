@@ -23,7 +23,7 @@ Berry is a bear companion that gives 18–34 year-old users a reason to open the
 | **Leaderboards** | A ranking per game, shown right after each round and on a Play tab |
 | **Blindbox** | Spend coins on random hats, accessories and looks; duplicates refund coins |
 | **Passport & medals** | 35 real UO destinations to stamp; your first landing in each country unlocks that country's exclusive prop |
-| **Redemption** | 22 rewards across six tabs, coins and vouchers expiring after six months, priced against the real UO inflight menu — onboard discounts, Berry merchandise and travel extras. Redeemable from ticket purchase until online check-in, capped at one outstanding voucher each |
+| **Redemption** | 22 rewards across six tabs — onboard discounts priced against the real UO inflight menu, room backgrounds and Berry merch. Redeemable from ticket purchase until online check-in, one outstanding voucher each, and coins and vouchers expire after six months |
 
 ### Berry's wardrobe
 
@@ -212,18 +212,18 @@ scored within 8% of optimal. The economy had been assuming 17.7 coins a round ag
 10.4.
 
 All three were retuned — a wider gap for Cloud Dash, a tighter clock plus a move bonus for Baggage
-Match, a higher divisor and a big-match bonus for Candy Rush — bringing the blend to **12.1 coins a
+Match, a higher divisor and a big-match bonus for Candy Rush — bringing the blend to **8.2 coins a
 round** and narrowing the spread between best and worst game from 8× to 2.5×. That matters because
 tickets let a player *choose* their game, so the best-paying one sets the whole economy.
 
 The floor keeps AFK pointless: three idled rounds pay 3 coins. Onboard coupons are **percentages** — 5% / 7.5% / 10% off, with the cash equivalent spelled out on
-each card because a percentage on a HK$20 item is vaguer than an amount. The shop runs 21 rewards
-across six tabs — Drinks, Snacks, Meals, Sweets, Berry and Travel — and **every tab opens on something reachable
-in 3–11 days**, because a tab whose cheapest item is months away just reads as a wall.
+each card because a percentage on a HK$20 item is vaguer than an amount. The shop runs 22 rewards
+across six tabs — Drinks, Snacks, Meals, Sweets, Berry and Travel — and **every food and Berry tab opens on something
+reachable in 6–14 days**, and Merch in 24, because a tab whose cheapest item is months away just reads as a wall.
 
-At 10,000 registered players the programme issues ~156,000 coins a day (73% of it from games, which
-is why the ticket cap is the control that matters) and costs roughly **HK$279/day — ~HK$102,000/year,
-or HK$10.20 per registered user** after breakage. Full derivation, per-game curves, the markup schedule and the costing model are in
+At 10,000 registered players the programme issues ~119,000 coins a day (65% of it from games, which
+is why the ticket cap is the control that matters) and costs roughly **HK$192/day — ~HK$70,000/year,
+or HK$7.00 per registered user** after breakage. Full derivation, per-game curves, the markup schedule and the costing model are in
 [docs/REWARD-TABLE.md](docs/REWARD-TABLE.md).
 
 Everything is stored locally in `localStorage`. There is no backend and no network calls, so the

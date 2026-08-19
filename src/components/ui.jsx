@@ -22,6 +22,23 @@ export function Modal({ open, onClose, children, label }) {
   )
 }
 
+/**
+ * A room theme has no prop art to hang on Berry, so it previews as the room
+ * itself — wall over floor, with the window's sky. Reuses the same `room--<id>`
+ * custom properties the real room does, so a swatch can never drift from what
+ * equipping it actually looks like.
+ */
+export function RoomSwatch({ id, locked, size }) {
+  return (
+    <div
+      className={`room-swatch room--${id} ${locked ? 'room-swatch--locked' : ''}`}
+      style={size ? { width: size, height: Math.round(size * 0.8) } : undefined}
+    >
+      <span className="room-swatch__sky" />
+    </div>
+  )
+}
+
 export function Coin({ small }) {
   return <span className={`coin-icon ${small ? 'coin-icon--sm' : ''}`}>B</span>
 }

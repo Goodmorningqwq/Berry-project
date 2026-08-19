@@ -64,15 +64,27 @@ export const COSMETICS = [
   { id: 'lantern', name: 'Paper Lantern', slot: 'accessory', art: 'lantern', rarity: 'rare', source: 'blindbox' },
 
   /* ---- country exclusives (first landing in that country) ---- */
-  { id: 'sakura-clip', name: 'Japan Sakura Clip', slot: 'hat', art: 'sakura', rarity: 'epic', source: 'country' },
-  { id: 'hanbok-band', name: 'Korea Hanbok Headband', slot: 'hat', art: 'hanbokBand', rarity: 'epic', source: 'country' },
+  { id: 'japan-hachimaki', name: 'Japan Hachimaki', slot: 'hat', art: 'hachimaki', rarity: 'epic', source: 'country' },
+  { id: 'korea-gat', name: 'Korean Gat', slot: 'hat', art: 'gat', rarity: 'epic', source: 'country' },
   { id: 'panda-hood', name: 'Mainland Panda Hood', slot: 'hat', art: 'pandaHood', rarity: 'epic', source: 'country' },
   { id: 'bubble-tea', name: 'Taiwan Bubble Tea', slot: 'accessory', art: 'bubbleTea', rarity: 'epic', source: 'country' },
   { id: 'batik-bandana', name: 'Malaysia Batik Bandana', slot: 'hat', art: 'bandana', rarity: 'epic', source: 'country' },
   { id: 'salakot', name: 'Philippines Salakot', slot: 'hat', art: 'salakot', rarity: 'epic', source: 'country' },
   { id: 'thai-garland', name: 'Thailand Garland', slot: 'accessory', art: 'garland', rarity: 'epic', source: 'country' },
-  { id: 'conical-hat', name: 'Vietnam Nón Lá', slot: 'hat', art: 'conical', rarity: 'epic', source: 'country' }
+  { id: 'conical-hat', name: 'Vietnam Nón Lá', slot: 'hat', art: 'conical', rarity: 'epic', source: 'country' },
+
+  /* ---- room backgrounds and digital goods, bought in the shop ----
+     Backgrounds are CSS themes rather than art files: BerryRoom applies
+     `room--<id>` and the stylesheet recolours the wall, window and floor. */
+  { id: 'bg-clouds', name: 'Above the Clouds', slot: 'background', rarity: 'common', source: 'shop' },
+  { id: 'bg-sakura', name: 'Sakura Season', slot: 'background', rarity: 'rare', source: 'shop' },
+  { id: 'bg-island', name: 'Island Getaway', slot: 'background', rarity: 'rare', source: 'shop' },
+  { id: 'bg-seoul', name: 'Seoul Nights', slot: 'background', rarity: 'rare', source: 'shop' },
+  { id: 'bg-cabin', name: 'Cabin Class', slot: 'background', rarity: 'epic', source: 'shop' }
 ]
+
+/** The room theme shown when nothing else is equipped. */
+export const DEFAULT_BACKGROUND = 'bg-home'
 
 export const MILESTONE_ITEM_ID = 'pilot'
 export const STARTER_ITEM_ID = 'everyday'
@@ -95,5 +107,6 @@ export const BASIC_ITEMS_BY_ID = Object.fromEntries(BASIC_ITEMS.map((i) => [i.id
 export const SLOTS = [
   { id: 'look', label: 'Look' },
   { id: 'hat', label: 'Head' },
-  { id: 'accessory', label: 'Accessory' }
+  { id: 'accessory', label: 'Accessory' },
+  { id: 'background', label: 'Room' }
 ]

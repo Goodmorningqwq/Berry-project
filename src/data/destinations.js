@@ -62,8 +62,8 @@ export const DESTINATIONS = [
  * countries is a set I can actually draw well; thirty-five cities is not.
  */
 export const COUNTRIES = [
-  { id: 'Japan', region: 'Japan', flag: '🇯🇵', reward: 'sakura-clip' },
-  { id: 'South Korea', region: 'Korea', flag: '🇰🇷', reward: 'hanbok-band' },
+  { id: 'Japan', region: 'Japan', flag: '🇯🇵', reward: 'japan-hachimaki' },
+  { id: 'South Korea', region: 'Korea', flag: '🇰🇷', reward: 'korea-gat' },
   { id: 'Chinese Mainland', region: 'Greater China', flag: '🇨🇳', reward: 'panda-hood' },
   { id: 'Taiwan', region: 'Greater China', flag: '🇹🇼', reward: 'bubble-tea' },
   { id: 'Malaysia', region: 'Southeast Asia', flag: '🇲🇾', reward: 'batik-bandana' },

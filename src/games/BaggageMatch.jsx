@@ -109,8 +109,8 @@ export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, o
    * the game is actually about, and gives the cap a real if rare route: about
    * 2% of strong rounds reach it, matching the intended tail.
    */
-  const moveBonus = Math.max(0, 16 - moves) * 1.5
-  const reward = solved ? Math.min(35, 1 + Math.floor(left * 1.15 + moveBonus)) : 1
+  const moveBonus = Math.max(0, 16 - moves) * 1.0
+  const reward = solved ? Math.min(23, 1 + Math.floor(left * 0.76 + moveBonus)) : 1
   const matchedPairs = cards.filter((c) => c.matched).length / 2
 
   return (

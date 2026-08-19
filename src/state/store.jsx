@@ -13,7 +13,12 @@ import { REGION_BADGES, TIERED_MEDALS, tierFor } from '../data/medals.js'
 import { REWARDS_BY_ID } from '../data/rewards.js'
 
 const STORAGE_KEY = 'flywithberry.v1'
-const SCHEMA_VERSION = 12
+/**
+ * Which release the player last saw, kept deliberately *outside* STORAGE_KEY so
+ * a SCHEMA_VERSION bump doesn't wipe it — see the patch-notes effect in App.
+ */
+export const RELEASE_KEY = 'flywithberry.release'
+const SCHEMA_VERSION = 13
 
 /**
  * The coin's **book value** — what UO carries the outstanding coin liability
@@ -132,7 +137,7 @@ function initialState() {
     dayOffset: 0,
     blindboxTickets: 0,
     ownedItems: [STARTER_ITEM_ID],
-    equipped: { look: STARTER_ITEM_ID, hat: null, accessory: null },
+    equipped: { look: STARTER_ITEM_ID, hat: null, accessory: null, background: null },
     inventory: {},
     fedCount: 0,
     feedProgress: 0,
@@ -524,6 +529,21 @@ function reducer(state, action) {
       // dumped on a single flight. Mark the one you hold as used and the slot
       // frees up — see USE_VOUCHER.
       if (holdsVoucher(state, reward.id)) return state
+
+      // Digital goods are handed over on the spot — there is nobody to show a
+      // wallpaper or a room background to, so issuing a voucher for one would
+      // be theatre. Everything physical still gets a code.
+      if (reward.grant === 'item') {
+        if (state.ownedItems.includes(reward.itemId)) return state
+        return {
+          ...state,
+          coins: state.coins - reward.cost,
+          coinsExpireOn: nextExpiry(state, state.coins - reward.cost),
+          ownedItems: [...state.ownedItems, reward.itemId],
+          lastPull: { itemId: reward.itemId, duplicate: false, refund: 0 }
+        }
+      }
+
       return {
         ...state,
         coins: state.coins - reward.cost,

@@ -97,7 +97,7 @@ export default function BerryRoom({ mood, effect, speech }) {
   }
 
   return (
-    <section className="room">
+    <section className={`room ${state.equipped.background ? `room--${state.equipped.background}` : ''}`}>
       {/* back wall */}
       <div className="room__wall" aria-hidden="true">
         <div className="room__window">

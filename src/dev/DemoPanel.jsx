@@ -105,8 +105,8 @@ export default function DemoPanel() {
               ✈️ In-flight mode: {offline ? 'ON' : 'off'}
               <small>Play keeps working, earning stops</small>
             </button>
-            <button className="demo-btn" onClick={() => grant(15000)}>
-              🪙 Grant 15,000 coins
+            <button className="demo-btn" onClick={() => grant(6000)}>
+              🪙 Grant 6,000 coins
               <small>Reaches the Berry plush, the top redemption tier</small>
             </button>
             <button
@@ -118,6 +118,18 @@ export default function DemoPanel() {
             >
               🍪 Give treats
               <small>So Feed Berry can be shown on cue</small>
+            </button>
+            <button
+              className="demo-btn"
+              onClick={() => {
+                // The seen-marker survives Reset demo by design, so the only
+                // way back to the popup on stage is to ask for it.
+                window.dispatchEvent(new Event('berry:show-patch-notes'))
+                setOpen(false)
+              }}
+            >
+              📣 Show what's new
+              <small>Reopens the release notes popup</small>
             </button>
             <button className="demo-btn demo-btn--danger" onClick={reset}>
               ↺ Reset demo

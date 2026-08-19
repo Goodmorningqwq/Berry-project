@@ -89,8 +89,9 @@ the host app without losing progress.
 
 - Three full-body **looks**, each a swappable sprite: Everyday Berry, UO Cabin Crew Berry, UO Pilot
   Berry
-- **25 cosmetics** total: 3 looks plus 22 hats and accessories, rendered as layered SVG over the
-  sprite. Each look defines anchor points so one prop drawing positions correctly on every pose
+- **31 cosmetics** total: 3 looks, 23 hats and accessories rendered as layered SVG over the sprite,
+  and 5 room backgrounds implemented as CSS themes rather than image assets. Each look defines anchor
+  points so one prop drawing positions correctly on every pose
 - Props can render **behind** the character as well as in front (e.g. a neck pillow sits behind the
   head), which requires per-item layer ordering
 - Moods drive presentation: idle, happy, sleepy — affecting animation speed and colour treatment
@@ -128,8 +129,8 @@ A **fixed 7-day reward calendar**, publicly previewed so users always know what 
 
 Entry is **ticket-gated**: 3 play tickets a day, spendable on any mix of games, 1 per round. The
 ticket is taken on entry and **refunded if the player leaves without collecting**. Every 7th
-consecutive check-in grants a bonus ticket, capped at 5 held. Rounds pay **1–35 coins** by
-performance — a token floor that makes idling worthless, and a cap all three games can reach.
+consecutive check-in grants a bonus ticket, capped at 5 held. Rounds pay **1 to 23 coins** by
+performance — a token floor that makes idling worthless and a cap all three games can reach.
 
 Payout curves are **tuned against simulation, not intuition**: a harness replays each game's real
 logic for 20,000 rounds per game per skill level and reports the actual distribution. It found a
@@ -168,7 +169,7 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
   unavoidable duplicate. Rarity-tiered reveal animation
 - **Odds disclosure screen** listing every rarity percentage, the items in each tier, the full
   check-in calendar and the feeding conversion. This mirrors real gacha disclosure obligations
-- **Redemption catalogue:** 21 rewards across six tabs (Drinks, Snacks, Meals, Sweets, Berry,
+- **Redemption catalogue:** 22 rewards across six tabs (Drinks, Snacks, Meals, Sweets, Berry,
   Travel), priced against the **real HK Express inflight menu**. Pricing separates the coin's **book
   value** (1 coin = HK$0.01, the accounting liability) from its **shelf price**, which applies a
   markup rising with what a reward costs to fulfil — 100 coins/HK$ for zero-cost perks, 160 for

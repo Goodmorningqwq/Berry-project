@@ -4,7 +4,7 @@ import { useToast } from '../components/Toast.jsx'
 import Berry from '../components/Berry.jsx'
 import Celebration from '../components/Celebration.jsx'
 import OddsSheet from '../components/OddsSheet.jsx'
-import { Coin, Empty } from '../components/ui.jsx'
+import { Coin, Empty, RoomSwatch } from '../components/ui.jsx'
 import { ITEMS_BY_ID, RARITY_LABEL } from '../data/items.js'
 import { REDEMPTION_WINDOW, REWARDS, REWARD_KINDS, REWARDS_BY_ID } from '../data/rewards.js'
 import { prettyDate } from '../state/store.jsx'
@@ -28,7 +28,13 @@ function Reveal({ pull, onClose }) {
           <span className={`rarity rarity--${item.rarity}`} style={{ position: 'static' }}>
             {RARITY_LABEL[item.rarity]}
           </span>
-          <Berry equipped={{ [item.slot]: item.id }} mood="excited" size={150} animate={false} />
+          {item.slot === 'background' ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
+              <RoomSwatch id={item.id} size={150} />
+            </div>
+          ) : (
+            <Berry equipped={{ [item.slot]: item.id }} mood="excited" size={150} animate={false} />
+          )}
           <h3 style={{ marginTop: 4 }}>{item.name}</h3>
           <p className="muted" style={{ marginTop: 6 }}>
             {pull.duplicate

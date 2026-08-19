@@ -4,52 +4,63 @@
  * Per the brief, redemption is open from ticket purchase until online check-in,
  * which is exactly the window where an extra touchpoint can convert.
  *
+ * Three kinds of thing are sold here:
+ *
+ *   onboard coupons  percentage discounts on the real inflight menu, issued as
+ *                    a voucher you show the crew
+ *   digital goods    wallpapers, stickers and room backgrounds — granted
+ *                    instantly, since you don't show a wallpaper to cabin crew
+ *   merch            physical Berry goods, collected or posted
+ *
  * **Menu prices are real.** Every `retail` figure comes from the HK Express
- * *Inflight Gourmet Meals and Deals* menu — water HK$10, cartons HK$20, cans
- * HK$25, signature drinks HK$40/45, packet snacks HK$20, Pringles HK$25, cup
- * noodles HK$30, light bites HK$35–45, combos HK$65, hearty mains HK$75,
- * desserts HK$35, Häagen-Dazs HK$40. The menu is seasonal, so these need
- * refreshing when UO reissues it; the reward *wording* is deliberately generic
- * so a new menu doesn't invalidate the catalogue.
+ * *Inflight Gourmet Meals and Deals* menu — cartons HK$20, cans HK$25,
+ * signature drinks HK$40/45, packet snacks HK$20, cup noodles HK$30, light
+ * bites HK$35–45, combos HK$65, hearty mains HK$75, desserts HK$35,
+ * Häagen-Dazs HK$40. The menu is seasonal, so these need refreshing when UO
+ * reissues it; the reward *wording* is deliberately generic so a new menu
+ * doesn't invalidate the catalogue.
  *
  * **Onboard coupons are percentages, not cash amounts.** `pct` is the headline
  * the customer sees and `hkd` is what it works out to against that reward's
  * `retail` — the number the costing model needs. Both are stored rather than
- * derived at render time so the economy script can assert they agree.
- *
- * A percentage reads as a proper offer and scales with what you order, but it
- * is vaguer than cash, so each card also spells the money out in `detail`.
+ * derived at render time so the economy script can assert they agree. A
+ * percentage reads as a proper offer and scales with what you order, but it is
+ * vaguer than cash, so each card spells the money out in `detail`.
  *
  * **Every onboard reward is a discount, never a free item.** The customer
  * always pays the balance, so every redemption is attached to a sale UO would
- * often not otherwise have made. Free items were tried and removed: they cost
- * twice as much per coin as a discount, because nothing is bought alongside
- * them to offset the cost.
+ * often not otherwise have made.
  *
  * **Two rules keep onboard margin intact**, both asserted in
  * `scratchpad/economy.mjs` against the real menu prices:
  *   1. no discount is worth more than **HK$10** in cash
  *   2. no discount exceeds **a third of the `retail`** it applies to
  *
- * At 5–10% both hold with enormous headroom — the largest coupon in the
- * catalogue is HK$7.50, a tenth of the hearty main it discounts.
+ * At 5–10% both hold with enormous headroom — the largest coupon is HK$7.50, a
+ * tenth of the hearty main it discounts.
  *
  * `cost` is what the store charges in coins, always *above* the coin's book
  * value — see COINS_PER_HKD in state/store.jsx, which is the accounting
- * liability, not a price. The base markup rises with what fulfilment costs UO:
- *
- *   free    100 coins/HK$   nothing to fulfil — digital goods, seat selection
- *   coupon  160 coins/HK$   customer pays the balance, so the sale offsets it
- *   merch   200 coins/HK$   real COGS, priced as the aspiration
+ * liability, not a price.
  */
 
 export const REDEMPTION_WINDOW = 'Redeemable from ticket purchase until online check-in'
 
-/** Coins charged per HK$1 of face value, by what fulfilment costs UO. */
+/**
+ * Coins charged per HK$1 of face value, by what fulfilment costs UO.
+ *
+ * `merch` sits *below* the coupon rates, which inverts the usual logic that
+ * physical goods with real COGS should cost more. That is deliberate: coins
+ * expire 180 days after the balance starts and the clock is never extended, so
+ * the most anyone can ever bank is around 6,300. At the old 200/HK$ the plush
+ * cost 15,000 and was simply impossible to buy — as were the tote, the
+ * front-row seat and the extra baggage. An unreachable reward is worse than an
+ * imperfect markup, so merch came down to fit inside one expiry window.
+ */
 export const MARKUP = {
   free: 100,
   coupon: 160,
-  merch: 200
+  merch: 70
 }
 
 /** The most any single onboard discount may be worth, to protect margin. */
@@ -58,23 +69,28 @@ export const MAX_DISCOUNT_HKD = 10
 /**
  * **Onboard coupons are priced on a volume curve, not proportionally.**
  *
- * Flat pricing was the previous mistake: every coupon cost the same per HK$1,
- * so the bigger rungs were identical value and there was no reason to ever pick
+ * Flat pricing was an earlier mistake: every coupon cost the same per HK$1, so
+ * the bigger rungs were identical value and there was no reason to ever pick
  * one. The choice collapsed to 'what can I afford today', which parks everyone
  * on the cheapest rung forever.
  *
- * The rate now falls as the *percentage* grows, exactly like a bulk price.
- * Saving up is genuinely rewarded, and the top rung of each tab is flagged
- * 'Best value' so the ladder is legible without doing the division.
+ * The rate falls as the *percentage* grows, exactly like a bulk price. Saving
+ * up is genuinely rewarded, and the top rung of each tab is flagged 'Best
+ * value' so the ladder is legible without doing the division.
  *
  * This is the honest version of the decoy effect (Huber, Payne & Puto, 1982):
  * a real quantity discount rather than a deliberately bad middle option, so it
  * survives a customer actually running the numbers.
+ *
+ * Rates were raised from 160/150/140 so the best-value rung lands around a
+ * month of play. Coupons are spent onboard and people fly perhaps twice a year,
+ * so a month-scale goal fits inside a flight cycle — and inside the six-month
+ * voucher window — where a three-day one did not.
  */
 export const VOLUME_MARKUP = {
-  5: 160,
-  7.5: 150,
-  10: 140
+  5: 270,
+  7.5: 250,
+  10: 230
 }
 
 /** Which tabs use the volume curve — the onboard ladders where sizes compete. */
@@ -100,7 +116,7 @@ export const REWARDS = [
     pct: 5,
     hkd: 1,
     retail: 20,
-    cost: 160,
+    cost: 270,
     emoji: '🥤'
   },
   {
@@ -112,7 +128,7 @@ export const REWARDS = [
     pct: 7.5,
     hkd: 1.5,
     retail: 20,
-    cost: 225,
+    cost: 375,
     emoji: '🧃'
   },
   {
@@ -124,7 +140,7 @@ export const REWARDS = [
     pct: 10,
     hkd: 4,
     retail: 40,
-    cost: 560,
+    cost: 920,
     bestValue: true,
     emoji: '☕'
   },
@@ -139,7 +155,7 @@ export const REWARDS = [
     pct: 5,
     hkd: 1,
     retail: 20,
-    cost: 160,
+    cost: 270,
     emoji: '🍪'
   },
   {
@@ -151,7 +167,7 @@ export const REWARDS = [
     pct: 7.5,
     hkd: 1.5,
     retail: 20,
-    cost: 225,
+    cost: 375,
     emoji: '🥨'
   },
   {
@@ -163,7 +179,7 @@ export const REWARDS = [
     pct: 10,
     hkd: 3,
     retail: 30,
-    cost: 420,
+    cost: 690,
     bestValue: true,
     emoji: '🍜'
   },
@@ -178,7 +194,7 @@ export const REWARDS = [
     pct: 5,
     hkd: 1.75,
     retail: 35,
-    cost: 280,
+    cost: 475,
     emoji: '🥟'
   },
   {
@@ -190,7 +206,7 @@ export const REWARDS = [
     pct: 7.5,
     hkd: 4.875,
     retail: 65,
-    cost: 730,
+    cost: 1220,
     emoji: '🍱'
   },
   {
@@ -202,7 +218,7 @@ export const REWARDS = [
     pct: 10,
     hkd: 7.5,
     retail: 75,
-    cost: 1050,
+    cost: 1725,
     bestValue: true,
     emoji: '🍛'
   },
@@ -217,7 +233,7 @@ export const REWARDS = [
     pct: 5,
     hkd: 1.75,
     retail: 35,
-    cost: 280,
+    cost: 475,
     emoji: '🧇'
   },
   {
@@ -229,7 +245,7 @@ export const REWARDS = [
     pct: 7.5,
     hkd: 2.625,
     retail: 35,
-    cost: 395,
+    cost: 655,
     emoji: '🍮'
   },
   {
@@ -241,18 +257,20 @@ export const REWARDS = [
     pct: 10,
     hkd: 4,
     retail: 40,
-    cost: 560,
+    cost: 920,
     bestValue: true,
     emoji: '🍨'
   },
 
-  /* ---- Berry: digital goods cost nothing, merchandise is the aspiration ---- */
+  /* ---- Berry: digital goods. `grant: 'item'` adds the cosmetic straight to
+     the wardrobe instead of issuing a voucher — there is nobody to show a
+     wallpaper to. ---- */
   {
     id: 'wallpaper-pack',
     tier: 'free',
     kind: 'berry',
     name: 'Berry wallpaper pack',
-    detail: 'Phone wallpapers, four designs',
+    detail: 'Four phone wallpapers — download link on your voucher',
     hkd: 2,
     cost: 200,
     emoji: '🖼️'
@@ -262,88 +280,103 @@ export const REWARDS = [
     tier: 'free',
     kind: 'berry',
     name: 'Berry sticker pack',
-    detail: 'Digital stickers for your chats',
+    detail: 'Chat stickers — download link on your voucher',
     hkd: 3,
     cost: 300,
     emoji: '💜'
   },
   {
+    id: 'bg-clouds',
+    tier: 'free',
+    kind: 'berry',
+    grant: 'item',
+    itemId: 'bg-clouds',
+    name: 'Above the Clouds',
+    detail: 'Room background — sky blue, cloud window',
+    hkd: 6,
+    cost: 600,
+    emoji: '☁️'
+  },
+  {
+    id: 'bg-sakura',
+    tier: 'free',
+    kind: 'berry',
+    grant: 'item',
+    itemId: 'bg-sakura',
+    name: 'Sakura Season',
+    detail: 'Room background — blossom pink, petals falling',
+    hkd: 9,
+    cost: 900,
+    emoji: '🌸'
+  },
+  {
+    id: 'bg-island',
+    tier: 'free',
+    kind: 'berry',
+    grant: 'item',
+    itemId: 'bg-island',
+    name: 'Island Getaway',
+    detail: 'Room background — teal walls, sea and palms',
+    hkd: 9,
+    cost: 900,
+    emoji: '🏝️'
+  },
+  {
+    id: 'bg-seoul',
+    tier: 'free',
+    kind: 'berry',
+    grant: 'item',
+    itemId: 'bg-seoul',
+    name: 'Seoul Nights',
+    detail: 'Room background — deep blue, neon skyline',
+    hkd: 12,
+    cost: 1200,
+    emoji: '🌃'
+  },
+  {
+    id: 'bg-cabin',
+    tier: 'free',
+    kind: 'berry',
+    grant: 'item',
+    itemId: 'bg-cabin',
+    name: 'Cabin Class',
+    detail: 'Room background — UO purple, oval cabin window',
+    hkd: 15,
+    cost: 1500,
+    emoji: '✈️'
+  },
+
+  /* ---- merch: real COGS, collected or posted. Priced to fit inside one
+     180-day coin expiry window — see MARKUP above. ---- */
+  {
     id: 'merch-pin',
     tier: 'merch',
-    kind: 'berry',
+    kind: 'merch',
     name: 'Berry enamel pin badge',
     detail: 'Collect at the airport UO counter',
     hkd: 12,
-    cost: 2400,
+    cost: 840,
     emoji: '📌'
   },
   {
     id: 'merch-luggage-tag',
     tier: 'merch',
-    kind: 'berry',
+    kind: 'merch',
     name: 'Berry luggage tag',
     detail: 'Collect at the airport UO counter',
     hkd: 40,
-    cost: 8000,
+    cost: 2800,
     emoji: '🏷️'
-  },
-  {
-    id: 'merch-tote',
-    tier: 'merch',
-    kind: 'berry',
-    name: 'Berry tote bag voucher',
-    detail: 'Redeem at the UO online shop',
-    hkd: 55,
-    cost: 11000,
-    emoji: '👜'
   },
   {
     id: 'merch-plush',
     tier: 'merch',
-    kind: 'berry',
+    kind: 'merch',
     name: 'Berry plush voucher',
     detail: 'The one everyone posts about',
     hkd: 75,
-    cost: 15000,
+    cost: 5250,
     emoji: '🧸'
-  },
-
-  /* ---- travel: seat selection is free to give; the rest is forgone
-     ancillary revenue, capacity-limited rather than a cash cost. These are the
-     ancillary itself rather than a discount on it, so they sit outside the
-     percentage ladder ---- */
-  {
-    id: 'seat-standard',
-    tier: 'free',
-    kind: 'travel',
-    name: 'Standard seat selection',
-    detail: 'Pick your seat on your next UO flight',
-    hkd: 5,
-    retail: 50,
-    cost: 500,
-    emoji: '💺'
-  },
-  {
-    id: 'seat-upgrade',
-    tier: 'coupon',
-    kind: 'travel',
-    name: 'Front-row seat selection',
-    detail: 'Subject to availability',
-    hkd: 50,
-    retail: 180,
-    cost: 8000,
-    emoji: '🪟'
-  },
-  {
-    id: 'baggage-3kg',
-    tier: 'coupon',
-    kind: 'travel',
-    name: '3kg extra baggage',
-    detail: 'Added to your next booking',
-    hkd: 75,
-    retail: 260,
-    cost: 12000,
-    emoji: '🧳'
   }
 ]
 
@@ -353,7 +386,14 @@ export const REWARD_KINDS = [
   { id: 'meal', label: 'Meals' },
   { id: 'sweet', label: 'Sweets' },
   { id: 'berry', label: 'Berry' },
-  { id: 'travel', label: 'Travel' }
+  { id: 'merch', label: 'Merch' }
 ]
+
+/**
+ * How long a tab's cheapest reward may take. Food and digital goods have to
+ * open inside a fortnight or the tab reads as a wall; merch is explicitly the
+ * aspiration and carries real COGS, so it cannot have a one-week rung.
+ */
+export const REACHABLE_DAYS = { merch: 30, default: 14 }
 
 export const REWARDS_BY_ID = Object.fromEntries(REWARDS.map((r) => [r.id, r]))
