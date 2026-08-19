@@ -25,9 +25,11 @@
  * `retail` — the number the costing model needs. Both are stored rather than
  * derived at render time so the economy script can assert they agree.
  *
- * `detail` says what the coupon applies to rather than restating the discount
- * in dollars — the percentage is the offer, and spelling the cash out again
- * underneath made every card read like a receipt.
+ * `detail` on a coupon is just its category. The percentage in the title is the
+ * whole offer; spelling the cash out underneath made every card read like a
+ * receipt, and listing the products made them dense. Berry and merch keep real
+ * descriptions, because there the category name tells you nothing — a room
+ * theme and a plush are not the same kind of thing.
  *
  * **Every onboard reward is a discount, never a free item.** The customer
  * always pays the balance, so every redemption is attached to a sale UO would
@@ -114,7 +116,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'drink',
     name: '5% off any drink',
-    detail: 'Soft drinks, juices and teas from the trolley',
+    detail: 'Drinks',
     pct: 5,
     hkd: 1,
     retail: 20,
@@ -126,7 +128,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'drink',
     name: '7.5% off any drink',
-    detail: 'Soft drinks, juices and teas from the trolley',
+    detail: 'Drinks',
     pct: 7.5,
     hkd: 1.5,
     retail: 20,
@@ -138,7 +140,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'drink',
     name: '10% off any Signature Drink',
-    detail: 'Milk tea, latte or the barista-made specials',
+    detail: 'Drinks',
     pct: 10,
     hkd: 4,
     retail: 40,
@@ -153,7 +155,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'snack',
     name: '5% off any snack',
-    detail: 'Crisps, gummies, biscuits — anything from the snack page',
+    detail: 'Snacks',
     pct: 5,
     hkd: 1,
     retail: 20,
@@ -165,7 +167,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'snack',
     name: '7.5% off any snack',
-    detail: 'Crisps, gummies, biscuits — anything from the snack page',
+    detail: 'Snacks',
     pct: 7.5,
     hkd: 1.5,
     retail: 20,
@@ -177,7 +179,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'snack',
     name: '10% off any cup noodles',
-    detail: 'Any cup noodle on board',
+    detail: 'Snacks',
     pct: 10,
     hkd: 3,
     retail: 30,
@@ -192,7 +194,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'meal',
     name: '5% off any light bite',
-    detail: 'Rice noodle rolls, buns, sandwiches',
+    detail: 'Meals',
     pct: 5,
     hkd: 1.75,
     retail: 35,
@@ -204,7 +206,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'meal',
     name: '7.5% off any hot meal',
-    detail: 'Any hot dish on your next UO flight',
+    detail: 'Meals',
     pct: 7.5,
     hkd: 4.875,
     retail: 65,
@@ -216,7 +218,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'meal',
     name: '10% off any Hearty Bites main',
-    detail: 'The signature rice and pasta mains',
+    detail: 'Meals',
     pct: 10,
     hkd: 7.5,
     retail: 75,
@@ -231,7 +233,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'sweet',
     name: '5% off any dessert',
-    detail: 'Egg waffles, red bean soup, ice cream',
+    detail: 'Sweets',
     pct: 5,
     hkd: 1.75,
     retail: 35,
@@ -243,7 +245,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'sweet',
     name: '7.5% off any dessert',
-    detail: 'Egg waffles, red bean soup, ice cream',
+    detail: 'Sweets',
     pct: 7.5,
     hkd: 2.625,
     retail: 35,
@@ -255,7 +257,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'sweet',
     name: '10% off an ice cream cup',
-    detail: 'Häagen-Dazs 100mL, vanilla or cookies & cream',
+    detail: 'Sweets',
     pct: 10,
     hkd: 4,
     retail: 40,
