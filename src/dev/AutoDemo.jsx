@@ -36,25 +36,59 @@ export default function AutoDemo() {
     []
   )
 
-  const ripple = useCallback((el) => {
-    const r = el.getBoundingClientRect()
-    // Wide targets — nav items, tab strips, whole rows — read better with the
-    // ripple where a thumb would actually land than dead centre.
-    const x = r.left + Math.min(r.width / 2, 90)
-    const y = r.top + r.height / 2
+  const ripple = useCallback((x, y) => {
     const id = ++rippleId.current
     setRipples((rs) => [...rs, { id, x, y }])
     setTimeout(() => setRipples((rs) => rs.filter((p) => p.id !== id)), RIPPLE_MS)
   }, [])
 
+  /**
+   * A point inside `el` that a finger could actually hit — one that is on
+   * screen and not covered by the fixed header, the nav or an overlay.
+   *
+   * Dead centre is not enough on its own: a tall game card or wardrobe tile can
+   * have its middle under the nav bar while most of it is plainly tappable.
+   * Sample a few spots and take the first that really lands on the element.
+   */
+  const hitPoint = useCallback((el) => {
+    const r = el.getBoundingClientRect()
+    if (!r.width || !r.height) return null
+    for (const fy of [0.5, 0.3, 0.7, 0.15]) {
+      for (const fx of [0.5, 0.25, 0.75]) {
+        const x = r.left + r.width * fx
+        const y = r.top + r.height * fy
+        if (x < 1 || y < 1 || x > window.innerWidth - 1 || y > window.innerHeight - 1) continue
+        const hit = document.elementFromPoint(x, y)
+        if (hit && (hit === el || el.contains(hit))) return { x, y }
+      }
+    }
+    return null
+  }, [])
+
   const tapEl = useCallback(
     async (el) => {
       if (!el) throw new Error('tap: element vanished before it could be clicked')
-      ripple(el)
+
+      // `.click()` fires on a covered element regardless of what is on top of
+      // it, so a clip can read as correct to the script while an overlay sits
+      // over the whole recording. Insist on a point that is genuinely hittable.
+      let p = hitPoint(el)
+      if (!p) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        await wait(450)
+        p = hitPoint(el)
+      }
+      if (!p) {
+        const r = el.getBoundingClientRect()
+        const over = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+        throw new Error(`tap: nothing hittable — covered by ${over?.className || over?.tagName || 'nothing'}`)
+      }
+
+      ripple(p.x, p.y)
       await wait(140) // let the ripple land before the screen changes under it
       el.click()
     },
-    [ripple, wait]
+    [hitPoint, ripple, wait]
   )
 
   const tap = useCallback(
@@ -90,6 +124,17 @@ export default function AutoDemo() {
       const ctx = { dispatch, wait, tap, tapEl, scroll, cancelled: () => cancelled.current }
 
       try {
+        // Whatever was left open from poking around — a sheet, a reveal — would
+        // sit over the whole recording, and RESET won't close it because that
+        // state lives in the components, not the store. Both kinds of overlay
+        // close on a backdrop click, so no Escape (which would abort the clip).
+        for (let i = 0; i < 4; i++) {
+          const overlay = document.querySelector('.modal, .reveal')
+          if (!overlay) break
+          overlay.click()
+          await wait(200)
+        }
+
         // Every clip starts from the same place, so order never matters and a
         // retake is identical to the take it replaces.
         dispatch({ type: 'RESET' })

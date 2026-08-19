@@ -41,7 +41,12 @@ function Reveal({ pull, onClose }) {
               ? `Berry already had this one — here’s ${pull.refund} coins back instead.`
               : 'Added to Berry’s wardrobe.'}
           </p>
-          <button className="btn btn--primary btn--block" style={{ marginTop: 16 }} onClick={onClose}>
+          <button
+            className="btn btn--primary btn--block"
+            data-demo="pull-close"
+            style={{ marginTop: 16 }}
+            onClick={onClose}
+          >
             Nice!
           </button>
         </div>

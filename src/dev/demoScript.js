@@ -58,6 +58,8 @@ export const CLIPS = [
       { type: 'SEEN_INTRO' },
       { type: 'NAVIGATE', screen: 'home' },
       { type: 'CHECK_IN' },
+      // Drop the reveal the check-in queues, or it pops over the opening beat.
+      { type: 'CLEAR_CHECK_IN' },
       { type: 'DEMO_GRANT_ITEMS' },
       { type: 'DEMO_OWN_ITEMS', ids: ['bg-sakura', 'bg-cabin'] }
     ],
@@ -85,6 +87,8 @@ export const CLIPS = [
     seed: [
       { type: 'SEEN_INTRO' },
       { type: 'CHECK_IN' },
+      // Drop the reveal the check-in queues, or it pops over the opening beat.
+      { type: 'CLEAR_CHECK_IN' },
       { type: 'NAVIGATE', screen: 'play' }
     ],
     steps: [
@@ -148,7 +152,9 @@ export const CLIPS = [
       tap('shop-tab-berry'),
       wait(1400),
       tap('reward-bg-sakura'), // digital: granted instantly, no voucher
-      wait(2400),
+      wait(2600), // the "added to Berry's wardrobe" celebration
+      tap('pull-close'),
+      wait(1200),
       tap('shop-tab-merch'),
       wait(2200),
       OUTRO
@@ -163,6 +169,8 @@ export const CLIPS = [
       { type: 'SEEN_INTRO' },
       { type: 'NAVIGATE', screen: 'home' },
       { type: 'CHECK_IN' },
+      // Drop the reveal the check-in queues, or it pops over the opening beat.
+      { type: 'CLEAR_CHECK_IN' },
       { type: 'DEMO_GRANT_COINS', amount: 3000 }
     ],
     steps: [
