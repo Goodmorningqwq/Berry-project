@@ -136,7 +136,7 @@ export default function PlayScreen() {
 
       <div className="tabs" style={{ marginTop: 12 }}>
         {TABS.map((t) => (
-          <button key={t.id} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
+          <button key={t.id} data-demo={`play-tab-${t.id}`} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
             {t.label}
           </button>
         ))}
@@ -154,6 +154,7 @@ export default function PlayScreen() {
             <button
               key={g.id}
               className="game-card"
+              data-demo={`game-${g.id}`}
               onClick={() => openGame(g.id)}
               disabled={locked}
               style={locked ? { opacity: 0.55 } : undefined}

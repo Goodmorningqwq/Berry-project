@@ -1,0 +1,142 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useStore } from '../state/store.jsx'
+import { CLIPS_BY_ID } from './demoScript.js'
+
+/**
+ * Runs a demo clip so the app drives itself while someone records the screen.
+ *
+ * Nothing of this component is visible during a clip except the tap ripple —
+ * no status chip, no progress bar — because anything else would land in the
+ * capture. `body.demo-recording` also hides the presenter FAB for the duration.
+ *
+ * If a step cannot resolve its target the clip **aborts and says so on screen**.
+ * The person recording is watching OBS, not the console, and a runner that
+ * silently skipped a step would hand them a take that looked fine to the script
+ * and was useless on video.
+ *
+ * Triggered by a `berry:run-clip` window event, the same way the presenter panel
+ * reopens the release notes. Esc aborts.
+ */
+
+const RIPPLE_MS = 620
+
+export default function AutoDemo() {
+  const { dispatch } = useStore()
+  const [ripples, setRipples] = useState([])
+  const [error, setError] = useState(null)
+  const cancelled = useRef(false)
+  const running = useRef(false)
+  const rippleId = useRef(0)
+
+  const wait = useCallback(
+    (ms) =>
+      new Promise((resolve) => {
+        setTimeout(resolve, ms)
+      }),
+    []
+  )
+
+  const ripple = useCallback((el) => {
+    const r = el.getBoundingClientRect()
+    // Wide targets — nav items, tab strips, whole rows — read better with the
+    // ripple where a thumb would actually land than dead centre.
+    const x = r.left + Math.min(r.width / 2, 90)
+    const y = r.top + r.height / 2
+    const id = ++rippleId.current
+    setRipples((rs) => [...rs, { id, x, y }])
+    setTimeout(() => setRipples((rs) => rs.filter((p) => p.id !== id)), RIPPLE_MS)
+  }, [])
+
+  const tapEl = useCallback(
+    async (el) => {
+      if (!el) throw new Error('tap: element vanished before it could be clicked')
+      ripple(el)
+      await wait(140) // let the ripple land before the screen changes under it
+      el.click()
+    },
+    [ripple, wait]
+  )
+
+  const tap = useCallback(
+    async (name) => {
+      const el = document.querySelector(`[data-demo="${name}"]`)
+      if (!el) throw new Error(`no element with data-demo="${name}" on screen`)
+      if (el.disabled) throw new Error(`[data-demo="${name}"] is disabled — the seed is wrong`)
+      await tapEl(el)
+    },
+    [tapEl]
+  )
+
+  const scroll = useCallback(
+    async (name) => {
+      const el = document.querySelector(`[data-demo="${name}"]`)
+      if (!el) throw new Error(`no element with data-demo="${name}" to scroll to`)
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      await wait(600)
+    },
+    [wait]
+  )
+
+  const runClip = useCallback(
+    async (id) => {
+      const clip = CLIPS_BY_ID[id]
+      if (!clip || running.current) return
+
+      running.current = true
+      cancelled.current = false
+      setError(null)
+      document.body.classList.add('demo-recording')
+
+      const ctx = { dispatch, wait, tap, tapEl, scroll, cancelled: () => cancelled.current }
+
+      try {
+        // Every clip starts from the same place, so order never matters and a
+        // retake is identical to the take it replaces.
+        dispatch({ type: 'RESET' })
+        clip.seed.forEach((action) => dispatch(action))
+        await wait(700) // let the seeded state paint before the first beat
+
+        for (const step of clip.steps) {
+          if (cancelled.current) break
+          await step(ctx)
+        }
+      } catch (err) {
+        setError(`Clip ${clip.id} — ${clip.title}: ${err.message}`)
+      } finally {
+        document.body.classList.remove('demo-recording')
+        running.current = false
+      }
+    },
+    [dispatch, wait, tap, tapEl, scroll]
+  )
+
+  useEffect(() => {
+    const onRun = (e) => runClip(e.detail?.id)
+    window.addEventListener('berry:run-clip', onRun)
+    return () => window.removeEventListener('berry:run-clip', onRun)
+  }, [runClip])
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape' && running.current) cancelled.current = true
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  return (
+    <>
+      {ripples.map((p) => (
+        <span key={p.id} className="demo-tap" style={{ left: p.x, top: p.y }} aria-hidden="true" />
+      ))}
+
+      {error && (
+        <div className="demo-error" role="alert">
+          <b>Clip aborted</b>
+          <span>{error}</span>
+          <button onClick={() => setError(null)}>Dismiss</button>
+        </div>
+      )}
+    </>
+  )
+}

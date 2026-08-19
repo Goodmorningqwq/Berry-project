@@ -184,6 +184,7 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
 
                 <button
                   className="btn btn--gold btn--block"
+                  data-demo="reveal-collect"
                   style={{ marginTop: 18 }}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -256,6 +257,7 @@ export default function CheckInReveal({ result, equipped, onCollect }) {
 
             <button
               className="btn btn--primary btn--block"
+              data-demo="reveal-done"
               style={{ marginTop: 16 }}
               onClick={(e) => {
                 e.stopPropagation()

@@ -13,7 +13,7 @@ export function Modal({ open, onClose, children, label }) {
   if (!open) return null
 
   return (
-    <div className="modal" onClick={onClose} role="dialog" aria-modal="true" aria-label={label}>
+    <div className="modal" data-demo="modal-close" onClick={onClose} role="dialog" aria-modal="true" aria-label={label}>
       <div className="modal__sheet" onClick={(e) => e.stopPropagation()}>
         <div className="modal__grip" />
         {children}

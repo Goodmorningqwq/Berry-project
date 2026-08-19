@@ -13,6 +13,7 @@ import CollectScreen from './screens/CollectScreen.jsx'
 import ShopScreen from './screens/ShopScreen.jsx'
 import TripsScreen from './screens/TripsScreen.jsx'
 import DemoPanel from './dev/DemoPanel.jsx'
+import AutoDemo from './dev/AutoDemo.jsx'
 
 const TABS = [
   { id: 'home', label: 'Berry', Icon: Icons.home, Screen: HomeScreen },
@@ -55,6 +56,7 @@ function TopBar({ onBack }) {
               away on Rewards. */}
           <button
             className={`pill pill--coin pill--tap ${bump ? 'coin-bump' : ''}`}
+            data-demo="coin-pill"
             onClick={() => setCoinsOpen(true)}
             aria-label="Your berry coins and when they expire"
           >
@@ -190,6 +192,10 @@ export default function App() {
     return (
       <div className="app">
         <HostScreen onOpen={openBerry} />
+        {/* Mounted here too: clip 1 starts on the host screen, and without this
+            its opening tap would draw no ripple and an abort would have nowhere
+            to report itself. */}
+        <AutoDemo />
       </div>
     )
   }
@@ -221,6 +227,7 @@ export default function App() {
             <button
               key={id}
               className={`nav__item ${state.screen === id ? 'nav__item--active' : ''}`}
+              data-demo={`nav-${id}`}
               onClick={() => dispatch({ type: 'NAVIGATE', screen: id })}
               aria-current={state.screen === id ? 'page' : undefined}
             >
@@ -235,6 +242,7 @@ export default function App() {
       </div>
 
       <DemoPanel />
+      <AutoDemo />
     </div>
   )
 }

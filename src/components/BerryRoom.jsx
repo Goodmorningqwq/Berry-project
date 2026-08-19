@@ -144,7 +144,7 @@ export default function BerryRoom({ mood, effect, speech }) {
           {tapLine ?? speech}
         </p>
 
-        <button className="room__pet" onClick={pet} aria-label="Pet Berry">
+        <button className="room__pet" data-demo="berry-pet" onClick={pet} aria-label="Pet Berry">
           {/* mood and effect pass straight through: a tap must not change how
               Berry looks or moves, and hearts stay reserved for feeding. Note
               the happy mood also speeds up his idle bob, so overriding it here

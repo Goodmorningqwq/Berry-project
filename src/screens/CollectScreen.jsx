@@ -183,7 +183,7 @@ function Wardrobe() {
 
       <div className="tabs" style={{ marginTop: 12 }}>
         {SLOTS.map((s) => (
-          <button key={s.id} aria-selected={slot === s.id} onClick={() => setSlot(s.id)}>
+          <button key={s.id} data-demo={`slot-${s.id}`} aria-selected={slot === s.id} onClick={() => setSlot(s.id)}>
             {s.label}
           </button>
         ))}
@@ -201,6 +201,7 @@ function Wardrobe() {
             <button
               key={item.id}
               className={`wardrobe-item ${state.equipped[item.slot] === item.id ? 'wardrobe-item--on' : ''}`}
+              data-demo={`item-${item.id}`}
               onClick={() => toggle(item)}
             >
               <span className={`rarity rarity--${item.rarity}`}>{RARITY_LABEL[item.rarity]}</span>
@@ -265,7 +266,7 @@ export default function CollectScreen() {
       </div>
       <div className="tabs">
         {TABS.map((t) => (
-          <button key={t.id} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
+          <button key={t.id} data-demo={`collect-tab-${t.id}`} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
             {t.label}
           </button>
         ))}

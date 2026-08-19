@@ -646,6 +646,15 @@ function reducer(state, action) {
       return { ...state, inventory }
     }
 
+    case 'DEMO_OWN_ITEMS': {
+      // The auto-demo needs specific cosmetics in the wardrobe on cue. Blindbox
+      // pulls and destination unlocks are both too slow and too random to seed
+      // a clip with.
+      const add = action.ids.filter((id) => ITEMS_BY_ID[id] && !state.ownedItems.includes(id))
+      if (!add.length) return state
+      return { ...state, ownedItems: [...state.ownedItems, ...add] }
+    }
+
     case 'DEMO_GRANT_COINS':
       return {
         ...state,
