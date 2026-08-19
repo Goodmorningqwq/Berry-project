@@ -786,15 +786,21 @@ p {
 }
 
 /* ---- room backgrounds ----
-   Each theme is four custom properties, so a new one is four lines rather than
-   four rulesets. The default values are the original room, so an unequipped
-   room renders exactly as it always did. */
+   Each theme is a handful of custom properties, so a new one is a few lines
+   rather than a few rulesets. The default values are the original room, so an
+   unequipped room renders exactly as it always did.
+
+   `--room-ink` is part of the theme rather than a fixed purple: Berry's name
+   and greeting sit directly on the wall, and two of these walls are dark. */
 
 .room {
   --room-wall: linear-gradient(180deg, #e3d4f2 0%, #f1e7f9 100%);
   --room-floor: linear-gradient(180deg, #f7e6c9 0%, #fdf4e4 100%);
   --room-sky: linear-gradient(180deg, #bfe3fa, #e7f4fd);
   --room-speck: rgba(255, 255, 255, 0.9);
+  --room-ink: var(--purple-900);
+  --room-ink-soft: var(--purple-800);
+  --room-ink-shadow: none;
 }
 
 .room--bg-clouds {
@@ -821,12 +827,18 @@ p {
   --room-floor: linear-gradient(180deg, #2a2550 0%, #3d3566 100%);
   --room-sky: linear-gradient(180deg, #10142e, #2b2a5c);
   --room-speck: rgba(255, 214, 102, 0.95);
+  --room-ink: #ffffff;
+  --room-ink-soft: rgba(255, 255, 255, 0.82);
+  --room-ink-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
 .room--bg-cabin {
   --room-wall: linear-gradient(180deg, #6f2b90 0%, #8c47ab 100%);
   --room-floor: linear-gradient(180deg, #3f3a46 0%, #5a5462 100%);
   --room-sky: linear-gradient(180deg, #9ad4f5, #dff0fb);
+  --room-ink: #ffffff;
+  --room-ink-soft: rgba(255, 255, 255, 0.85);
+  --room-ink-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* The cabin window is an aircraft porthole rather than a house window. */
@@ -948,8 +960,9 @@ p {
   position: relative;
   font-size: 13px;
   font-weight: 600;
-  color: var(--purple-800);
-  opacity: 0.8;
+  color: var(--room-ink-soft);
+  opacity: 0.9;
+  text-shadow: var(--room-ink-shadow);
 }
 
 .stage__name {
@@ -957,7 +970,8 @@ p {
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.3px;
-  color: var(--purple-900);
+  color: var(--room-ink);
+  text-shadow: var(--room-ink-shadow);
 }
 
 /* Berry is the official sprite with SVG props layered over (and under) it.
