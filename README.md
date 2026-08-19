@@ -216,8 +216,8 @@ Match, a higher divisor and a big-match bonus for Candy Rush — bringing the bl
 round** and narrowing the spread between best and worst game from 8× to 2.5×. That matters because
 tickets let a player *choose* their game, so the best-paying one sets the whole economy.
 
-The floor keeps AFK pointless: three idled rounds pay 3 coins. Onboard coupons are **percentages** — 5% / 7.5% / 10% off, with the cash equivalent spelled out on
-each card because a percentage on a HK$20 item is vaguer than an amount. The shop runs 22 rewards
+The floor keeps AFK pointless: three idled rounds pay 3 coins. Onboard coupons are **percentages** — 5% / 7.5% / 10% off, each card saying what it covers rather
+than restating the discount in dollars. The shop runs 22 rewards
 across six tabs — Drinks, Snacks, Meals, Sweets, Berry and Travel — and **every food and Berry tab opens on something
 reachable in 6–14 days**, and Merch in 24, because a tab whose cheapest item is months away just reads as a wall.
 

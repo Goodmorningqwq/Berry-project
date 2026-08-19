@@ -23,9 +23,11 @@
  * **Onboard coupons are percentages, not cash amounts.** `pct` is the headline
  * the customer sees and `hkd` is what it works out to against that reward's
  * `retail` — the number the costing model needs. Both are stored rather than
- * derived at render time so the economy script can assert they agree. A
- * percentage reads as a proper offer and scales with what you order, but it is
- * vaguer than cash, so each card spells the money out in `detail`.
+ * derived at render time so the economy script can assert they agree.
+ *
+ * `detail` says what the coupon applies to rather than restating the discount
+ * in dollars — the percentage is the offer, and spelling the cash out again
+ * underneath made every card read like a receipt.
  *
  * **Every onboard reward is a discount, never a free item.** The customer
  * always pays the balance, so every redemption is attached to a sale UO would
@@ -112,7 +114,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'drink',
     name: '5% off any drink',
-    detail: 'About HK$1 off a HK$20 carton',
+    detail: 'Soft drinks, juices and teas from the trolley',
     pct: 5,
     hkd: 1,
     retail: 20,
@@ -124,7 +126,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'drink',
     name: '7.5% off any drink',
-    detail: 'About HK$1.50 off a HK$20 carton',
+    detail: 'Soft drinks, juices and teas from the trolley',
     pct: 7.5,
     hkd: 1.5,
     retail: 20,
@@ -136,7 +138,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'drink',
     name: '10% off any Signature Drink',
-    detail: 'About HK$4 off a HK$40 milk tea or latte',
+    detail: 'Milk tea, latte or the barista-made specials',
     pct: 10,
     hkd: 4,
     retail: 40,
@@ -151,7 +153,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'snack',
     name: '5% off any snack',
-    detail: 'About HK$1 off a HK$20 packet',
+    detail: 'Crisps, gummies, biscuits — anything from the snack page',
     pct: 5,
     hkd: 1,
     retail: 20,
@@ -163,7 +165,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'snack',
     name: '7.5% off any snack',
-    detail: 'About HK$1.50 off a HK$20 packet',
+    detail: 'Crisps, gummies, biscuits — anything from the snack page',
     pct: 7.5,
     hkd: 1.5,
     retail: 20,
@@ -175,7 +177,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'snack',
     name: '10% off any cup noodles',
-    detail: 'About HK$3 off a HK$30 cup',
+    detail: 'Any cup noodle on board',
     pct: 10,
     hkd: 3,
     retail: 30,
@@ -190,7 +192,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'meal',
     name: '5% off any light bite',
-    detail: 'About HK$1.75 off a HK$35 bun or roll',
+    detail: 'Rice noodle rolls, buns, sandwiches',
     pct: 5,
     hkd: 1.75,
     retail: 35,
@@ -202,7 +204,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'meal',
     name: '7.5% off any hot meal',
-    detail: 'About HK$4.90 off a HK$65 combo',
+    detail: 'Any hot dish on your next UO flight',
     pct: 7.5,
     hkd: 4.875,
     retail: 65,
@@ -214,7 +216,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'meal',
     name: '10% off any Hearty Bites main',
-    detail: 'About HK$7.50 off a HK$75 signature main',
+    detail: 'The signature rice and pasta mains',
     pct: 10,
     hkd: 7.5,
     retail: 75,
@@ -229,7 +231,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'sweet',
     name: '5% off any dessert',
-    detail: 'About HK$1.75 off a HK$35 egg waffle',
+    detail: 'Egg waffles, red bean soup, ice cream',
     pct: 5,
     hkd: 1.75,
     retail: 35,
@@ -241,7 +243,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'sweet',
     name: '7.5% off any dessert',
-    detail: 'About HK$2.60 off a HK$35 egg waffle',
+    detail: 'Egg waffles, red bean soup, ice cream',
     pct: 7.5,
     hkd: 2.625,
     retail: 35,
@@ -253,7 +255,7 @@ export const REWARDS = [
     tier: 'coupon',
     kind: 'sweet',
     name: '10% off an ice cream cup',
-    detail: 'About HK$4 off a HK$40 Häagen-Dazs',
+    detail: 'Häagen-Dazs 100mL, vanilla or cookies & cream',
     pct: 10,
     hkd: 4,
     retail: 40,

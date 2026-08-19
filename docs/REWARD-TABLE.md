@@ -239,8 +239,8 @@ only *issuing* new vouchers is frozen offline.
 ### The catalogue — 22 rewards, six tabs
 
 **Onboard coupons are percentages.** `pct` is the headline the customer sees; `hkd` is what it works
-out to against that reward's real menu price, and is the number the costing model uses. Cards spell
-the money out too, because a percentage on a HK$20 item is vaguer than a cash amount.
+out to against that reward's real menu price, and is the number the costing model uses. The card's
+`detail` says what the coupon covers rather than restating the discount in dollars.
 
 | Reward | % | Of | Worth | Price | Days |
 | --- | --- | --- | --- | --- | --- |
