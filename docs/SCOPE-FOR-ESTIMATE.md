@@ -164,7 +164,7 @@ treats and hasn't been fed for two days he visibly looks unhappy — mood only, 
 
 ## 2.8 Blindbox and redemption
 
-- **Blindbox** at 800 coins or a free ticket. **Published odds — Common 60% / Rare 30% / Epic 10%** —
+- **Blindbox** at 50 coins or a free ticket. **Published odds — Common 60% / Rare 30% / Epic 10%** —
   with duplicate protection (unowned items preferred within a tier) and a 20-coin refund on an
   unavoidable duplicate. Rarity-tiered reveal animation
 - **Odds disclosure screen** listing every rarity percentage, the items in each tier, the full

@@ -301,7 +301,7 @@ difference (`REACHABLE_DAYS`) rather than being loosened for everyone.
 **And every reward is now buyable inside one 180-day coin window**, asserted separately. That was not
 true before this round.
 
-Plus the blindbox at **800**.
+Plus the blindbox at **50**.
 
 ---
 

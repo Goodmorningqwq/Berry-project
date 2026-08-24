@@ -32,7 +32,12 @@ const SCHEMA_VERSION = 14
  */
 export const COINS_PER_HKD = 100
 
-export const BLINDBOX_COST = 800
+/**
+ * A pull is priced to be tried, not saved up for. At 800 it was a fortnight
+ * of play for one spin, which made the wardrobe something you read about
+ * rather than something you used.
+ */
+export const BLINDBOX_COST = 50
 export const MILESTONE_DAYS = 30
 /** Game entry is ticketed: 3 a day, spend them on whichever games you like. */
 export const DAILY_TICKETS = 3
