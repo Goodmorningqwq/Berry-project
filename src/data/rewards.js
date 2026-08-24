@@ -1,8 +1,9 @@
 /**
  * Berry coin redemption catalogue.
  *
- * Per the brief, redemption is open from ticket purchase until online check-in,
- * which is exactly the window where an extra touchpoint can convert.
+ * Redemption happens at ticket booking, while the full inflight menu is still
+ * open. The brief originally said "until online check-in", but by check-in there
+ * is little left to pre-order — so a coupon issued then has nothing to spend on.
  *
  * Three kinds of thing are sold here:
  *
@@ -48,7 +49,7 @@
  * liability, not a price.
  */
 
-export const REDEMPTION_WINDOW = 'Redeemable from ticket purchase until online check-in'
+export const REDEMPTION_WINDOW = 'Redeem when you book, while the full menu is open'
 
 /**
  * Coins charged per HK$1 of face value, by what fulfilment costs UO.
