@@ -3,7 +3,6 @@ import { useStore, MILESTONE_DAYS, prettyDate, STORAGE_KEY } from '../state/stor
 import { useToast } from '../components/Toast.jsx'
 import { Modal } from '../components/ui.jsx'
 import { BY_COUNTRY, DESTINATIONS_BY_CODE } from '../data/destinations.js'
-import { CLIPS } from './demoScript.js'
 
 /**
  * Presenter controls. Nothing here exists in the real product — it's the
@@ -70,33 +69,6 @@ export default function DemoPanel() {
             Demo-only shortcuts. None of this ships in the real app.
           </p>
 
-          {/* Recording. Each button closes the panel, waits for it to fade,
-              then hands off to AutoDemo — so start OBS first, then click. */}
-          <p className="demo-panel__label">🎬 Record clips</p>
-          <p className="tiny" style={{ marginTop: 2 }}>
-            Start recording, then click one. The app drives itself and holds a still frame at
-            each end. Esc aborts.
-          </p>
-          <div className="demo-panel__grid" style={{ marginBottom: 14 }}>
-            {CLIPS.map((clip) => (
-              <button
-                key={clip.id}
-                className="demo-btn"
-                onClick={() => {
-                  setOpen(false)
-                  setTimeout(
-                    () => window.dispatchEvent(new CustomEvent('berry:run-clip', { detail: { id: clip.id } })),
-                    1200
-                  )
-                }}
-              >
-                {clip.id}. {clip.title}
-                <small>{clip.note}</small>
-              </button>
-            ))}
-          </div>
-
-          <p className="demo-panel__label">Shortcuts</p>
           <div className="demo-panel__grid">
             <button className="demo-btn" onClick={() => advance(1)}>
               ⏭ Next day

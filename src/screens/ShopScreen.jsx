@@ -43,7 +43,6 @@ function Reveal({ pull, onClose }) {
           </p>
           <button
             className="btn btn--primary btn--block"
-            data-demo="pull-close"
             style={{ marginTop: 16 }}
             onClick={onClose}
           >
@@ -171,7 +170,7 @@ export default function ShopScreen() {
 
       <div className="tabs tabs--scroll" style={{ marginTop: 10 }}>
         {REWARD_KINDS.map((k) => (
-          <button key={k.id} data-demo={`shop-tab-${k.id}`} aria-selected={kind === k.id} onClick={() => setKind(k.id)}>
+          <button key={k.id} aria-selected={kind === k.id} onClick={() => setKind(k.id)}>
             {k.label}
           </button>
         ))}
@@ -187,7 +186,6 @@ export default function ShopScreen() {
             <button
               key={r.id}
               className="reward-row"
-              data-demo={`reward-${r.id}`}
               onClick={() => redeem(r)}
               style={affordable ? undefined : { opacity: 0.6 }}
             >

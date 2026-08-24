@@ -18,7 +18,7 @@ const STORAGE_KEY = 'flywithberry.v1'
  * a SCHEMA_VERSION bump doesn't wipe it — see the patch-notes effect in App.
  */
 export const RELEASE_KEY = 'flywithberry.release'
-const SCHEMA_VERSION = 13
+const SCHEMA_VERSION = 14
 
 /**
  * The coin's **book value** — what UO carries the outstanding coin liability
@@ -118,6 +118,39 @@ function makeGuest() {
   }
 }
 
+/**
+ * A past flight, shaped exactly like the ones COMPLETE_FLIGHT writes. Used only
+ * to seed the demo account — a passport with stamps but an empty flight history
+ * would contradict itself.
+ */
+function seedFlight(code, daysAgo, unlocked) {
+  const trip = tripFor(code)
+  return {
+    code,
+    date: dayKey(-daysAgo),
+    number: trip.number,
+    depart: trip.depart,
+    arrive: trip.arrive,
+    gate: trip.gate,
+    seat: trip.seat,
+    coins: 50,
+    unlocked: unlocked ?? null
+  }
+}
+
+/**
+ * The demo starts as a *lightly used* account rather than an empty one.
+ *
+ * This is a pitch build handed to people who will hold it for a minute or two,
+ * so every screen needs something on it immediately — an empty passport and an
+ * empty wardrobe show none of what the product is for. It stays deliberately
+ * small: three stamps out of 35, and the 30-day exclusive still locked, because
+ * the gaps are the argument.
+ *
+ * Two things are pointedly *not* seeded. Today's check-in is unclaimed, so the
+ * core loop is still the first thing a new pair of hands does. And nothing is
+ * equipped, so dressing Berry and re-theming the room stay live moments.
+ */
 function initialState() {
   return {
     version: SCHEMA_VERSION,
@@ -125,25 +158,29 @@ function initialState() {
     guest: makeGuest(),
     /** Best score per game id — the only thing a leaderboard needs to persist. */
     bestScores: {},
-    coins: 0,
-    lifetimeCoins: 0,
-    /** When the whole balance lapses. Null while there is nothing to lose. */
-    coinsExpireOn: null,
+    coins: 1000,
+    lifetimeCoins: 1000,
+    /** When the whole balance lapses. Set here because the seed starts with coins. */
+    coinsExpireOn: dayKey(COIN_EXPIRY_DAYS),
     /** Set by SWEEP_EXPIRY so App can announce it, then cleared. */
     lastExpiry: null,
     streak: 0,
     bestStreak: 0,
     lastCheckIn: null,
     dayOffset: 0,
-    blindboxTickets: 0,
-    ownedItems: [STARTER_ITEM_ID],
+    blindboxTickets: 1,
+    ownedItems: [STARTER_ITEM_ID, 'japan-hachimaki', 'korea-gat', 'captain-cap', 'sunnies'],
     equipped: { look: STARTER_ITEM_ID, hat: null, accessory: null, background: null },
-    inventory: {},
+    inventory: { 'berry-snack': 3, 'berry-juice': 3, 'berry-soap': 3 },
     fedCount: 0,
     feedProgress: 0,
     lastFed: null,
-    stamps: [],
-    flights: [],
+    stamps: ['FUK', 'KIX', 'ICN'],
+    flights: [
+      seedFlight('FUK', 46, 'japan-hachimaki'),
+      seedFlight('KIX', 24),
+      seedFlight('ICN', 9, 'korea-gat')
+    ],
     vouchers: [],
     playTickets: DAILY_TICKETS,
     /** Which day the ticket balance belongs to; a new day refreshes it. */
@@ -644,15 +681,6 @@ function reducer(state, action) {
         inventory[item.id] = (inventory[item.id] || 0) + 2
       })
       return { ...state, inventory }
-    }
-
-    case 'DEMO_OWN_ITEMS': {
-      // The auto-demo needs specific cosmetics in the wardrobe on cue. Blindbox
-      // pulls and destination unlocks are both too slow and too random to seed
-      // a clip with.
-      const add = action.ids.filter((id) => ITEMS_BY_ID[id] && !state.ownedItems.includes(id))
-      if (!add.length) return state
-      return { ...state, ownedItems: [...state.ownedItems, ...add] }
     }
 
     case 'DEMO_GRANT_COINS':

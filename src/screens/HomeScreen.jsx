@@ -89,7 +89,6 @@ export default function HomeScreen() {
         <button
           className={`btn btn--block btn--lg ${checkedInToday || offline ? '' : 'btn--primary'}`}
           style={{ marginTop: 14 }}
-          data-demo="check-in"
           onClick={() => dispatch({ type: 'CHECK_IN' })}
           disabled={checkedInToday || offline}
         >
@@ -102,7 +101,6 @@ export default function HomeScreen() {
             the exclusive is worth chasing. */}
         <button
           className="streak-days"
-          data-demo="streak-strip"
           onClick={() => setMonthOpen(true)}
           aria-label="See the full 30-day check-in calendar"
         >
@@ -149,7 +147,6 @@ export default function HomeScreen() {
           </div>
           <button
             className={`btn ${basics.length > 0 && !offline ? 'btn--gold' : ''}`}
-            data-demo="feed-berry"
             onClick={() => setCaring(true)}
             disabled={basics.length === 0 || offline}
           >
@@ -210,7 +207,7 @@ export default function HomeScreen() {
         ) : (
           <div style={{ marginTop: 12 }}>
             {basics.map((item) => (
-              <button key={item.id} className="reward-row" data-demo={`treat-${item.id}`} onClick={() => care(item)}>
+              <button key={item.id} className="reward-row" onClick={() => care(item)}>
                 <div className="reward-row__emoji">{item.emoji}</div>
                 <div className="reward-row__body">
                   <div className="reward-row__name">

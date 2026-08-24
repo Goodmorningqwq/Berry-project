@@ -105,7 +105,7 @@ export default function HostScreen({ onOpen }) {
         <img className="host__shot" src="/host/uo-home.jpg" alt="HK Express app home screen" />
 
         {showRow && (
-          <button className="host__entry" data-demo="host-entry" style={ENTRY_RECT} onClick={onOpen}>
+          <button className="host__entry" style={ENTRY_RECT} onClick={onOpen}>
             <span className="host__entry-ring" aria-hidden="true" />
             <span className="host__entry-berry" aria-hidden="true">
               <Berry equipped={{ look: 'everyday' }} mood="happy" size={44} animate={false} />

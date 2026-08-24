@@ -155,7 +155,7 @@ export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, o
                 Find all 8 pairs before the clock runs out. The faster you clear, the more berry
                 coins Berry earns.
               </p>
-              <button className="btn btn--primary btn--block" data-demo="game-start" style={{ marginTop: 16 }} onClick={start}>
+              <button className="btn btn--primary btn--block" style={{ marginTop: 16 }} onClick={start}>
                 Start
               </button>
             </div>
@@ -188,7 +188,6 @@ export default function BaggageMatch({ offline, gameId, bestScore = 0, onExit, o
                   )}
                   <button
                     className="btn btn--gold btn--block"
-                    data-demo="game-collect"
                     style={{ marginTop: 16 }}
                     onClick={() => onFinish(reward, left)}
                   >

@@ -1,55 +1,52 @@
-# Recording the six demo clips
+# Recording the demo clips
 
-The app records itself. You start OBS, click a clip in the presenter panel, and
-don't touch anything — the script navigates, checks in, plays a full round of
-Baggage Match and buys a room background on a fixed timer. Every clip resets the
-save first, so they can be shot in any order and a retake is identical to the
-take it replaces.
+The five clips in `demo-media/` were recorded by hand against the deployed app and cropped down to
+the phone frame. This is the workflow for replacing them.
 
-## Setup, once
+There used to be a scripted runner that drove the app through each clip on a timer. It was removed
+once the clips were shot — the buttons sat in the presenter panel where a judge might open them, and
+the recordings they produced are already in the deck.
 
-1. `npm run dev`, open <http://localhost:5173> in the browser.
-2. Size the browser so the app column is fully visible with a little margin.
-   **Keep this window size for all six** — the crop is measured once and reused.
-3. In OBS, capture the browser window. Any resolution is fine; 1280×720 is what
-   the August set used.
+## Recording
 
-## Each clip
+1. Open the app — `npm run dev`, or the deployed build at <https://berryuo.vercel.app>.
+2. Size the browser and **keep that size for every clip**, because the crop is measured once and
+   reused across all of them.
+3. Record the browser window in OBS, one file per clip.
+4. Use the presenter panel (⚙, bottom right) for anything that needs time to pass: *Next day*,
+   *Simulate flight*, *Skip 5 months*, *In-flight mode*.
 
-1. Hit record.
-2. Click **⚙** (bottom right) → the clip under **🎬 Record clips**.
-3. The panel closes, waits 1.2s, then the app takes over. Hands off the mouse
-   and keyboard — a stray click can land on the app and desync the script.
-4. Wait for the app to stop moving. Every clip ends on a **1.5s still frame**.
-5. Stop recording. Save as `clip-1.mkv` … `clip-6.mkv` in the project root.
+Two things worth doing deliberately:
 
-Esc aborts a clip. If a step can't find what it needs the clip stops and a red
-banner explains why — that's a bug to report, not a recording to keep.
+- **Close the presenter panel before the part you want to keep.** One take was spoiled by six
+  seconds of the panel sitting open mid-clip, and it had to be spliced out afterwards.
+- **Let the shot settle at both ends.** A second of stillness before and after gives something to
+  trim into.
 
-## The six
+## Converting
 
-| # | Title | ~s | What it shows |
-| --- | --- | --- | --- |
-| 1 | Entry & check-in | 16 | The HK Express home screen, the Fly with Berry tile, the push-in, a check-in reveal, and the 30-day calendar |
-| 2 | Berry's room | 12 | Tap-to-talk, feeding a treat, and the room re-theming |
-| 3 | Play & earn | 18 | Ticket pips, the suitcase cards, a full 8-pair clear, the payout, a ticket spent |
-| 4 | Collection | 16 | Landing in Tokyo, the stamp and the Japan exclusive, then the wardrobe equipping it and a new room |
-| 5 | Rewards | 17 | The four coupon ladders with *Best value*, buying a room background, and the merch tier |
-| 6 | In-flight & expiry | 22 | In-flight mode, play still free, redemption locked, back online, and when the coins expire |
-
-## After
-
-Drop the six files in the project root and say so — the crop is confirmed
-against one probe frame first, then all six convert to `demo-media/demo-N.mp4`
-and `.gif`:
+`tools/make-clips.sh` does the crop and the export. Measure the crop once per recording session
+rather than assuming the last one still applies — it depends entirely on the browser window.
 
 ```bash
 tools/make-clips.sh probe clip-1.mkv
 ```
 
-## When the app changes again
+That writes a still to `demo-media/probe.png` and prints the source geometry. Read the app column
+off it, then build each clip:
 
-Update `src/dev/demoScript.js` and reshoot. The clips are plain data — a list of
-`tap`/`wait`/`act` steps against `data-demo` names — so a new screen is a few
-lines, not a re-learned performance. Grep for `data-demo` to see every hook the
-scripts can reach.
+```bash
+tools/make-clips.sh build clip-1.mkv 1 360:606:460:98
+```
+
+The crop is `W:H:X:Y`. `360:606:460:98` was correct for a 1280×720 capture with the browser at the
+size used in August — the app column is 360px wide, and the phone frame runs from y=98 to y=704.
+
+Each build writes `demo-media/demo-N.mp4` and `demo-N.gif`. The GIF is two-pass with a per-clip
+palette; a single global palette turns Berry's flat fills muddy.
+
+## What is in demo-media now
+
+`berry`, `play`, `collection`, `rewards` and `trips` — named by the screen each one opens on, with
+the August set kept in `demo-media/archive-2026-08-13/`. `demo-script.txt` alongside them has the
+spoken script for each, timed to its runtime.
